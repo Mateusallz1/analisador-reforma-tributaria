@@ -1,0 +1,7 @@
+{
+  "name": "Analisador da Reforma Tributária",
+  "description": "Analisador local da Reforma Tributária (IBS/CBS) para documentos fiscais eletrônicos de entrada e saída.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
+

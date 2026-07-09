@@ -1,0 +1,16 @@
+{
+  "nodeModulesDir": "auto",
+  "tasks": {
+    "dev": "vite --port=3000 --host=0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit",
+    "clean": "deno run --allow-write scripts/clean.ts",
+    "test": "deno run --allow-run --allow-net=127.0.0.1 --allow-read --allow-env --allow-write scripts/run-browser-tests.ts",
+    "check": "deno task lint && deno task test && deno task build"
+  },
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}
