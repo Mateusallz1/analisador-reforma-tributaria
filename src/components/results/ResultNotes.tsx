@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { NFeAnalysis } from '../../types';
 import { DocumentIdentity } from './DocumentIdentity';
@@ -7,6 +7,8 @@ import { OperationBadge } from './OperationBadge';
 import { PartyInfo } from './PartyInfo';
 import type { ExpandedNotes } from './types';
 import { getNoteExpansionState, isActionableNote } from './notePresentation';
+
+const NOTE_PAGE_SIZE = 100;
 
 interface ResultNotesProps {
   notes: NFeAnalysis[];
@@ -133,10 +135,19 @@ function MobileItemDetails({ note }: { note: NFeAnalysis }) {
 }
 
 export function ResultNotes({ notes, expandedNotes, onToggleNote }: ResultNotesProps) {
+  const [visibleCount, setVisibleCount] = useState(NOTE_PAGE_SIZE);
+
+  useEffect(() => {
+    setVisibleCount(NOTE_PAGE_SIZE);
+  }, [notes]);
+
+  const visibleNotes = notes.slice(0, visibleCount);
+  const remainingNotes = notes.length - visibleNotes.length;
+
   return (
     <>
       <div className="space-y-3 p-3 lg:hidden">
-        {notes.map((note) => {
+        {visibleNotes.map((note) => {
           const isSaida = note.tipoNota === 'SAÍDA';
           const isNoteExpanded = getNoteExpansionState(note, expandedNotes);
           const controlsId = `note-items-mobile-${note.id}`;
@@ -222,7 +233,7 @@ export function ResultNotes({ notes, expandedNotes, onToggleNote }: ResultNotesP
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-sm text-slate-600">
-            {notes.map((note) => {
+            {visibleNotes.map((note) => {
               const isSaida = note.tipoNota === 'SAÍDA';
               const hasFailedItems = isActionableNote(note);
               const isNoteExpanded = getNoteExpansionState(note, expandedNotes);
@@ -405,6 +416,20 @@ export function ResultNotes({ notes, expandedNotes, onToggleNote }: ResultNotesP
           </tbody>
         </table>
       </div>
+      {remainingNotes > 0 && (
+        <div className="border-t border-slate-100 px-3 py-3 text-center">
+          <button
+            type="button"
+            onClick={() => setVisibleCount((current) => Math.min(current + NOTE_PAGE_SIZE, notes.length))}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+          >
+            Mostrar mais {Math.min(NOTE_PAGE_SIZE, remainingNotes)} {Math.min(NOTE_PAGE_SIZE, remainingNotes) === 1 ? 'nota' : 'notas'}
+          </button>
+          <span className="ml-2 text-[11px] text-slate-400">
+            {remainingNotes} restantes
+          </span>
+        </div>
+      )}
     </>
   );
 }

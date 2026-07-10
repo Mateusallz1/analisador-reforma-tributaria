@@ -23,6 +23,12 @@ export interface CompanyInfo {
   nome: string;
 }
 
+export interface TaxBaseInfo {
+  version: string;
+  source: string;
+  legalSource: string;
+}
+
 export interface ItemValidation {
   numeroItem: number;
   descricaoProduto: string;
@@ -57,7 +63,8 @@ export interface NFeAnalysis {
   validationStatus?: ValidationStatus;
   validationReason?: string;
   itens?: ItemValidation[];
-  xmlContent: string; // for potential detailed inspection if the user wants
+  taxBase: TaxBaseInfo;
+  contentFingerprint?: string;
 }
 
 export interface GroupedAnalysis {
@@ -69,7 +76,10 @@ export interface GroupedAnalysis {
   porcentagemEmConformidade: number;
 }
 
+export type FileProcessingErrorKind = 'PROCESSING' | 'DUPLICATE';
+
 export interface FileProcessingError {
   fileName: string;
   error: string;
+  kind?: FileProcessingErrorKind;
 }

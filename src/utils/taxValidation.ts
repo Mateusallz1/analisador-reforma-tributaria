@@ -1,4 +1,4 @@
-import { ComplianceStatus, DocType, ItemClassificationStatus, ItemValidation, ValidationStatus } from '../types';
+import { ComplianceStatus, DocType, ItemClassificationStatus, ItemValidation, TaxBaseInfo, ValidationStatus } from '../types';
 import baseCompleta from '../data/base_completa.json' with { type: 'json' };
 import { extractPRedAliq, getElementsByLocalName, getTagValue, parseXmlDate } from './xmlHelpers';
 
@@ -19,7 +19,10 @@ interface TaxCstEntry {
   classificacoes?: TaxClassificationEntry[];
 }
 
-interface TaxBase {
+interface TaxBase extends Partial<TaxBaseInfo> {
+  versao?: string;
+  fonteOriginal?: string;
+  fonteLegalBase?: string;
   csts?: TaxCstEntry[];
 }
 
@@ -44,6 +47,11 @@ interface TaxAnalysisInput {
 
 const taxBase = baseCompleta as TaxBase;
 
+export const TAX_BASE_INFO: TaxBaseInfo = {
+  version: taxBase.versao || 'desconhecida',
+  source: taxBase.fonteOriginal || 'Base fiscal local',
+  legalSource: taxBase.fonteLegalBase || '',
+};
 
 interface ClassificationResolution {
   currentCst?: TaxCstEntry;

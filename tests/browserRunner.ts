@@ -1,11 +1,12 @@
 import { runEngineTests } from './engine.test.ts';
+import type { TestCaseResult } from './engine.test.ts';
 import { runUiSmokeTests } from './uiSmoke.test.tsx';
 
 interface BrowserTestReport {
   passed: boolean;
   total: number;
   failed: number;
-  results: ReturnType<typeof runEngineTests>;
+  results: TestCaseResult[];
 }
 
 declare global {
@@ -14,7 +15,7 @@ declare global {
   }
 }
 
-const results = [...runEngineTests(), ...runUiSmokeTests()];
+const results = [...await runEngineTests(), ...runUiSmokeTests()];
 const failed = results.filter((result) => result.status === 'failed').length;
 const report: BrowserTestReport = {
   passed: failed === 0,

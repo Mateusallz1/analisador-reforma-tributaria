@@ -2,23 +2,84 @@ import { FileProcessingError, NFeAnalysis } from '../types';
 import { getErrorMessage } from './errors';
 import { parseNFeXml } from './nfeParser';
 
+export interface ProcessFilesOptions {
+  existingFingerprints?: ReadonlySet<string>;
+}
+
+export interface ProcessFilesResult {
+  results: NFeAnalysis[];
+  errors: FileProcessingError[];
+}
+
+export function normalizeXmlForFingerprint(xmlText: string): string {
+  return xmlText
+    .replace(/\r\n?/g, '\n')
+    .replace(/>\s+</g, '><')
+    .trim();
+}
+
+export function getXmlFingerprint(xmlText: string): string {
+  const normalizedXml = normalizeXmlForFingerprint(xmlText);
+  let hash = 14695981039346656037n;
+
+  for (let index = 0; index < normalizedXml.length; index += 1) {
+    hash ^= BigInt(normalizedXml.charCodeAt(index));
+    hash = BigInt.asUintN(64, hash * 1099511628211n);
+  }
+
+  return hash.toString(16).padStart(16, '0');
+}
+
+function duplicateError(fileName: string): FileProcessingError {
+  return {
+    fileName,
+    kind: 'DUPLICATE',
+    error: 'Documento duplicado: o conteúdo já está presente na análise e foi ignorado.',
+  };
+}
+
 /**
  * Process a list of uploaded files, supporting XML and ZIP files.
+ * Raw XML is parsed and released after processing; only a compact fingerprint is retained.
  */
 export async function processFiles(
   files: File[],
-): Promise<{ results: NFeAnalysis[]; errors: FileProcessingError[] }> {
+  options: ProcessFilesOptions = {},
+): Promise<ProcessFilesResult> {
   const results: NFeAnalysis[] = [];
   const errors: FileProcessingError[] = [];
+  const knownFingerprints = new Set(options.existingFingerprints || []);
+
+  const addXmlResult = async (
+    xmlContent: string,
+    analysisFileName: string,
+    displayFileName: string,
+  ): Promise<void> => {
+    const contentFingerprint = getXmlFingerprint(xmlContent);
+
+    if (knownFingerprints.has(contentFingerprint)) {
+      errors.push(duplicateError(displayFileName));
+      return;
+    }
+
+    try {
+      const analysis = parseNFeXml(xmlContent, analysisFileName);
+      results.push({ ...analysis, contentFingerprint });
+      knownFingerprints.add(contentFingerprint);
+    } catch (err: unknown) {
+      errors.push({
+        fileName: displayFileName,
+        error: getErrorMessage(err, 'Erro desconhecido ao ler XML.'),
+      });
+    }
+  };
 
   for (const file of files) {
     const lowerName = file.name.toLowerCase();
 
     if (lowerName.endsWith('.xml')) {
       try {
-        const text = await file.text();
-        const analysis = parseNFeXml(text, file.name);
-        results.push(analysis);
+        await addXmlResult(await file.text(), file.name, file.name);
       } catch (err: unknown) {
         errors.push({
           fileName: file.name,
@@ -45,11 +106,10 @@ export async function processFiles(
           try {
             const xmlContent = await zip.files[xmlPath].async('string');
             const pureFileName = xmlPath.split('/').pop() || xmlPath;
-            const analysis = parseNFeXml(xmlContent, pureFileName);
-            results.push(analysis);
+            await addXmlResult(xmlContent, pureFileName, file.name + ' -> ' + xmlPath);
           } catch (err: unknown) {
             errors.push({
-              fileName: `${file.name} -> ${xmlPath}`,
+              fileName: file.name + ' -> ' + xmlPath,
               error: getErrorMessage(err, 'Erro ao processar XML de dentro do ZIP.'),
             });
           }

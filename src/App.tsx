@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { NFeAnalysis, FileProcessingError } from './types';
 import { parseNFeXml } from './utils/nfeParser';
-import { processFiles } from './utils/fileProcessing';
+import { getXmlFingerprint, processFiles } from './utils/fileProcessing';
 import { getNoteItemCount, groupAnalysesByEmpresaFoco } from './utils/analysisStats';
 import { getErrorMessage } from './utils/errors';
 import UploadSection from './components/UploadSection';
@@ -29,7 +29,17 @@ export default function App() {
   const handleFilesSelected = async (files: File[], append = false) => {
     setIsLoading(true);
     try {
-      const parsed = await processFiles(files);
+      const existingFingerprints: Set<string> | undefined = append
+        ? new Set(
+            results
+              .map((result) => result.contentFingerprint)
+              .filter((fingerprint): fingerprint is string => Boolean(fingerprint)),
+          )
+        : undefined;
+      const parsed = await processFiles(
+        files,
+        existingFingerprints ? { existingFingerprints } : undefined,
+      );
       setResults((previous) => append ? [...previous, ...parsed.results] : parsed.results);
       setErrors((previous) => append ? [...previous, ...parsed.errors] : parsed.errors);
     } catch (err: unknown) {
@@ -51,7 +61,11 @@ export default function App() {
 
       SAMPLE_NFES.forEach((sample) => {
         try {
-          sampleResults.push(parseNFeXml(sample.xmlContent, sample.fileName));
+          const analysis = parseNFeXml(sample.xmlContent, sample.fileName);
+          sampleResults.push({
+            ...analysis,
+            contentFingerprint: getXmlFingerprint(sample.xmlContent),
+          });
         } catch (err: unknown) {
           sampleErrors.push({
             fileName: sample.fileName,
@@ -91,6 +105,8 @@ export default function App() {
     (acc, note) => acc + getNoteItemCount(note),
     0,
   );
+  const duplicateErrorCount = errors.filter((error) => error.kind === 'DUPLICATE').length;
+  const processingErrorCount = errors.length - duplicateErrorCount;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
@@ -127,16 +143,36 @@ export default function App() {
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {errors.length > 0 && (
-          <div id="error-list-container" className="mb-6 rounded-lg border border-rose-200 bg-rose-50 p-4">
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-rose-800">
-              <AlertCircle className="h-4 w-4 text-rose-500" />
-              <span>{errors.length} arquivo(s) não puderam ser processados.</span>
+          <div
+            id="error-list-container"
+            className={
+              'mb-6 rounded-lg border p-4 ' +
+              (processingErrorCount > 0
+                ? 'border-rose-200 bg-rose-50'
+                : 'border-amber-200 bg-amber-50')
+            }
+          >
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-800">
+              <AlertCircle
+                className={processingErrorCount > 0 ? 'h-4 w-4 text-rose-500' : 'h-4 w-4 text-amber-500'}
+                aria-hidden="true"
+              />
+              <span>
+                {processingErrorCount > 0 && processingErrorCount + ' arquivo(s) não puderam ser processados.'}
+                {processingErrorCount > 0 && duplicateErrorCount > 0 && ' '}
+                {duplicateErrorCount > 0 && duplicateErrorCount + ' duplicado(s) ignorado(s).'}
+              </span>
             </div>
             <div className="max-h-36 space-y-1.5 overflow-y-auto pr-2">
               {errors.map((err, idx) => (
                 <div
                   key={`${err.fileName}-${idx}`}
-                  className="flex items-center justify-between gap-3 rounded border border-rose-100 bg-white/70 p-2 text-xs text-rose-700"
+                  className={
+                    'flex items-center justify-between gap-3 rounded border bg-white/70 p-2 text-xs ' +
+                    (err.kind === 'DUPLICATE'
+                      ? 'border-amber-100 text-amber-800'
+                      : 'border-rose-100 text-rose-700')
+                  }
                 >
                   <span className="min-w-0 truncate font-mono">
                     <strong>{err.fileName}</strong>: {err.error}
@@ -144,8 +180,13 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => clearSingleError(idx)}
-                    className="shrink-0 rounded p-1 text-rose-500 transition-colors hover:bg-rose-100"
-                    title="Remover erro"
+                    className={
+                      'shrink-0 rounded p-1 transition-colors ' +
+                      (err.kind === 'DUPLICATE'
+                        ? 'text-amber-600 hover:bg-amber-100'
+                        : 'text-rose-500 hover:bg-rose-100')
+                    }
+                    title="Remover aviso"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>

@@ -1,5 +1,6 @@
 import { calculateItemStats, groupAnalysesByEmpresaFoco } from '../src/utils/analysisStats.ts';
 import { getFilteredResultGroups } from '../src/utils/resultFilters.ts';
+import { getXmlFingerprint, processFiles } from '../src/utils/fileProcessing.ts';
 import { parseNFeXml } from '../src/utils/nfeParser.ts';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
 import { ComplianceStatus, DocType, ItemClassificationStatus, NFeAnalysis, NFeType, ValidationStatus } from '../src/types.ts';
@@ -12,7 +13,7 @@ export interface TestCaseResult {
 
 type TestCase = {
   name: string;
-  run: () => void;
+  run: () => void | Promise<void>;
 };
 
 interface SampleExpectation {
@@ -150,6 +151,9 @@ const tests: TestCase[] = [
     run: () => {
       const results = parseSamples();
       assertEquals(results.length, sampleExpectations.length);
+      assertEquals(results[0].taxBase.version, '1.0.0');
+      assert(results[0].taxBase.source.includes('cClassTrib_2026_04_15.xlsx'), 'Origem da base fiscal não foi preservada');
+      assertEquals('xmlContent' in results[0], false);
 
       sampleExpectations.forEach((expectation) => {
         const result = findByFileName(results, expectation.fileName);
@@ -160,6 +164,23 @@ const tests: TestCase[] = [
         assertEquals(firstItemStatus(result), expectation.itemStatus, `${expectation.fileName}: itemStatus divergente`);
         assertEquals(result.empresaFoco.cnpj, expectation.empresaFocoCnpj, `${expectation.fileName}: empresa em foco divergente`);
       });
+    },
+  },
+  {
+    name: 'processamento ignora XML duplicado por conteúdo normalizado',
+    run: async () => {
+      const sourceXml = SAMPLE_NFES[0].xmlContent;
+      const equivalentXml = sourceXml.replace(/>\s+</g, '> \n <');
+      const parsed = await processFiles([
+        new File([sourceXml], 'original.xml', { type: 'text/xml' }),
+        new File([equivalentXml], 'copia-renomeada.xml', { type: 'text/xml' }),
+      ]);
+
+      assertEquals(parsed.results.length, 1);
+      assertEquals(parsed.errors.length, 1);
+      assertEquals(parsed.errors[0].kind, 'DUPLICATE');
+      assert(parsed.errors[0].error.includes('duplicado'), 'A duplicidade deve ser informada ao usuário');
+      assertEquals(parsed.results[0].contentFingerprint, getXmlFingerprint(sourceXml));
     },
   },
   {
@@ -243,17 +264,21 @@ const tests: TestCase[] = [
     },
   },];
 
-export function runEngineTests(): TestCaseResult[] {
-  return tests.map((test) => {
+export async function runEngineTests(): Promise<TestCaseResult[]> {
+  const results: TestCaseResult[] = [];
+
+  for (const test of tests) {
     try {
-      test.run();
-      return { name: test.name, status: 'passed' };
+      await test.run();
+      results.push({ name: test.name, status: 'passed' });
     } catch (error) {
-      return {
+      results.push({
         name: test.name,
         status: 'failed',
         message: error instanceof Error ? error.message : String(error),
-      };
+      });
     }
-  });
+  }
+
+  return results;
 }

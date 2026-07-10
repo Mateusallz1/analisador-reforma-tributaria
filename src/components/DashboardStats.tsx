@@ -11,6 +11,7 @@ interface DashboardStatsProps {
 export default function DashboardStats({ results, grouped, onReset }: DashboardStatsProps) {
   const stats = calculateItemStats(results);
   const actionableItems = stats.pendingItems + stats.nonCompliantItems;
+  const taxBase = results[0]?.taxBase;
 
   return (
     <div className="space-y-3">
@@ -90,6 +91,27 @@ export default function DashboardStats({ results, grouped, onReset }: DashboardS
           <RefreshCcw className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
           Limpar análise
         </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-400">
+        <span>
+          Base fiscal <strong className="text-slate-600">{taxBase?.version || 'N/A'}</strong>
+        </span>
+        {taxBase?.source && (
+          <span className="max-w-[360px] truncate" title={taxBase.source}>
+            Fonte: {taxBase.source}
+          </span>
+        )}
+        {taxBase?.legalSource && (
+          <a
+            href={taxBase.legalSource}
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline"
+          >
+            Fonte legal
+          </a>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { NFeAnalysis, NFeType, DocType, CompanyInfo } from '../types';
 import { formatEmissionDate, getElementsByLocalName, getTagValue, parseXmlDate } from './xmlHelpers';
-import { analyzeTaxCompliance } from './taxValidation';
+import { TAX_BASE_INFO, analyzeTaxCompliance } from './taxValidation';
 /**
  * Formats CNPJ with mask (XX.XXX.XXX/XXXX-XX) or CPF (XXX.XXX.XXX-XX)
  */
@@ -173,7 +173,7 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     validationStatus,
     validationReason,
     itens,
-    xmlContent: xmlText,
+    taxBase: TAX_BASE_INFO,
   };
 }
 
