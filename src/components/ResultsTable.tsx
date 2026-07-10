@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Building2,
   ChevronDown,
@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { NFeAnalysis } from '../types';
 import { formatCnpjOrCpf } from '../utils/nfeParser';
-import { calculateItemStats } from '../utils/analysisStats';
+import { calculateItemStats, groupAnalysesByEmpresaFoco } from '../utils/analysisStats';
 import { getFilteredResultGroups } from '../utils/resultFilters';
 import type { DocTypeFilter, StatusFilter, TypeFilter } from '../utils/resultFilters';
 import { IncompleteDocumentsSection } from './results/IncompleteDocumentsSection';
@@ -19,15 +19,24 @@ interface ResultsTableProps {
   allResults: NFeAnalysis[];
 }
 
+function getDefaultCollapsedGroups(results: NFeAnalysis[]): Record<string, boolean> {
+  return groupAnalysesByEmpresaFoco(results).reduce<Record<string, boolean>>((collapsed, group) => {
+    collapsed[group.empresaFoco.cnpj] = group.naoConformeNotas === 0;
+    return collapsed;
+  }, {});
+}
+
 export default function ResultsTable({ allResults }: ResultsTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('ALL');
   const [docTypeFilter, setDocTypeFilter] = useState<DocTypeFilter>('ALL');
-  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>(
+    () => getDefaultCollapsedGroups(allResults),
+  );
   const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
   const [openDropdown, setOpenDropdown] = useState<ResultsDropdown>('NONE');
-  const [isIncompleteCollapsed, setIsIncompleteCollapsed] = useState(false);
+  const [isIncompleteCollapsed, setIsIncompleteCollapsed] = useState(true);
 
   // Toggle single group collapse
   const toggleGroup = (cnpj: string) => {
@@ -51,6 +60,20 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
       };
     });
   };
+
+  const allGroups = useMemo(() => groupAnalysesByEmpresaFoco(allResults), [allResults]);
+
+  useEffect(() => {
+    setCollapsedGroups((previous) => {
+      return allGroups.reduce<Record<string, boolean>>((next, group) => {
+        const cnpj = group.empresaFoco.cnpj;
+        next[cnpj] = Object.prototype.hasOwnProperty.call(previous, cnpj)
+          ? previous[cnpj]
+          : group.naoConformeNotas === 0;
+        return next;
+      }, {});
+    });
+  }, [allGroups]);
 
   const { activeGroups, matchesWithoutCnpj, totalProcessedFiltered, totalProcessed } = useMemo(() => 
     getFilteredResultGroups(allResults, {
@@ -84,7 +107,7 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
           <FileSpreadsheet className="w-12 h-12 text-slate-300 mx-auto mb-4" aria-hidden="true" />
           <h4 className="font-sans font-semibold text-slate-800 text-md mb-1">Nenhuma nota corresponde aos filtros</h4>
           <p className="text-sm text-slate-500 font-sans max-w-sm mx-auto">
-            Por favor, ajuste sua pesquisa ou marque a opção de exibir todos os resultados.
+            Remova ou altere os filtros para ver outros documentos.
           </p>
         </div>
       ) : (
@@ -104,15 +127,15 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
                 <button
                   type="button"
                   onClick={() => toggleGroup(group.empresaFoco.cnpj)}
-                  className="w-full text-left bg-slate-50/50 p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 cursor-pointer select-none hover:bg-slate-50 transition-colors"
+                  className="flex w-full flex-row items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/50 p-4 text-left transition-colors hover:bg-slate-50"
                   aria-expanded={!isCollapsed}
                   aria-controls={`group-content-${group.empresaFoco.cnpj}`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
                     <div className="p-2 bg-white border border-slate-200 text-slate-600 rounded-lg shadow-sm">
                       <Building2 className="w-5 h-5 text-slate-400" aria-hidden="true" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-sans font-bold text-slate-800 text-base">
                           {group.empresaFoco.nome}
@@ -147,7 +170,7 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
                   </div>
 
                   {/* Right indicators & Arrow */}
-                  <div className="flex items-center gap-4 self-stretch sm:self-auto justify-end">
+                  <div className="flex shrink-0 items-center justify-end gap-2">
                     {group.naoConformeNotas > 0 && (
                       <span className="text-xs bg-rose-50 text-rose-700 border border-slate-200 py-1 px-2.5 rounded-lg font-sans font-medium">
                         Ação recomendada ({group.naoConformeNotas})

@@ -19,24 +19,36 @@ export interface FilteredResultGroups {
   totalProcessed: number;
 }
 
-function matchesSearchTerm(note: NFeAnalysis, searchLower: string): boolean {
-  return note.numeroNota.includes(searchLower) ||
-    note.empresaFoco.nome.toLowerCase().includes(searchLower) ||
-    note.empresaFoco.cnpj.includes(searchLower) ||
-    note.nomeEmitente.toLowerCase().includes(searchLower) ||
-    note.cnpjEmitente.includes(searchLower) ||
-    note.nomeDestinatario.toLowerCase().includes(searchLower) ||
-    note.cnpjDestinatario.includes(searchLower);
+function onlyDigits(value: string): string {
+  return value.replace(/\D/g, '');
+}
+
+function matchesSearchTerm(note: NFeAnalysis, searchTerm: string): boolean {
+  const searchLower = searchTerm.toLowerCase();
+  const searchDigits = onlyDigits(searchTerm);
+  const matchesText = (value: string): boolean => value.toLowerCase().includes(searchLower);
+  const matchesDocumentId = (value: string): boolean => {
+    if (matchesText(value)) return true;
+    return searchDigits.length > 0 && onlyDigits(value).includes(searchDigits);
+  };
+
+  return matchesText(note.numeroNota) ||
+    matchesText(note.empresaFoco.nome) ||
+    matchesDocumentId(note.empresaFoco.cnpj) ||
+    matchesText(note.nomeEmitente) ||
+    matchesDocumentId(note.cnpjEmitente) ||
+    matchesText(note.nomeDestinatario) ||
+    matchesDocumentId(note.cnpjDestinatario);
 }
 
 export function getFilteredResultGroups(allResults: NFeAnalysis[], filters: ResultFilters): FilteredResultGroups {
-  const searchLower = filters.searchTerm.toLowerCase();
+  const searchTerm = filters.searchTerm.trim();
   const matches = allResults.filter((note) => {
     const matchStatus = filters.statusFilter === 'ALL' || note.status === filters.statusFilter;
     const matchType = filters.typeFilter === 'ALL' || note.tipoNota === filters.typeFilter;
     const matchDocType = filters.docTypeFilter === 'ALL' || note.docType === filters.docTypeFilter;
 
-    return matchesSearchTerm(note, searchLower) && matchStatus && matchType && matchDocType;
+    return matchesSearchTerm(note, searchTerm) && matchStatus && matchType && matchDocType;
   });
 
   const matchesWithCnpj = matches.filter((note) => note.empresaFoco.cnpj && note.empresaFoco.cnpj.trim() !== '');

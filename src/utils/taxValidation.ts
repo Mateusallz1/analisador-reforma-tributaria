@@ -1,6 +1,6 @@
 import { ComplianceStatus, DocType, ItemClassificationStatus, ItemValidation, ValidationStatus } from '../types';
 import baseCompleta from '../data/base_completa.json' with { type: 'json' };
-import { extractPRedAliq, getTagValue, parseXmlDate } from './xmlHelpers';
+import { extractPRedAliq, getElementsByLocalName, getTagValue, parseXmlDate } from './xmlHelpers';
 
 interface TaxClassificationEntry {
   codigo: string;
@@ -74,17 +74,15 @@ function resolveClassification(baseCsts: TaxCstEntry[], itemCst: string, itemCCl
   return { currentCst };
 }
 function getDocumentHasProtocol(xmlDoc: Document, xmlText: string): boolean {
-  return xmlDoc.getElementsByTagName('nProt').length > 0 ||
-    xmlDoc.getElementsByTagName('Protocolo').length > 0 ||
-    xmlDoc.getElementsByTagName('protocolo').length > 0 ||
-    xmlDoc.getElementsByTagName('protNFe').length > 0 ||
+  return ['nProt', 'Protocolo', 'protocolo', 'protNFe']
+    .some((tagName) => getElementsByLocalName(xmlDoc, tagName).length > 0) ||
     xmlText.includes('<nProt>') ||
     xmlText.includes('<Protocolo>') ||
     xmlText.includes('<protocolo>');
 }
 
-function getFallbackStatus(itemHasIBSCBS: boolean, xmlText: string): ItemClassificationStatus {
-  return itemHasIBSCBS || xmlText.includes('<IBSCBS>') || xmlText.includes('</IBSCBS>') || xmlText.includes('<IBSCBS ') ? 'incompleto' : 'N/A';
+function getFallbackStatus(itemHasIBSCBS: boolean, documentHasIBSCBS: boolean): ItemClassificationStatus {
+  return itemHasIBSCBS || documentHasIBSCBS ? 'incompleto' : 'N/A';
 }
 
 export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate }: TaxAnalysisInput): TaxValidationResult {
@@ -99,21 +97,21 @@ export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate }: 
   const baseCsts = taxBase.csts || [];
 
   if (docType === 'NFe' || docType === 'NFCe' || docType === 'NFSe') {
-    let detElements: Element[] = Array.from(xmlDoc.getElementsByTagName('det'));
+    let detElements: Element[] = getElementsByLocalName(xmlDoc, 'det');
 
     if (detElements.length === 0 && docType === 'NFSe') {
-      const servicos = xmlDoc.getElementsByTagName('Servico');
-      if (servicos && servicos.length > 0) {
-        detElements = Array.from(servicos);
+      const servicos = getElementsByLocalName(xmlDoc, 'Servico');
+      if (servicos.length > 0) {
+        detElements = servicos;
       } else {
-        const ibscbsTags = xmlDoc.getElementsByTagName('IBSCBS');
-        if (ibscbsTags && ibscbsTags.length > 0) {
-          detElements = Array.from(ibscbsTags);
+        const ibscbsTags = getElementsByLocalName(xmlDoc, 'IBSCBS');
+        if (ibscbsTags.length > 0) {
+          detElements = ibscbsTags;
         }
       }
     }
 
-    contemIBSCBS = xmlText.includes('<IBSCBS>') || xmlText.includes('</IBSCBS>') || xmlText.includes('<IBSCBS ') || xmlDoc.getElementsByTagName('IBSCBS').length > 0;
+    contemIBSCBS = getElementsByLocalName(xmlDoc, 'IBSCBS').length > 0;
     const siglaDfe = docType === 'NFe' ? 'NFE' : docType === 'NFCe' ? 'NFCE' : 'NFSE';
 
     if (detElements && detElements.length > 0) {
@@ -122,20 +120,21 @@ export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate }: 
         let descricaoProduto = 'Descrição não identificada';
         let numeroItem = i + 1;
 
-        if (det.tagName === 'det') {
-          const prodElement = det.getElementsByTagName('prod')[0];
+        const detLocalName = det.localName || det.tagName.split(':').pop() || det.tagName;
+        if (detLocalName.toLowerCase() === 'det') {
+          const prodElement = getElementsByLocalName(det, 'prod')[0];
           const rawItemNo = det.getAttribute('nItem');
           numeroItem = rawItemNo ? parseInt(rawItemNo, 10) : (i + 1);
           descricaoProduto = prodElement ? (getTagValue(prodElement, 'xProd') || 'Produto sem descrição') : 'Produto sem descrição';
-        } else if (det.tagName === 'Servico') {
+        } else if (detLocalName.toLowerCase() === 'servico') {
           descricaoProduto = getTagValue(det, 'Discriminacao') || getTagValue(det, 'discriminacao') || getTagValue(det, 'xServ') || 'Serviço prestado';
-        } else if (det.tagName === 'IBSCBS') {
+        } else if (detLocalName.toLowerCase() === 'ibscbs') {
           descricaoProduto = 'Tributação de Reforma Tributária';
         } else {
           descricaoProduto = getTagValue(det, 'xProd') || getTagValue(det, 'Discriminacao') || det.tagName || 'Item de serviço/produto';
         }
 
-        const ibscbsElement = det.tagName === 'IBSCBS' ? det : det.getElementsByTagName('IBSCBS')[0];
+        const ibscbsElement = detLocalName.toLowerCase() === 'ibscbs' ? det : getElementsByLocalName(det, 'IBSCBS')[0];
         const itemHasIBSCBS = !!ibscbsElement;
 
         let itemCst: string | undefined = undefined;
@@ -144,7 +143,7 @@ export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate }: 
         let itemCClassTribDesc: string | undefined = undefined;
         let itemValStatus: ValidationStatus = 'N/A';
         let itemValReason = '';
-        let itemStatus: ItemClassificationStatus = getFallbackStatus(itemHasIBSCBS, xmlText);
+        let itemStatus: ItemClassificationStatus = getFallbackStatus(itemHasIBSCBS, contemIBSCBS);
 
         if (itemHasIBSCBS) {
           itemCst = getTagValue(ibscbsElement, 'CST') || getTagValue(ibscbsElement, 'cst') || undefined;
@@ -189,31 +188,12 @@ export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate }: 
                   const expectedIBS = typeof classFound.reducaoPercentualIBS === 'number' ? classFound.reducaoPercentualIBS : 0.0;
                   const expectedCBS = typeof classFound.reducaoPercentualCBS === 'number' ? classFound.reducaoPercentualCBS : 0.0;
 
-                  const checkGroupExists = (item: Element, groupName: string) => {
-                    const gps = item.getElementsByTagName(groupName);
-                    if (gps && gps.length > 0) return true;
-                    const all = item.getElementsByTagName('*');
-                    const targetLower = groupName.toLowerCase();
-                    for (let j = 0; j < all.length; j++) {
-                      if (all[j].tagName.toLowerCase() === targetLower) return true;
-                    }
-                    if (item.parentElement) {
-                      const pgps = item.parentElement.getElementsByTagName(groupName);
-                      if (pgps && pgps.length > 0) return true;
-                      const pall = item.parentElement.getElementsByTagName('*');
-                      for (let j = 0; j < pall.length; j++) {
-                        if (pall[j].tagName.toLowerCase() === targetLower) return true;
-                      }
-                    }
-                    return false;
-                  };
-
                   let declaredIBS = 0.0;
-                  const hasIBSUF = checkGroupExists(det, 'gIBSUF');
+                  const hasIBSUF = getElementsByLocalName(det, 'gIBSUF').length > 0;
                   if (hasIBSUF) {
                     declaredIBS = extractPRedAliq(det, 'gIBSUF');
                   } else {
-                    const hasIBSMun = checkGroupExists(det, 'gIBSMun');
+                    const hasIBSMun = getElementsByLocalName(det, 'gIBSMun').length > 0;
                     if (hasIBSMun) {
                       declaredIBS = extractPRedAliq(det, 'gIBSMun');
                     }

@@ -25,80 +25,36 @@ export function parseXmlDate(xmlDate: string | null): Date | null {
   }
 }
 
+export function getElementsByLocalName(parent: Element | Document | null, tagName: string): Element[] {
+  if (!parent) return [];
+
+  const expectedName = tagName.toLowerCase();
+  return Array.from(parent.getElementsByTagName('*')).filter((element) => {
+    const localName = element.localName || element.tagName.split(':').pop() || element.tagName;
+    return localName.toLowerCase() === expectedName;
+  });
+}
+
 export function getTagValue(parent: Element | Document | null, tagName: string): string | null {
-  if (!parent) return null;
-  const elements = parent.getElementsByTagName(tagName);
-  if (elements && elements.length > 0) {
-    return elements[0].textContent;
-  }
-  return null;
+  const element = getElementsByLocalName(parent, tagName)[0];
+  return element?.textContent?.trim() || null;
 }
 
 export function extractPRedAliq(itemElement: Element, groupName: string): number {
   if (!itemElement) return 0.0;
 
   let group: Element | null = null;
-  const groups = itemElement.getElementsByTagName(groupName);
-  if (groups && groups.length > 0) {
-    group = groups[0];
-  } else {
-    const allDescendants = itemElement.getElementsByTagName('*');
-    const groupLower = groupName.toLowerCase();
-    for (let i = 0; i < allDescendants.length; i++) {
-      if (allDescendants[i].tagName.toLowerCase() === groupLower) {
-        group = allDescendants[i];
-        break;
-      }
-    }
-  }
-
-  if (!group && itemElement.parentElement) {
-    const parentGroups = itemElement.parentElement.getElementsByTagName(groupName);
-    if (parentGroups && parentGroups.length > 0) {
-      group = parentGroups[0];
-    } else {
-      const parentDescendants = itemElement.parentElement.getElementsByTagName('*');
-      const groupLower = groupName.toLowerCase();
-      for (let i = 0; i < parentDescendants.length; i++) {
-        if (parentDescendants[i].tagName.toLowerCase() === groupLower) {
-          group = parentDescendants[i];
-          break;
-        }
-      }
-    }
-  }
+  group = getElementsByLocalName(itemElement, groupName)[0] || null;
 
   if (!group) return 0.0;
 
   let gRed: Element | null = null;
-  const gReds = group.getElementsByTagName('gRed');
-  if (gReds && gReds.length > 0) {
-    gRed = gReds[0];
-  } else {
-    const allInGroup = group.getElementsByTagName('*');
-    for (let i = 0; i < allInGroup.length; i++) {
-      if (allInGroup[i].tagName.toLowerCase() === 'gred') {
-        gRed = allInGroup[i];
-        break;
-      }
-    }
-  }
+  gRed = getElementsByLocalName(group, 'gRed')[0] || null;
 
   if (!gRed) return 0.0;
 
   let pRedAliqStr: string | null = null;
-  const pRedAliqs = gRed.getElementsByTagName('pRedAliq');
-  if (pRedAliqs && pRedAliqs.length > 0) {
-    pRedAliqStr = pRedAliqs[0].textContent;
-  } else {
-    const allInGRed = gRed.getElementsByTagName('*');
-    for (let i = 0; i < allInGRed.length; i++) {
-      if (allInGRed[i].tagName.toLowerCase() === 'predaliq') {
-        pRedAliqStr = allInGRed[i].textContent;
-        break;
-      }
-    }
-  }
+  pRedAliqStr = getElementsByLocalName(gRed, 'pRedAliq')[0]?.textContent || null;
 
   if (!pRedAliqStr) return 0.0;
   const parsed = parseFloat(pRedAliqStr);

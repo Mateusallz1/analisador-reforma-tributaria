@@ -41,6 +41,22 @@ function parseSamples(): NFeAnalysis[] {
   return SAMPLE_NFES.map((sample) => parseNFeXml(sample.xmlContent, sample.fileName));
 }
 
+function parsePrefixedMultiItemSample(): NFeAnalysis {
+  const xml = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<nfe:nfeProc xmlns:nfe="http://www.portalfiscal.inf.br/nfe">',
+    '<nfe:NFe><nfe:infNFe>',
+    '<nfe:ide><nfe:mod>55</nfe:mod><nfe:nNF>9001</nfe:nNF><nfe:dhEmi>2026-05-29T10:00:00-03:00</nfe:dhEmi><nfe:tpNF>1</nfe:tpNF></nfe:ide>',
+    '<nfe:emit><nfe:CNPJ>61585865000108</nfe:CNPJ><nfe:xNome>Alfa Implementos Industriais S.A.</nfe:xNome></nfe:emit>',
+    '<nfe:dest><nfe:CNPJ>12345678000199</nfe:CNPJ><nfe:xNome>Beta Distribuidora de Bebidas Ltda</nfe:xNome></nfe:dest>',
+    '<nfe:det nItem="1"><nfe:prod><nfe:xProd>Item sem redução</nfe:xProd></nfe:prod><nfe:imposto><nfe:IBSCBS><nfe:CST>000</nfe:CST><nfe:cClassTrib>000001</nfe:cClassTrib><nfe:gIBSCBS><nfe:vBC>100.00</nfe:vBC><nfe:gCBS><nfe:pCBS>0.9000</nfe:pCBS><nfe:vCBS>0.90</nfe:vCBS></nfe:gCBS></nfe:gIBSCBS></nfe:IBSCBS></nfe:imposto></nfe:det>',
+    '<nfe:det nItem="2"><nfe:prod><nfe:xProd>Item com redução</nfe:xProd></nfe:prod><nfe:imposto><nfe:IBSCBS><nfe:CST>200</nfe:CST><nfe:cClassTrib>200038</nfe:cClassTrib><nfe:gIBSCBS><nfe:vBC>100.00</nfe:vBC><nfe:gIBSUF><nfe:pIBSUF>0.1000</nfe:pIBSUF><nfe:gRed><nfe:pRedAliq>60.0000</nfe:pRedAliq><nfe:pAliqEfet>0.0400</nfe:pAliqEfet></nfe:gRed><nfe:vIBSUF>0.04</nfe:vIBSUF></nfe:gIBSUF><nfe:gIBSMun><nfe:pIBSMun>0.0000</nfe:pIBSMun><nfe:gRed><nfe:pRedAliq>60.0000</nfe:pRedAliq><nfe:pAliqEfet>0.0000</nfe:pAliqEfet></nfe:gRed><nfe:vIBSMun>0.00</nfe:vIBSMun></nfe:gIBSMun><nfe:vIBS>0.04</nfe:vIBS><nfe:gCBS><nfe:pCBS>0.9000</nfe:pCBS><nfe:gRed><nfe:pRedAliq>60.0000</nfe:pRedAliq><nfe:pAliqEfet>0.3600</nfe:pAliqEfet></nfe:gRed><nfe:vCBS>0.36</nfe:vCBS></nfe:gCBS></nfe:gIBSCBS></nfe:IBSCBS></nfe:imposto></nfe:det>',
+    '</nfe:infNFe></nfe:NFe></nfe:nfeProc>',
+  ].join('');
+
+  return parseNFeXml(xml, 'NFe_Prefixado_Multiplos_Itens.xml');
+}
+
 function findByFileName(results: NFeAnalysis[], fileName: string): NFeAnalysis {
   const result = results.find((item) => item.fileName === fileName);
   assert(result, `Amostra não encontrada após parsing: ${fileName}`);
@@ -144,6 +160,36 @@ const tests: TestCase[] = [
         assertEquals(firstItemStatus(result), expectation.itemStatus, `${expectation.fileName}: itemStatus divergente`);
         assertEquals(result.empresaFoco.cnpj, expectation.empresaFocoCnpj, `${expectation.fileName}: empresa em foco divergente`);
       });
+    },
+  },
+  {
+    name: 'busca encontra CNPJ formatado e mantém o grupo correspondente',
+    run: () => {
+      const filtered = getFilteredResultGroups(parseSamples(), {
+        searchTerm: '61.585.865/0001-08',
+        statusFilter: 'ALL',
+        typeFilter: 'ALL',
+        docTypeFilter: 'ALL',
+      });
+
+      assertEquals(filtered.activeGroups.length, 1);
+      assertEquals(filtered.activeGroups[0].empresaFoco.cnpj, '61585865000108');
+      assertEquals(filtered.activeGroups[0].notas.length, 3);
+      assertEquals(filtered.matchesWithoutCnpj.length, 0);
+    },
+  },
+  {
+    name: 'validação de múltiplos itens respeita namespace e não mistura alíquotas entre itens',
+    run: () => {
+      const result = parsePrefixedMultiItemSample();
+
+      assertEquals(result.status, 'CONFORME');
+      assertEquals(result.validationStatus, 'válido');
+      assertEquals(result.itens?.length, 2);
+      assertEquals(result.itens?.[0]?.itemStatus, 'conforme');
+      assertEquals(result.itens?.[1]?.itemStatus, 'conforme');
+      assertEquals(result.itens?.[0]?.numeroItem, 1);
+      assertEquals(result.itens?.[1]?.numeroItem, 2);
     },
   },
   {

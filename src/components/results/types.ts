@@ -1,2 +1,2 @@
-export type ResultsDropdown = 'NONE' | 'TYPE' | 'STATUS' | 'DOCTYPE';
+export type ResultsDropdown = 'NONE' | 'STATUS' | 'MORE';
 export type ExpandedNotes = Record<string, boolean>;

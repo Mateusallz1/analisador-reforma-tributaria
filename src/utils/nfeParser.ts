@@ -1,5 +1,5 @@
 import { NFeAnalysis, NFeType, DocType, CompanyInfo } from '../types';
-import { formatEmissionDate, getTagValue, parseXmlDate } from './xmlHelpers';
+import { formatEmissionDate, getElementsByLocalName, getTagValue, parseXmlDate } from './xmlHelpers';
 import { analyzeTaxCompliance } from './taxValidation';
 /**
  * Formats CNPJ with mask (XX.XXX.XXX/XXXX-XX) or CPF (XXX.XXX.XXX-XX)
@@ -30,7 +30,7 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
 
   // Detect docType
   let docType: DocType = 'NFe';
-  const ideElement = xmlDoc.getElementsByTagName('ide')[0];
+  const ideElement = getElementsByLocalName(xmlDoc, 'ide')[0];
   if (ideElement) {
     const mod = getTagValue(xmlDoc, 'mod'); // search document-wide or under ide
     if (mod === '65') {
@@ -40,16 +40,8 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     }
   } else {
     // No <ide> element. Let's see if there are any NFS-e indicators or service markers
-    const hasNfseTag = xmlDoc.getElementsByTagName('Nfse').length > 0 || 
-                       xmlDoc.getElementsByTagName('CompNfse').length > 0 ||
-                       xmlDoc.getElementsByTagName('PrestadorServico').length > 0 ||
-                       xmlDoc.getElementsByTagName('Prestador').length > 0 ||
-                       xmlDoc.getElementsByTagName('TomadorServico').length > 0 ||
-                       xmlText.includes('<Nfse') || 
-                       xmlText.includes('<nfse') ||
-                       xmlText.includes('<Rps') ||
-                       xmlText.includes('<rps') ||
-                       xmlText.includes('<EnviarLoteRpsEnvio');
+    const hasNfseTag = ['Nfse', 'CompNfse', 'PrestadorServico', 'Prestador', 'TomadorServico', 'Rps', 'EnviarLoteRpsEnvio']
+      .some((tagName) => getElementsByLocalName(xmlDoc, tagName).length > 0);
     if (hasNfseTag) {
       docType = 'NFSe';
     }
@@ -77,7 +69,7 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     tipoNota = 'SAÍDA';
 
     // 4. Emitente (Prestador)
-    const prestadorElement = xmlDoc.getElementsByTagName('PrestadorServico')[0] || xmlDoc.getElementsByTagName('Prestador')[0] || xmlDoc.getElementsByTagName('IdentificacaoPrestador')[0];
+    const prestadorElement = getElementsByLocalName(xmlDoc, 'PrestadorServico')[0] || getElementsByLocalName(xmlDoc, 'Prestador')[0] || getElementsByLocalName(xmlDoc, 'IdentificacaoPrestador')[0];
     if (prestadorElement) {
       cnpjEmitente = getTagValue(prestadorElement, 'CNPJ') || getTagValue(prestadorElement, 'Cnpj') || getTagValue(prestadorElement, 'CPF') || getTagValue(prestadorElement, 'Cpf') || '';
       nomeEmitente = getTagValue(prestadorElement, 'RazaoSocial') || getTagValue(prestadorElement, 'razaoSocial') || getTagValue(prestadorElement, 'xNome') || 'Prestador de Serviço';
@@ -87,7 +79,7 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     }
 
     // 5. Destinatário (Tomador)
-    const tomadorElement = xmlDoc.getElementsByTagName('TomadorServico')[0] || xmlDoc.getElementsByTagName('Tomador')[0] || xmlDoc.getElementsByTagName('IdentificacaoTomador')[0];
+    const tomadorElement = getElementsByLocalName(xmlDoc, 'TomadorServico')[0] || getElementsByLocalName(xmlDoc, 'Tomador')[0] || getElementsByLocalName(xmlDoc, 'IdentificacaoTomador')[0];
     if (tomadorElement) {
       cnpjDestinatario = getTagValue(tomadorElement, 'CNPJ') || getTagValue(tomadorElement, 'Cnpj') || getTagValue(tomadorElement, 'CPF') || getTagValue(tomadorElement, 'Cpf') || '';
       nomeDestinatario = getTagValue(tomadorElement, 'RazaoSocial') || getTagValue(tomadorElement, 'razaoSocial') || getTagValue(tomadorElement, 'xNome') || 'Tomador de Serviço';
@@ -111,14 +103,14 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     tipoNota = tpNFText === '0' ? 'ENTRADA' : 'SAÍDA';
 
     // 2. Identify <emit> block
-    const emitElement = xmlDoc.getElementsByTagName('emit')[0];
+    const emitElement = getElementsByLocalName(xmlDoc, 'emit')[0];
     if (emitElement) {
       cnpjEmitente = getTagValue(emitElement, 'CNPJ') || getTagValue(emitElement, 'CPF') || '';
       nomeEmitente = getTagValue(emitElement, 'xNome') || 'Emitente sem nome';
     }
 
     // 3. Identify <dest> block
-    const destElement = xmlDoc.getElementsByTagName('dest')[0];
+    const destElement = getElementsByLocalName(xmlDoc, 'dest')[0];
     if (destElement) {
       cnpjDestinatario = getTagValue(destElement, 'CNPJ') || getTagValue(destElement, 'CPF') || '';
       nomeDestinatario = getTagValue(destElement, 'xNome') || 'Destinatário sem nome';

@@ -48,14 +48,14 @@ export function IncompleteDocumentsSection({ notes, isCollapsed, onToggle }: Inc
               </span>
             </div>
             <p className="text-xs font-sans text-slate-500 mt-1">
-              Notas fiscais que não puderam ser atribuídas a um CNPJ em foco devido a informações ausentes no XML.
+              Empresa em foco sem CNPJ/CPF identificado no XML.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-4 self-stretch sm:self-auto justify-end">
           <span className="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-100/50 rounded-lg px-2.5 py-1">
-            Sinalização de dados faltantes
+            CNPJ/CPF ausente
           </span>
           <div>
             {isCollapsed ? (
@@ -125,7 +125,7 @@ export function IncompleteDocumentsSection({ notes, isCollapsed, onToggle }: Inc
           </div>
 
           <div className="hidden w-full overflow-x-auto lg:block">
-            <table className="min-w-[900px] divide-y divide-slate-100 text-left">
+            <table className="w-full min-w-[900px] divide-y divide-slate-100 text-left">
               <thead>
                 <tr className="bg-slate-50 text-slate-500 text-[11px] font-sans font-medium tracking-normal border-b border-slate-100 font-sans">
                   <th className="py-3 px-4">Código / nota</th>

@@ -26,16 +26,18 @@ export default function App() {
     return groupAnalysesByEmpresaFoco(results);
   }, [results]);
 
-  const handleFilesSelected = async (files: File[]) => {
+  const handleFilesSelected = async (files: File[], append = false) => {
     setIsLoading(true);
     try {
       const parsed = await processFiles(files);
-      setResults(parsed.results);
-      setErrors(parsed.errors);
+      setResults((previous) => append ? [...previous, ...parsed.results] : parsed.results);
+      setErrors((previous) => append ? [...previous, ...parsed.errors] : parsed.errors);
     } catch (err: unknown) {
-      setErrors([
-        { fileName: 'Geral', error: getErrorMessage(err, 'Falha ao processar arquivos.') },
-      ]);
+      const processingError = {
+        fileName: 'Geral',
+        error: getErrorMessage(err, 'Falha ao processar arquivos.'),
+      };
+      setErrors((previous) => append ? [...previous, processingError] : [processingError]);
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +82,7 @@ export default function App() {
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      handleFilesSelected(Array.from(e.target.files));
+      handleFilesSelected(Array.from(e.target.files), true);
       e.target.value = '';
     }
   };
@@ -242,7 +244,7 @@ export default function App() {
                   className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50"
                 >
                   <FileText className="h-4 w-4 text-slate-500" />
-                  Analisar arquivos
+                  Adicionar arquivos
                   <input
                     id="append-nfe-file-input"
                     type="file"
