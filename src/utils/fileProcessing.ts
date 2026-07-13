@@ -11,6 +11,12 @@ export interface ProcessFilesResult {
   errors: FileProcessingError[];
 }
 
+export const MAX_XML_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+export const MAX_ZIP_FILE_SIZE_BYTES = 50 * 1024 * 1024;
+
+function formatMegabytes(bytes: number): string {
+  return (bytes / (1024 * 1024)).toFixed(0) + ' MB';
+}
 export function normalizeXmlForFingerprint(xmlText: string): string {
   return xmlText
     .replace(/\r\n?/g, '\n')
@@ -77,6 +83,19 @@ export async function processFiles(
   for (const file of files) {
     const lowerName = file.name.toLowerCase();
 
+    const maxSize = lowerName.endsWith('.xml')
+      ? MAX_XML_FILE_SIZE_BYTES
+      : lowerName.endsWith('.zip')
+        ? MAX_ZIP_FILE_SIZE_BYTES
+        : undefined;
+
+    if (maxSize !== undefined && file.size > maxSize) {
+      errors.push({
+        fileName: file.name,
+        error: 'Arquivo excede o limite de ' + formatMegabytes(maxSize) + ' para este formato.',
+      });
+      continue;
+    }
     if (lowerName.endsWith('.xml')) {
       try {
         await addXmlResult(await file.text(), file.name, file.name);

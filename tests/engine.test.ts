@@ -1,6 +1,11 @@
 import { calculateItemStats, groupAnalysesByEmpresaFoco } from '../src/utils/analysisStats.ts';
 import { getFilteredResultGroups } from '../src/utils/resultFilters.ts';
-import { getXmlFingerprint, processFiles } from '../src/utils/fileProcessing.ts';
+import {
+  getXmlFingerprint,
+  MAX_XML_FILE_SIZE_BYTES,
+  MAX_ZIP_FILE_SIZE_BYTES,
+  processFiles,
+} from '../src/utils/fileProcessing.ts';
 import { parseNFeXml } from '../src/utils/nfeParser.ts';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
 import { ComplianceStatus, DocType, ItemClassificationStatus, NFeAnalysis, NFeType, ValidationStatus } from '../src/types.ts';
@@ -181,6 +186,21 @@ const tests: TestCase[] = [
       assertEquals(parsed.errors[0].kind, 'DUPLICATE');
       assert(parsed.errors[0].error.includes('duplicado'), 'A duplicidade deve ser informada ao usuário');
       assertEquals(parsed.results[0].contentFingerprint, getXmlFingerprint(sourceXml));
+    },
+  },
+  {
+    name: 'processamento rejeita arquivos acima do limite de tamanho',
+    run: async () => {
+      const oversizedXml = new File(['x'], 'grande.xml', { type: 'text/xml' });
+      const oversizedZip = new File(['x'], 'grande.zip', { type: 'application/zip' });
+      Object.defineProperty(oversizedXml, 'size', { value: MAX_XML_FILE_SIZE_BYTES + 1 });
+      Object.defineProperty(oversizedZip, 'size', { value: MAX_ZIP_FILE_SIZE_BYTES + 1 });
+
+      const parsed = await processFiles([oversizedXml, oversizedZip]);
+
+      assertEquals(parsed.results.length, 0);
+      assertEquals(parsed.errors.length, 2);
+      assert(parsed.errors.every((error) => error.error.includes('limite de')), 'O limite deve ser informado ao usuário');
     },
   },
   {
