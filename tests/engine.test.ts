@@ -2,8 +2,11 @@ import { calculateItemStats, groupAnalysesByEmpresaFoco } from '../src/utils/ana
 import { getFilteredResultGroups } from '../src/utils/resultFilters.ts';
 import {
   getXmlFingerprint,
+  getZipLimitError,
   MAX_XML_FILE_SIZE_BYTES,
   MAX_ZIP_FILE_SIZE_BYTES,
+  MAX_ZIP_UNCOMPRESSED_SIZE_BYTES,
+  MAX_ZIP_XML_FILES,
   processFiles,
 } from '../src/utils/fileProcessing.ts';
 import { parseNFeXml } from '../src/utils/nfeParser.ts';
@@ -201,6 +204,41 @@ const tests: TestCase[] = [
       assertEquals(parsed.results.length, 0);
       assertEquals(parsed.errors.length, 2);
       assert(parsed.errors.every((error) => error.error.includes('limite de')), 'O limite deve ser informado ao usuário');
+    },
+  },
+  {
+    name: 'limites de ZIP bloqueiam excesso de arquivos e volume descompactado',
+    run: () => {
+      const tooManyEntries = Array.from(
+        { length: MAX_ZIP_XML_FILES + 1 },
+        () => ({ uncompressedSize: 1 }),
+      );
+      const tooLargeEntries = [
+        { uncompressedSize: MAX_ZIP_UNCOMPRESSED_SIZE_BYTES + 1 },
+      ];
+
+      assert(getZipLimitError(tooManyEntries)?.includes('limite'), 'O limite de XMLs deve ser aplicado');
+      assert(getZipLimitError(tooLargeEntries)?.includes('descompactados'), 'O limite descompactado deve ser aplicado');
+      assert(
+        getZipLimitError([{}])?.includes('verificar'),
+        'Entradas sem tamanho declarado devem ser rejeitadas',
+      );
+    },
+  },
+  {
+    name: 'processamento aceita ZIP válido dentro dos limites',
+    run: async () => {
+      const { default: JSZip } = await import('jszip');
+      const zip = new JSZip();
+      zip.file('nota.xml', SAMPLE_NFES[0].xmlContent);
+      const zipContent = await zip.generateAsync({ type: 'uint8array' });
+      const parsed = await processFiles([
+        new File([zipContent], 'notas.zip', { type: 'application/zip' }),
+      ]);
+
+      assertEquals(parsed.results.length, 1);
+      assertEquals(parsed.errors.length, 0);
+      assertEquals(parsed.results[0].fileName, 'nota.xml');
     },
   },
   {

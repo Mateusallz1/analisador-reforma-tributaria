@@ -13,10 +13,47 @@ export interface ProcessFilesResult {
 
 export const MAX_XML_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 export const MAX_ZIP_FILE_SIZE_BYTES = 50 * 1024 * 1024;
+export const MAX_ZIP_XML_FILES = 5000;
+export const MAX_ZIP_UNCOMPRESSED_SIZE_BYTES = 100 * 1024 * 1024;
 
 function formatMegabytes(bytes: number): string {
   return (bytes / (1024 * 1024)).toFixed(0) + ' MB';
 }
+
+export interface ZipEntryLimitInfo {
+  uncompressedSize?: number;
+}
+
+function getZipEntryUncompressedSize(entry: unknown): number | undefined {
+  const size = (entry as { _data?: ZipEntryLimitInfo })._data?.uncompressedSize;
+  return typeof size === 'number' && Number.isFinite(size) && size >= 0 ? size : undefined;
+}
+
+export function getZipLimitError(entries: readonly ZipEntryLimitInfo[]): string | undefined {
+  if (entries.length > MAX_ZIP_XML_FILES) {
+    return 'Arquivo ZIP contém ' + entries.length + ' XMLs; o limite é ' + MAX_ZIP_XML_FILES + '.';
+  }
+
+  if (entries.some((entry) => entry.uncompressedSize === undefined)) {
+    return 'Não foi possível verificar o tamanho descompactado dos XMLs do arquivo ZIP.';
+  }
+
+  const totalUncompressedSize = entries.reduce(
+    (total, entry) => total + (entry.uncompressedSize || 0),
+    0,
+  );
+
+  if (totalUncompressedSize > MAX_ZIP_UNCOMPRESSED_SIZE_BYTES) {
+    return (
+      'O conteúdo XML do arquivo ZIP excede o limite de ' +
+      formatMegabytes(MAX_ZIP_UNCOMPRESSED_SIZE_BYTES) +
+      ' descompactados.'
+    );
+  }
+
+  return undefined;
+}
+
 export function normalizeXmlForFingerprint(xmlText: string): string {
   return xmlText
     .replace(/\r\n?/g, '\n')
@@ -110,9 +147,24 @@ export async function processFiles(
         const { default: JSZip } = await import('jszip');
         const zip = await JSZip.loadAsync(file);
         const xmlFiles = Object.keys(zip.files).filter(
-          (name) => name.toLowerCase().endsWith('.xml') && !name.includes('__MACOSX'),
+          (name) =>
+            !zip.files[name].dir &&
+            name.toLowerCase().endsWith('.xml') &&
+            !name.includes('__MACOSX'),
         );
 
+        const zipLimitError = getZipLimitError(
+          xmlFiles.map((name) => ({
+            uncompressedSize: getZipEntryUncompressedSize(zip.files[name]),
+          })),
+        );
+        if (zipLimitError) {
+          errors.push({
+            fileName: file.name,
+            error: zipLimitError,
+          });
+          continue;
+        }
         if (xmlFiles.length === 0) {
           errors.push({
             fileName: file.name,
