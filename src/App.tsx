@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
   Database,
@@ -10,6 +10,7 @@ import {
 import { NFeAnalysis, FileProcessingError } from './types';
 import { parseNFeXml } from './utils/nfeParser';
 import { getXmlFingerprint, processFiles } from './utils/fileProcessing';
+import type { FileProcessingProgress } from './utils/fileProcessing';
 import { getNoteItemCount, groupAnalysesByEmpresaFoco } from './utils/analysisStats';
 import { getErrorMessage } from './utils/errors';
 import UploadSection from './components/UploadSection';
@@ -17,10 +18,74 @@ import ResultsTable from './components/ResultsTable';
 import DashboardStats from './components/DashboardStats';
 import { SAMPLE_NFES } from './data/samples';
 
+interface ProcessingStatusProps {
+  message: string;
+  progress?: FileProcessingProgress;
+  onCancel?: () => void;
+}
+
+function ProcessingStatus({ message, progress, onCancel }: ProcessingStatusProps) {
+  const progressPercent = progress && progress.total > 0
+    ? Math.min(100, Math.round((progress.processed / progress.total) * 100))
+    : undefined;
+
+  return (
+    <div
+      className="flex min-h-[360px] flex-col items-center justify-center rounded-lg border border-slate-200 bg-white p-8"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="mb-4 h-11 w-11 animate-spin rounded-full border-4 border-slate-100 border-t-slate-800" />
+      <p className="text-sm font-semibold text-slate-700">{message}</p>
+
+      {progress && (
+        <div className="mt-4 w-full max-w-sm">
+          <div
+            className="h-2 overflow-hidden rounded-full bg-slate-100"
+            role="progressbar"
+            aria-label="Progresso do processamento"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progressPercent || 0}
+          >
+            <div
+              className="h-full rounded-full bg-slate-800 transition-[width] duration-200"
+              style={{ width: (progressPercent || 0) + '%' }}
+            />
+          </div>
+          <div className="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500">
+            <span>{progress.processed} de {progress.total} arquivos</span>
+            <span>{progressPercent || 0}%</span>
+          </div>
+          {progress.currentFile && (
+            <p className="mt-1 truncate text-center text-xs text-slate-400" title={progress.currentFile}>
+              {progress.currentFile}
+            </p>
+          )}
+        </div>
+      )}
+
+      {onCancel && (
+        <button
+          type="button"
+          onClick={onCancel}
+          className="mt-5 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+        >
+          <X className="h-3.5 w-3.5" aria-hidden="true" />
+          Cancelar
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function App() {
   const [results, setResults] = useState<NFeAnalysis[]>([]);
   const [errors, setErrors] = useState<FileProcessingError[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState<FileProcessingProgress>();
+  const [canCancelProcessing, setCanCancelProcessing] = useState(false);
+  const processingAbortController = useRef<AbortController | null>(null);
 
   const groupedResults = useMemo(() => {
     return groupAnalysesByEmpresaFoco(results);
@@ -28,6 +93,15 @@ export default function App() {
 
   const handleFilesSelected = async (files: File[], append = false) => {
     setIsLoading(true);
+    const controller = new AbortController();
+    processingAbortController.current = controller;
+    setCanCancelProcessing(true);
+    setProcessingProgress({
+      processed: 0,
+      total: files.length,
+      currentFile: files[0]?.name,
+    });
+
     try {
       const existingFingerprints: Set<string> | undefined = append
         ? new Set(
@@ -36,10 +110,11 @@ export default function App() {
               .filter((fingerprint): fingerprint is string => Boolean(fingerprint)),
           )
         : undefined;
-      const parsed = await processFiles(
-        files,
-        existingFingerprints ? { existingFingerprints } : undefined,
-      );
+      const parsed = await processFiles(files, {
+        existingFingerprints,
+        signal: controller.signal,
+        onProgress: setProcessingProgress,
+      });
       setResults((previous) => append ? [...previous, ...parsed.results] : parsed.results);
       setErrors((previous) => append ? [...previous, ...parsed.errors] : parsed.errors);
     } catch (err: unknown) {
@@ -49,11 +124,23 @@ export default function App() {
       };
       setErrors((previous) => append ? [...previous, processingError] : [processingError]);
     } finally {
+      if (processingAbortController.current === controller) {
+        processingAbortController.current = null;
+      }
+      setCanCancelProcessing(false);
+      setProcessingProgress(undefined);
       setIsLoading(false);
     }
   };
 
+  const cancelProcessing = () => {
+    processingAbortController.current?.abort();
+  };
+
   const handleLoadSamples = () => {
+    processingAbortController.current = null;
+    setCanCancelProcessing(false);
+    setProcessingProgress(undefined);
     setIsLoading(true);
     try {
       const sampleResults: NFeAnalysis[] = [];
@@ -81,6 +168,7 @@ export default function App() {
         { fileName: 'Amostras', error: getErrorMessage(err, 'Falha ao carregar amostras.') },
       ]);
     } finally {
+      setProcessingProgress(undefined);
       setIsLoading(false);
     }
   };
@@ -213,11 +301,11 @@ export default function App() {
               </div>
 
               {isLoading ? (
-                <div className="flex min-h-[360px] flex-col items-center justify-center rounded-lg border border-slate-200 bg-white p-8">
-                  <div className="mb-4 h-11 w-11 animate-spin rounded-full border-4 border-slate-100 border-t-slate-800" />
-                  <p className="text-sm font-semibold text-slate-700">Processando arquivos...</p>
-                  <p className="mt-1 text-xs text-slate-400">A análise acontece no navegador.</p>
-                </div>
+                <ProcessingStatus
+                  message="Processando arquivos..."
+                  progress={processingProgress}
+                  onCancel={canCancelProcessing ? cancelProcessing : undefined}
+                />
               ) : (
                 <UploadSection onFilesSelected={handleFilesSelected} isLoading={isLoading} />
               )}
@@ -299,10 +387,11 @@ export default function App() {
             </div>
 
             {isLoading ? (
-              <div className="flex min-h-[260px] flex-col items-center justify-center rounded-lg border border-slate-200 bg-white p-8">
-                <div className="mb-3 h-10 w-10 animate-spin rounded-full border-4 border-slate-100 border-t-slate-800" />
-                <p className="text-sm font-semibold text-slate-700">Atualizando análise...</p>
-              </div>
+              <ProcessingStatus
+                message="Atualizando análise..."
+                progress={processingProgress}
+                onCancel={canCancelProcessing ? cancelProcessing : undefined}
+              />
             ) : (
               <ResultsTable allResults={results} />
             )}

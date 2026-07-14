@@ -2,13 +2,22 @@ import { FileProcessingError, NFeAnalysis } from '../types';
 import { getErrorMessage } from './errors';
 import { parseNFeXml } from './nfeParser';
 
+export interface FileProcessingProgress {
+  processed: number;
+  total: number;
+  currentFile?: string;
+}
+
 export interface ProcessFilesOptions {
   existingFingerprints?: ReadonlySet<string>;
+  signal?: AbortSignal;
+  onProgress?: (progress: FileProcessingProgress) => void;
 }
 
 export interface ProcessFilesResult {
   results: NFeAnalysis[];
   errors: FileProcessingError[];
+  cancelled: boolean;
 }
 
 export const MAX_XML_FILE_SIZE_BYTES = 10 * 1024 * 1024;
@@ -92,6 +101,20 @@ export async function processFiles(
   const results: NFeAnalysis[] = [];
   const errors: FileProcessingError[] = [];
   const knownFingerprints = new Set(options.existingFingerprints || []);
+  let processedFiles = 0;
+  let totalFiles = files.length;
+  const isCancelled = () => options.signal?.aborted === true;
+  const reportProgress = (currentFile?: string): void => {
+    options.onProgress?.({
+      processed: processedFiles,
+      total: totalFiles,
+      currentFile,
+    });
+  };
+  const markProcessed = (currentFile: string): void => {
+    processedFiles += 1;
+    reportProgress(currentFile);
+  };
 
   const addXmlResult = async (
     xmlContent: string,
@@ -117,7 +140,11 @@ export async function processFiles(
     }
   };
 
+  reportProgress(files[0]?.name);
+
   for (const file of files) {
+    if (isCancelled()) break;
+
     const lowerName = file.name.toLowerCase();
 
     const maxSize = lowerName.endsWith('.xml')
@@ -131,27 +158,48 @@ export async function processFiles(
         fileName: file.name,
         error: 'Arquivo excede o limite de ' + formatMegabytes(maxSize) + ' para este formato.',
       });
+      markProcessed(file.name);
       continue;
     }
+
     if (lowerName.endsWith('.xml')) {
       try {
-        await addXmlResult(await file.text(), file.name, file.name);
+        const xmlContent = await file.text();
+        if (!isCancelled()) {
+          await addXmlResult(xmlContent, file.name, file.name);
+        }
       } catch (err: unknown) {
-        errors.push({
-          fileName: file.name,
-          error: getErrorMessage(err, 'Erro desconhecido ao ler XML.'),
-        });
+        if (!isCancelled()) {
+          errors.push({
+            fileName: file.name,
+            error: getErrorMessage(err, 'Erro desconhecido ao ler XML.'),
+          });
+        }
       }
+      markProcessed(file.name);
     } else if (lowerName.endsWith('.zip')) {
       try {
         const { default: JSZip } = await import('jszip');
+        if (isCancelled()) continue;
+
         const zip = await JSZip.loadAsync(file);
+        if (isCancelled()) continue;
+
         const xmlFiles = Object.keys(zip.files).filter(
           (name) =>
             !zip.files[name].dir &&
             name.toLowerCase().endsWith('.xml') &&
             !name.includes('__MACOSX'),
         );
+
+        if (xmlFiles.length === 0) {
+          errors.push({
+            fileName: file.name,
+            error: 'Arquivo ZIP não contém arquivos XML válidos.',
+          });
+          markProcessed(file.name);
+          continue;
+        }
 
         const zipLimitError = getZipLimitError(
           xmlFiles.map((name) => ({
@@ -163,41 +211,49 @@ export async function processFiles(
             fileName: file.name,
             error: zipLimitError,
           });
-          continue;
-        }
-        if (xmlFiles.length === 0) {
-          errors.push({
-            fileName: file.name,
-            error: 'Arquivo ZIP não contém arquivos XML válidos.',
-          });
+          markProcessed(file.name);
           continue;
         }
 
+        totalFiles += xmlFiles.length - 1;
+        reportProgress(file.name);
+
         for (const xmlPath of xmlFiles) {
+          if (isCancelled()) break;
+
           try {
             const xmlContent = await zip.files[xmlPath].async('string');
-            const pureFileName = xmlPath.split('/').pop() || xmlPath;
-            await addXmlResult(xmlContent, pureFileName, file.name + ' -> ' + xmlPath);
+            if (!isCancelled()) {
+              const pureFileName = xmlPath.split('/').pop() || xmlPath;
+              await addXmlResult(xmlContent, pureFileName, file.name + ' -> ' + xmlPath);
+            }
           } catch (err: unknown) {
-            errors.push({
-              fileName: file.name + ' -> ' + xmlPath,
-              error: getErrorMessage(err, 'Erro ao processar XML de dentro do ZIP.'),
-            });
+            if (!isCancelled()) {
+              errors.push({
+                fileName: file.name + ' -> ' + xmlPath,
+                error: getErrorMessage(err, 'Erro ao processar XML de dentro do ZIP.'),
+              });
+            }
           }
+          markProcessed(file.name + ' -> ' + xmlPath);
         }
       } catch (err: unknown) {
-        errors.push({
-          fileName: file.name,
-          error: getErrorMessage(err, 'Erro ao descomprimir ou ler arquivo ZIP.'),
-        });
+        if (!isCancelled()) {
+          errors.push({
+            fileName: file.name,
+            error: getErrorMessage(err, 'Erro ao descomprimir ou ler arquivo ZIP.'),
+          });
+        }
+        markProcessed(file.name);
       }
     } else {
       errors.push({
         fileName: file.name,
         error: 'Extensão de arquivo não suportada. Envie apenas arquivos .XML ou .ZIP.',
       });
+      markProcessed(file.name);
     }
   }
 
-  return { results, errors };
+  return { results, errors, cancelled: isCancelled() };
 }

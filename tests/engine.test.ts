@@ -242,6 +242,38 @@ const tests: TestCase[] = [
     },
   },
   {
+    name: 'processamento reporta progresso e permite cancelamento',
+    run: async () => {
+      const controller = new AbortController();
+      const progressUpdates: Array<{ processed: number; total: number }> = [];
+      const parsed = await processFiles(
+        [
+          new File([SAMPLE_NFES[0].xmlContent], 'primeira.xml', { type: 'text/xml' }),
+          new File([SAMPLE_NFES[1].xmlContent], 'segunda.xml', { type: 'text/xml' }),
+        ],
+        {
+          signal: controller.signal,
+          onProgress: (progress) => {
+            progressUpdates.push({
+              processed: progress.processed,
+              total: progress.total,
+            });
+            if (progress.processed === 1) {
+              controller.abort();
+            }
+          },
+        },
+      );
+
+      assertEquals(parsed.cancelled, true);
+      assertEquals(parsed.results.length, 1);
+      assertEquals(parsed.errors.length, 0);
+      assertEquals(progressUpdates[0].processed, 0);
+      assertEquals(progressUpdates[0].total, 2);
+      assertEquals(progressUpdates.at(-1)?.processed, 1);
+    },
+  },
+  {
     name: 'busca encontra CNPJ formatado e mantém o grupo correspondente',
     run: () => {
       const filtered = getFilteredResultGroups(parseSamples(), {
