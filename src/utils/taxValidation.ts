@@ -1,4 +1,4 @@
-import { ComplianceStatus, DocType, ItemClassificationStatus, ItemValidation, TaxBaseInfo, ValidationStatus } from '../types';
+import { ComplianceStatus, DataIntegrityStatus, DocType, ItemClassificationStatus, ItemValidation, TaxBaseInfo, ValidationStatus } from '../types';
 import baseCompleta from '../data/base_completa.json' with { type: 'json' };
 import { extractPRedAliq, getElementsByLocalName, getTagValue, parseXmlDate } from './xmlHelpers';
 
@@ -43,6 +43,7 @@ interface TaxAnalysisInput {
   xmlText: string;
   docType: DocType;
   emissaoDate: Date | null;
+  emissionDateStatus: DataIntegrityStatus;
 }
 
 const taxBase = baseCompleta as TaxBase;
@@ -93,7 +94,7 @@ function getFallbackStatus(itemHasIBSCBS: boolean, documentHasIBSCBS: boolean): 
   return itemHasIBSCBS || documentHasIBSCBS ? 'incompleto' : 'N/A';
 }
 
-export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate }: TaxAnalysisInput): TaxValidationResult {
+export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate, emissionDateStatus }: TaxAnalysisInput): TaxValidationResult {
   let contemIBSCBS = false;
   let cst: string | undefined = undefined;
   let cClassTrib: string | undefined = undefined;
@@ -175,16 +176,23 @@ export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate }: 
               const vigenciaInicio = classFound.dataInicioVigencia ? parseXmlDate(classFound.dataInicioVigencia) : null;
               const vigenciaFim = classFound.dataFimVigencia ? parseXmlDate(classFound.dataFimVigencia) : null;
 
-              let isVigente = true;
-              if (emissaoDate) {
-                if (vigenciaInicio && emissaoDate < vigenciaInicio) {
-                  isVigente = false;
-                } else if (vigenciaFim && emissaoDate > vigenciaFim) {
-                  isVigente = false;
+              if (emissionDateStatus !== 'VALID') {
+                itemValStatus = 'incompleto';
+                itemStatus = 'incompleto';
+                itemValReason = emissionDateStatus === 'MISSING'
+                  ? 'Data de emissão não informada; não é possível verificar a vigência da classificação tributária.'
+                  : 'Data de emissão inválida; não é possível verificar a vigência da classificação tributária.';
+              } else {
+                let isVigente = true;
+                if (emissaoDate) {
+                  if (vigenciaInicio && emissaoDate < vigenciaInicio) {
+                    isVigente = false;
+                  } else if (vigenciaFim && emissaoDate > vigenciaFim) {
+                    isVigente = false;
+                  }
                 }
-              }
 
-              if (!isVigente) {
+                if (!isVigente) {
                 itemValStatus = 'inválido';
                 itemStatus = 'fora_vigencia';
                 itemValReason = `Código de classificação fora da vigência original (Início: ${classFound.dataInicioVigencia || 'N/A'}, Fim: ${classFound.dataFimVigencia || 'vigência aberta'}).`;
@@ -237,6 +245,7 @@ export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate }: 
                   itemValReason = `Inconsistência: O código de classificação "${itemCClassTrib}" não é permitido para o tipo de documento "${docType}" (usado em documento indevido). Permitidos: ${dfes.join(', ')}.`;
                   itemStatus = 'classificacao_invalida';
                 }
+              }
               }
             } else {
               itemValStatus = 'inválido';

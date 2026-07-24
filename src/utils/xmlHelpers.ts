@@ -19,7 +19,16 @@ export function parseXmlDate(xmlDate: string | null): Date | null {
     const match = xmlDate.match(/(\d{4})-(\d{2})-(\d{2})/);
     if (!match) return null;
     const [_, year, month, day] = match;
-    return new Date(Date.UTC(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10)));
+    const parsedYear = parseInt(year, 10);
+    const parsedMonth = parseInt(month, 10);
+    const parsedDay = parseInt(day, 10);
+    const date = new Date(Date.UTC(parsedYear, parsedMonth - 1, parsedDay));
+
+    return date.getUTCFullYear() === parsedYear &&
+      date.getUTCMonth() === parsedMonth - 1 &&
+      date.getUTCDate() === parsedDay
+      ? date
+      : null;
   } catch {
     return null;
   }

@@ -10,6 +10,8 @@ import {
   processFiles,
 } from '../src/utils/fileProcessing.ts';
 import { parseNFeXml } from '../src/utils/nfeParser.ts';
+import { parseXmlDate } from '../src/utils/xmlHelpers.ts';
+import { getTaxpayerDocumentStatus } from '../src/utils/taxpayerId.ts';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
 import { ComplianceStatus, DocType, ItemClassificationStatus, NFeAnalysis, NFeType, ValidationStatus } from '../src/types.ts';
 
@@ -172,6 +174,40 @@ const tests: TestCase[] = [
         assertEquals(firstItemStatus(result), expectation.itemStatus, `${expectation.fileName}: itemStatus divergente`);
         assertEquals(result.empresaFoco.cnpj, expectation.empresaFocoCnpj, `${expectation.fileName}: empresa em foco divergente`);
       });
+    },
+  },
+  {
+    name: 'integridade de datas, identificadores e layout DPS é reportada sem falso positivo fiscal',
+    run: () => {
+      assertEquals(parseXmlDate('2026-02-29'), null);
+      assertEquals(parseXmlDate('2028-02-29')?.toISOString().slice(0, 10), '2028-02-29');
+      assertEquals(getTaxpayerDocumentStatus('529.982.247-25'), 'VALID');
+      assertEquals(getTaxpayerDocumentStatus('04.252.011/0001-10'), 'VALID');
+      assertEquals(getTaxpayerDocumentStatus('04.252.011/0001-11'), 'INVALID');
+      assertEquals(getTaxpayerDocumentStatus('AB.252.011/0001-10'), 'NOT_VERIFIABLE');
+      assertEquals(getTaxpayerDocumentStatus(''), 'MISSING');
+
+      const missingDate = parseNFeXml(
+        SAMPLE_NFES[0].xmlContent.replace(/<dhEmi>[^<]+<\/dhEmi>/, ''),
+        'NFe_sem_data.xml',
+      );
+      assertEquals(missingDate.emissionDateStatus, 'MISSING');
+      assert(missingDate.status !== 'CONFORME', 'Classificação sem data de emissão não pode ser confirmada como conforme');
+      assert(missingDate.itens?.some((item) => item.validationReason?.includes('Data de emissão')), 'A pendência de data deve ser explicada');
+
+      const nationalNfse = parseNFeXml([
+        '<DPS><infDPS>',
+        '<nDPS>9001</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi>',
+        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
+        '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
+        '</infDPS></DPS>',
+      ].join(''), 'NFSe_DPS.xml');
+
+      assertEquals(nationalNfse.docType, 'NFSe');
+      assertEquals(nationalNfse.documentLayout, 'NFSE_NATIONAL');
+      assertEquals(nationalNfse.numeroNota, '9001');
+      assertEquals(nationalNfse.nomeEmitente, 'Prestador Nacional');
+      assertEquals(nationalNfse.nomeDestinatario, 'Tomador Nacional');
     },
   },
   {

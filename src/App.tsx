@@ -342,7 +342,7 @@ export default function App() {
             </aside>
           </section>
         ) : (
-          <section className="space-y-6 pb-10">
+          <section className="space-y-4 pb-10">
             <DashboardStats
               results={results}
               grouped={groupedResults}
@@ -353,7 +353,7 @@ export default function App() {
               <div>
                 <h2 className="text-base font-bold text-slate-900">Relatório de conformidade</h2>
                 <p className="mt-0.5 text-xs text-slate-500">
-                  Resultados agrupados por emitente ou destinatário em foco.
+                  Selecione um documento para consultar o diagnóstico e as classificações.
                 </p>
               </div>
 

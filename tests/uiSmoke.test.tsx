@@ -39,7 +39,7 @@ function renderResultsTable() {
 
 const tests: UiTestCase[] = [
   {
-    name: 'UI renderiza filtros, grupos e seção de documentos incompletos com controles acessíveis',
+    name: 'UI renderiza hierarquia empresa-documentos, detalhe inline e filtros acessíveis',
     run: () => {
       const { container, root } = renderResultsTable();
 
@@ -54,29 +54,67 @@ const tests: UiTestCase[] = [
         const moreFiltersButton = container.querySelector<HTMLButtonElement>('button[aria-haspopup="dialog"]');
         assert(moreFiltersButton, 'Botão de filtros adicionais não foi renderizado');
         assertEquals(moreFiltersButton.getAttribute('aria-expanded'), 'false');
-        assertEquals(container.querySelector('#results-advanced-filters'), null);
 
         flushSync(() => {
           moreFiltersButton.click();
         });
+
         const advancedPanel = container.querySelector('#results-advanced-filters');
         assert(advancedPanel, 'Painel de filtros avançados não abriu');
         assertEquals(advancedPanel.querySelectorAll('select').length, 2);
         assertEquals(moreFiltersButton.getAttribute('aria-expanded'), 'true');
 
+        const groupedList = container.querySelector('#results-grouped-list');
+        assert(groupedList, 'Lista agrupada de documentos não foi renderizada');
+
         const groupToggle = container.querySelector<HTMLButtonElement>('button[aria-controls^="group-content-"]');
-        assert(groupToggle, 'Accordion de grupo não foi renderizado como botão acessível');
-        assertEquals(groupToggle.getAttribute('aria-expanded'), 'true');
+        assert(groupToggle, 'Empresa não foi renderizada como nível hierárquico recolhível');
+        assertEquals(groupToggle.getAttribute('aria-expanded'), 'false', 'Empresa deve iniciar recolhida');
+        assert(
+          groupedList.textContent?.includes('Empresa não identificada'),
+          'Documentos incompletos devem aparecer como um grupo da lista principal',
+        );
 
-        const groupToggles = Array.from(container.querySelectorAll<HTMLButtonElement>('button[aria-controls^="group-content-"]'));
-        assert(groupToggles.some((button) => button.getAttribute('aria-expanded') === 'false'), 'Grupos conformes devem iniciar recolhidos');
+        flushSync(() => {
+          groupToggle.click();
+        });
 
-        const incompleteToggle = container.querySelector<HTMLButtonElement>('#incomplete-documents-block button[aria-controls="incomplete-documents-content"]');
-        assert(incompleteToggle, 'Accordion de documentos incompletos não foi renderizado');
-        assertEquals(incompleteToggle.getAttribute('aria-expanded'), 'false');
+        assertEquals(groupToggle.getAttribute('aria-expanded'), 'true', 'Empresa não abriu');
 
-        const incompleteBlock = container.querySelector('#incomplete-documents-block');
-        assert(incompleteBlock?.textContent?.includes('Documentos com dados incompletos'), 'Seção de documentos incompletos não está visível');
+        const documentButton = container.querySelector<HTMLButtonElement>('button[data-note-layer="summary"]');
+        assert(documentButton, 'Documento não foi renderizado como controle selecionável');
+        assertEquals(documentButton.getAttribute('aria-expanded'), 'false');
+        assert(documentButton.textContent?.includes('Alfa Implementos Industriais S.A.'), 'Primeira camada não exibe o emitente');
+        assert(documentButton.textContent?.includes('Beta Distribuidora de Bebidas Ltda'), 'Primeira camada não exibe o destinatário');
+        assert(!documentButton.textContent?.includes('cClassTrib'), 'Classificação de item vazou para a primeira camada');
+
+        flushSync(() => {
+          documentButton.click();
+        });
+
+        const detailPanel = container.querySelector<HTMLElement>('[data-detail-layout="inline"]');
+        assert(detailPanel, 'Detalhe inline do documento não abriu');
+        assert(detailPanel.closest('[id^="group-content-"]'), 'Detalhe deve permanecer dentro da empresa selecionada');
+        const itemHeaders = Array.from(detailPanel.querySelectorAll('th')).map((header) => header.textContent?.trim());
+        assertEquals(itemHeaders.join('|'), 'Item|Produto / serviço|CST|Classificação|Status|Diagnóstico da tabela oficial');
+        assert(detailPanel.textContent?.includes('Válvula Reguladora de Pressão Reforçada'), 'Detalhe não exibe a descrição do produto');
+        assertEquals(documentButton.getAttribute('aria-expanded'), 'true');
+
+        const closeButton = detailPanel.querySelector<HTMLButtonElement>('button[aria-label="Recolher itens da nota"]');
+        assert(closeButton, 'Detalhe não possui botão de recolher acessível');
+
+        flushSync(() => {
+          closeButton.click();
+        });
+
+        assertEquals(container.querySelector('[data-detail-layout="inline"]'), null, 'Detalhe inline não recolheu');
+
+        flushSync(() => {
+          groupToggle.click();
+        });
+
+        assertEquals(groupToggle.getAttribute('aria-expanded'), 'false', 'Empresa não foi recolhida');
+        assertEquals(container.querySelector(groupToggle.getAttribute('aria-controls') || ''), null);
       } finally {
         flushSync(() => root.unmount());
         container.remove();

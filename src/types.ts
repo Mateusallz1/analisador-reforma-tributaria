@@ -8,6 +8,10 @@ export type DocType = 'NFe' | 'NFCe' | 'NFSe';
 
 export type ValidationStatus = 'válido' | 'inválido' | 'incompleto' | 'N/A';
 
+export type DataIntegrityStatus = 'VALID' | 'MISSING' | 'INVALID' | 'NOT_VERIFIABLE';
+
+export type DocumentLayout = 'NFE' | 'NFSE_ABRASF' | 'NFSE_NATIONAL';
+
 export type ComplianceStatus = 'CONFORME' | 'NÃO_CONFORME' | 'AUTORIZADA_COM_PENDENCIAS' | 'N/A';
 
 export type ItemClassificationStatus =
@@ -47,12 +51,16 @@ export interface NFeAnalysis {
   fileName: string;
   numeroNota: string;
   dataEmissao: string;
+  emissionDateStatus: DataIntegrityStatus;
   tipoNota: NFeType;
   docType: DocType;
+  documentLayout: DocumentLayout;
   cnpjEmitente: string;
   nomeEmitente: string;
+  emitterDocumentStatus: DataIntegrityStatus;
   cnpjDestinatario: string;
   nomeDestinatario: string;
+  recipientDocumentStatus: DataIntegrityStatus;
   empresaFoco: CompanyInfo;
   contemIBSCBS: boolean;
   status: ComplianceStatus;

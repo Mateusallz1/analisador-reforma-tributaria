@@ -1,6 +1,7 @@
-import { NFeAnalysis, NFeType, DocType, CompanyInfo } from '../types';
+import { DataIntegrityStatus, DocumentLayout, NFeAnalysis, NFeType, DocType, CompanyInfo } from '../types';
 import { formatEmissionDate, getElementsByLocalName, getTagValue, parseXmlDate } from './xmlHelpers';
 import { TAX_BASE_INFO, analyzeTaxCompliance } from './taxValidation';
+import { getTaxpayerDocumentStatus } from './taxpayerId';
 /**
  * Formats CNPJ with mask (XX.XXX.XXX/XXXX-XX) or CPF (XXX.XXX.XXX-XX)
  */
@@ -28,28 +29,35 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     throw new Error('Erro de sintaxe no arquivo XML. O arquivo pode estar corrompido.');
   }
 
-  // Detect docType
   let docType: DocType = 'NFe';
+  let documentLayout: DocumentLayout = 'NFE';
   const ideElement = getElementsByLocalName(xmlDoc, 'ide')[0];
   if (ideElement) {
-    const mod = getTagValue(xmlDoc, 'mod'); // search document-wide or under ide
+    const mod = getTagValue(xmlDoc, 'mod');
     if (mod === '65') {
       docType = 'NFCe';
-    } else if (mod === '55') {
-      docType = 'NFe';
     }
   } else {
-    // No <ide> element. Let's see if there are any NFS-e indicators or service markers
-    const hasNfseTag = ['Nfse', 'CompNfse', 'PrestadorServico', 'Prestador', 'TomadorServico', 'Rps', 'EnviarLoteRpsEnvio']
+    const hasNationalNfseTag = ['DPS', 'infDPS', 'infNFSe']
       .some((tagName) => getElementsByLocalName(xmlDoc, tagName).length > 0);
-    if (hasNfseTag) {
+    const hasAbrasfNfseTag = ['Nfse', 'CompNfse', 'PrestadorServico', 'Prestador', 'TomadorServico', 'Tomador', 'Rps', 'EnviarLoteRpsEnvio']
+      .some((tagName) => getElementsByLocalName(xmlDoc, tagName).length > 0);
+
+    if (hasNationalNfseTag) {
       docType = 'NFSe';
+      documentLayout = 'NFSE_NATIONAL';
+    } else if (hasAbrasfNfseTag) {
+      docType = 'NFSe';
+      documentLayout = 'NFSE_ABRASF';
+    } else {
+      throw new Error('Formato XML não reconhecido. São aceitos NF-e/NFC-e e os layouts NFS-e ABRASF ou padrão nacional (DPS).');
     }
   }
 
   let numeroNota = 'N/A';
   let dataEmissao = 'Não informada';
   let emissaoDate: Date | null = null;
+  let emissionDateStatus: DataIntegrityStatus = 'MISSING';
   let tipoNota: NFeType = 'SAÍDA';
   let cnpjEmitente = '';
   let nomeEmitente = 'Emitente não identificado';
@@ -57,32 +65,38 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
   let nomeDestinatario = 'Destinatário não identificado';
 
   if (docType === 'NFSe') {
-    // 1. Número
-    numeroNota = getTagValue(xmlDoc, 'Numero') || getTagValue(xmlDoc, 'numero') || getTagValue(xmlDoc, 'NumeroRps') || getTagValue(xmlDoc, 'nNF') || 'N/A';
-    
-    // 2. Emissão
-    const rawDate = getTagValue(xmlDoc, 'DataEmissao') || getTagValue(xmlDoc, 'dataEmissao') || getTagValue(xmlDoc, 'dhEmi');
+    numeroNota = getTagValue(xmlDoc, 'nNFSe') || getTagValue(xmlDoc, 'Numero') || getTagValue(xmlDoc, 'numero') ||
+      getTagValue(xmlDoc, 'NumeroRps') || getTagValue(xmlDoc, 'nDPS') || getTagValue(xmlDoc, 'nNF') || 'N/A';
+    const rawDate = getTagValue(xmlDoc, 'dhEmi') || getTagValue(xmlDoc, 'dhEmis') ||
+      getTagValue(xmlDoc, 'DataEmissao') || getTagValue(xmlDoc, 'dataEmissao') || getTagValue(xmlDoc, 'dEmi');
     dataEmissao = formatEmissionDate(rawDate);
     emissaoDate = parseXmlDate(rawDate);
-    
-    // 3. Tipo: NFS-e acts as Service Outgoing
+    emissionDateStatus = !rawDate ? 'MISSING' : emissaoDate ? 'VALID' : 'INVALID';
     tipoNota = 'SAÍDA';
 
-    // 4. Emitente (Prestador)
-    const prestadorElement = getElementsByLocalName(xmlDoc, 'PrestadorServico')[0] || getElementsByLocalName(xmlDoc, 'Prestador')[0] || getElementsByLocalName(xmlDoc, 'IdentificacaoPrestador')[0];
+    const prestadorElement = getElementsByLocalName(xmlDoc, 'PrestadorServico')[0] ||
+      getElementsByLocalName(xmlDoc, 'Prestador')[0] ||
+      getElementsByLocalName(xmlDoc, 'IdentificacaoPrestador')[0] ||
+      getElementsByLocalName(xmlDoc, 'emit')[0] ||
+      getElementsByLocalName(xmlDoc, 'infEmit')[0];
     if (prestadorElement) {
       cnpjEmitente = getTagValue(prestadorElement, 'CNPJ') || getTagValue(prestadorElement, 'Cnpj') || getTagValue(prestadorElement, 'CPF') || getTagValue(prestadorElement, 'Cpf') || '';
-      nomeEmitente = getTagValue(prestadorElement, 'RazaoSocial') || getTagValue(prestadorElement, 'razaoSocial') || getTagValue(prestadorElement, 'xNome') || 'Prestador de Serviço';
+      nomeEmitente = getTagValue(prestadorElement, 'RazaoSocial') || getTagValue(prestadorElement, 'razaoSocial') ||
+        getTagValue(prestadorElement, 'xNome') || getTagValue(prestadorElement, 'xRazao') || 'Prestador de Serviço';
     } else {
       cnpjEmitente = getTagValue(xmlDoc, 'CNPJ') || getTagValue(xmlDoc, 'Cnpj') || '';
       nomeEmitente = getTagValue(xmlDoc, 'RazaoSocial') || getTagValue(xmlDoc, 'razaoSocial') || 'Prestador Não Identificado';
     }
 
-    // 5. Destinatário (Tomador)
-    const tomadorElement = getElementsByLocalName(xmlDoc, 'TomadorServico')[0] || getElementsByLocalName(xmlDoc, 'Tomador')[0] || getElementsByLocalName(xmlDoc, 'IdentificacaoTomador')[0];
+    const tomadorElement = getElementsByLocalName(xmlDoc, 'TomadorServico')[0] ||
+      getElementsByLocalName(xmlDoc, 'Tomador')[0] ||
+      getElementsByLocalName(xmlDoc, 'IdentificacaoTomador')[0] ||
+      getElementsByLocalName(xmlDoc, 'toma')[0] ||
+      getElementsByLocalName(xmlDoc, 'infToma')[0];
     if (tomadorElement) {
       cnpjDestinatario = getTagValue(tomadorElement, 'CNPJ') || getTagValue(tomadorElement, 'Cnpj') || getTagValue(tomadorElement, 'CPF') || getTagValue(tomadorElement, 'Cpf') || '';
-      nomeDestinatario = getTagValue(tomadorElement, 'RazaoSocial') || getTagValue(tomadorElement, 'razaoSocial') || getTagValue(tomadorElement, 'xNome') || 'Tomador de Serviço';
+      nomeDestinatario = getTagValue(tomadorElement, 'RazaoSocial') || getTagValue(tomadorElement, 'razaoSocial') ||
+        getTagValue(tomadorElement, 'xNome') || getTagValue(tomadorElement, 'xRazao') || 'Tomador de Serviço';
     } else {
       cnpjDestinatario = getTagValue(xmlDoc, 'CNPJ') || '';
       nomeDestinatario = 'Tomador Não Identificado';
@@ -97,6 +111,7 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     const rawDate = getTagValue(ideElement, 'dhEmi') || getTagValue(ideElement, 'dEmi');
     dataEmissao = formatEmissionDate(rawDate);
     emissaoDate = parseXmlDate(rawDate);
+    emissionDateStatus = !rawDate ? 'MISSING' : emissaoDate ? 'VALID' : 'INVALID';
 
     // tpNF: 0 = entrada, 1 = saída
     const tpNFText = getTagValue(ideElement, 'tpNF');
@@ -133,11 +148,15 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     };
   }
 
+  const emitterDocumentStatus = getTaxpayerDocumentStatus(cnpjEmitente);
+  const recipientDocumentStatus = getTaxpayerDocumentStatus(cnpjDestinatario);
+
   const taxValidation = analyzeTaxCompliance({
     xmlDoc,
     xmlText,
     docType,
     emissaoDate,
+    emissionDateStatus,
   });
 
   const {
@@ -157,12 +176,16 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     fileName,
     numeroNota,
     dataEmissao,
+    emissionDateStatus,
     tipoNota,
     docType,
+    documentLayout,
     cnpjEmitente,
     nomeEmitente,
+    emitterDocumentStatus,
     cnpjDestinatario,
     nomeDestinatario,
+    recipientDocumentStatus,
     empresaFoco,
     contemIBSCBS,
     status,
