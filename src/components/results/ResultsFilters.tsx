@@ -46,21 +46,11 @@ function MenuButton({ children, isSelected, onClick, className }: MenuButtonProp
   );
 }
 
-function getStatusButtonClass(status: StatusFilter): string {
-  const base = 'btn btn-sm min-w-[150px] justify-between';
-
-  if (status === 'CONFORME') return base + ' btn-success btn-soft';
-  if (status === 'NÃO_CONFORME') return base + ' btn-error btn-soft';
-  if (status === 'AUTORIZADA_COM_PENDENCIAS') return base + ' btn-warning btn-soft';
-  if (status === 'N/A') return base + ' btn-ghost';
-  return base + ' btn-outline';
-}
-
-function getMenuOptionClass(isSelected: boolean, selectedClass: string, withIcon = false): string {
+function getMenuOptionClass(isSelected: boolean, withIcon = false): string {
   const base = withIcon
     ? 'flex w-full items-center gap-2 rounded-field px-3 py-2 text-left text-sm font-medium hover:bg-base-200'
     : 'w-full rounded-field px-3 py-2 text-left text-sm font-medium hover:bg-base-200';
-  return base + (isSelected ? ' ' + selectedClass : ' text-base-content/70');
+  return base + (isSelected ? ' bg-base-200 font-semibold text-base-content' : ' text-base-content/70');
 }
 
 export function ResultsFilters({
@@ -101,7 +91,7 @@ export function ResultsFilters({
         />
       )}
 
-      <div className="relative z-20 border-y border-base-300 bg-base-100 px-0 py-3">
+      <div className="relative z-20 border-b border-base-300 bg-base-100 px-0 py-2.5">
         <div className="flex flex-col items-stretch justify-between gap-3 lg:flex-row lg:items-center">
           <div className="relative min-w-0 flex-1 lg:max-w-xl">
             <span className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3 text-base-content/40">
@@ -126,7 +116,7 @@ export function ResultsFilters({
                 aria-haspopup="menu"
                 aria-expanded={openDropdown === 'STATUS'}
                 aria-controls={statusMenuId}
-                className={getStatusButtonClass(statusFilter)}
+                className="btn btn-outline btn-sm min-w-[150px] justify-between"
               >
                 <span className="flex items-center gap-1.5 truncate">
                   {statusFilter === 'ALL' && 'Todos os status'}
@@ -151,7 +141,7 @@ export function ResultsFilters({
                   {statusFilter === 'N/A' && 'Fora do escopo'}
                 </span>
                 <ChevronDown
-                  className={'h-4 w-4 shrink-0 text-slate-400 transition-transform ' + (openDropdown === 'STATUS' ? 'rotate-180 text-slate-600' : '')}
+                  className={'h-4 w-4 shrink-0 text-base-content/40 transition-transform ' + (openDropdown === 'STATUS' ? 'rotate-180 text-base-content/70' : '')}
                   aria-hidden="true"
                 />
               </button>
@@ -165,14 +155,14 @@ export function ResultsFilters({
                   <MenuButton
                     isSelected={statusFilter === 'ALL'}
                     onClick={() => { setStatusFilter('ALL'); setOpenDropdown('NONE'); }}
-                    className={getMenuOptionClass(statusFilter === 'ALL', 'bg-neutral font-bold text-neutral-content')}
+                    className={getMenuOptionClass(statusFilter === 'ALL')}
                   >
                     Todos os status
                   </MenuButton>
                   <MenuButton
                     isSelected={statusFilter === 'CONFORME'}
                     onClick={() => { setStatusFilter('CONFORME'); setOpenDropdown('NONE'); }}
-                    className={getMenuOptionClass(statusFilter === 'CONFORME', 'bg-success/15 font-bold text-success', true)}
+                    className={getMenuOptionClass(statusFilter === 'CONFORME', true)}
                   >
                     <CheckCircle2 className="h-4 w-4 text-emerald-500" aria-hidden="true" />
                     Conforme
@@ -180,7 +170,7 @@ export function ResultsFilters({
                   <MenuButton
                     isSelected={statusFilter === 'AUTORIZADA_COM_PENDENCIAS'}
                     onClick={() => { setStatusFilter('AUTORIZADA_COM_PENDENCIAS'); setOpenDropdown('NONE'); }}
-                    className={getMenuOptionClass(statusFilter === 'AUTORIZADA_COM_PENDENCIAS', 'bg-warning/15 font-bold text-warning', true)}
+                    className={getMenuOptionClass(statusFilter === 'AUTORIZADA_COM_PENDENCIAS', true)}
                   >
                     <AlertTriangle className="h-4 w-4 text-amber-500" aria-hidden="true" />
                     Autorizada c/ pendências
@@ -188,7 +178,7 @@ export function ResultsFilters({
                   <MenuButton
                     isSelected={statusFilter === 'NÃO_CONFORME'}
                     onClick={() => { setStatusFilter('NÃO_CONFORME'); setOpenDropdown('NONE'); }}
-                    className={getMenuOptionClass(statusFilter === 'NÃO_CONFORME', 'bg-error/15 font-bold text-error', true)}
+                    className={getMenuOptionClass(statusFilter === 'NÃO_CONFORME', true)}
                   >
                     <XCircle className="h-4 w-4 text-rose-500" aria-hidden="true" />
                     Não conforme
@@ -196,7 +186,7 @@ export function ResultsFilters({
                   <MenuButton
                     isSelected={statusFilter === 'N/A'}
                     onClick={() => { setStatusFilter('N/A'); setOpenDropdown('NONE'); }}
-                    className={getMenuOptionClass(statusFilter === 'N/A', 'bg-base-200 font-bold text-base-content')}
+                    className={getMenuOptionClass(statusFilter === 'N/A')}
                   >
                     Fora do escopo
                   </MenuButton>
