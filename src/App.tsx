@@ -11,7 +11,7 @@ import { NFeAnalysis, FileProcessingError } from './types';
 import { parseNFeXml } from './utils/nfeParser';
 import { getXmlFingerprint, processFiles } from './utils/fileProcessing';
 import type { FileProcessingProgress } from './utils/fileProcessing';
-import { getNoteItemCount, groupAnalysesByEmpresaFoco } from './utils/analysisStats';
+import { groupAnalysesByEmpresaFoco } from './utils/analysisStats';
 import { getErrorMessage } from './utils/errors';
 import UploadSection from './components/UploadSection';
 import ResultsTable from './components/ResultsTable';
@@ -186,10 +186,6 @@ export default function App() {
     }
   };
 
-  const totalItems = results.reduce(
-    (acc, note) => acc + getNoteItemCount(note),
-    0,
-  );
   const duplicateErrorCount = errors.filter((error) => error.kind === 'DUPLICATE').length;
   const processingErrorCount = errors.length - duplicateErrorCount;
 
@@ -211,16 +207,10 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-xs">
+          <div className="flex items-center text-xs">
             <span className="badge badge-outline badge-sm gap-1.5">
               <span className="status status-success" />
               Local
-            </span>
-            <span className="badge badge-ghost badge-sm font-mono">
-              {results.length} docs
-            </span>
-            <span className="badge badge-ghost badge-sm font-mono">
-              {totalItems} itens
             </span>
           </div>
         </div>
@@ -365,17 +355,17 @@ export default function App() {
                   type="button"
                   onClick={handleLoadSamples}
                   disabled={isLoading}
-                  className="btn btn-outline btn-sm"
+                  className="btn btn-ghost btn-sm"
                 >
-                  <Database className="h-4 w-4 text-slate-500" />
+                  <Database className="h-4 w-4 text-base-content/50" />
                   Amostras
                 </button>
 
                 <label
                   htmlFor="append-nfe-file-input"
-                  className="btn btn-outline btn-sm"
+                  className="btn btn-neutral btn-sm"
                 >
-                  <FileText className="h-4 w-4 text-slate-500" />
+                  <FileText className="h-4 w-4" />
                   Adicionar arquivos
                   <input
                     id="append-nfe-file-input"
