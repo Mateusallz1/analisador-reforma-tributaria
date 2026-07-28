@@ -81,6 +81,7 @@ const tests: UiTestCase[] = [
           groupSummaryText.includes('3 itens: 1 conforme, 1 para revisar, 1 fora do escopo'),
           'Categorias de itens do resumo empresarial não reconciliam com o total',
         );
+        assert(groupSummaryText.includes('50% conforme'), 'Percentual comparativo deve aparecer para múltiplos itens aplicáveis');
         assert(groupSummaryText.includes('1 nota exige ação'), 'Selo de ação não informa sua unidade em notas');
         const companyToggles = Array.from(
           container.querySelectorAll<HTMLButtonElement>('button[aria-controls^="group-content-"]'),
@@ -91,6 +92,7 @@ const tests: UiTestCase[] = [
         assert(betaSummaryText.includes('1 item: 1 conforme'), 'Resumo empresarial omitiu categoria relevante');
         assert(!betaSummaryText.includes('0 para revisar'), 'Resumo empresarial não deve exibir categoria vazia');
         assert(!betaSummaryText.includes('0 fora do escopo'), 'Resumo empresarial não deve exibir categoria vazia');
+        assert(!betaSummaryText.includes('100% conforme'), 'Percentual redundante não deve aparecer para um único item aplicável');
         assert(
           groupedList.textContent?.includes('Empresa não identificada'),
           'Documentos incompletos devem aparecer como um grupo da lista principal',

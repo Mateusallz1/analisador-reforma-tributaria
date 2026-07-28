@@ -268,6 +268,7 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
             ).length;
             const stats = calculateItemStats(section.notes);
             const actionableItems = stats.pendingItems + stats.nonCompliantItems;
+            const showComplianceRate = stats.applicableItems > 1;
 
             return (
               <section
@@ -298,10 +299,14 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
                         <span>{section.notes.length} {section.notes.length === 1 ? 'nota' : 'notas'}</span>
                         <span className="text-base-content/20" aria-hidden="true">•</span>
                         <span>{formatCompanyItemSummary(stats)}</span>
-                        <span className="text-base-content/20" aria-hidden="true">•</span>
-                        <span className="font-semibold text-base-content/70">
-                          {stats.complianceRate}% conforme
-                        </span>
+                        {showComplianceRate && (
+                          <>
+                            <span className="text-base-content/20" aria-hidden="true">•</span>
+                            <span className="font-semibold text-base-content/70">
+                              {stats.complianceRate}% conforme
+                            </span>
+                          </>
+                        )}
                       </span>
                     </span>
                   </span>
