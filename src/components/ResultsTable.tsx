@@ -232,7 +232,11 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
           <p className="mt-1 text-sm text-base-content/60">Remova ou altere os filtros para ver outros documentos.</p>
         </div>
       ) : (
-        <div id="results-grouped-list" className="space-y-3">
+        <div
+          id="results-grouped-list"
+          className="overflow-hidden rounded-box border border-base-300 bg-base-100"
+          data-company-layout="compact-list"
+        >
           {sections.map((section) => {
             const available = Math.max(0, visibleCount - renderedCount);
             const visibleNotes = section.notes.slice(0, available);
@@ -247,16 +251,24 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
             const actionableItems = stats.pendingItems + stats.nonCompliantItems;
 
             return (
-              <section key={section.id} className="card card-border overflow-hidden bg-base-100 shadow-sm" aria-labelledby={`section-${section.id}`}>
+              <section
+                key={section.id}
+                className="border-b border-base-300 bg-base-100 last:border-b-0"
+                aria-labelledby={`section-${section.id}`}
+              >
                 <button
                   type="button"
                   onClick={() => toggleGroup(section)}
                   aria-expanded={!isCollapsed}
                   aria-controls={`group-content-${section.id}`}
-                  className="flex w-full flex-col items-stretch gap-3 bg-base-100 px-4 py-4 text-left hover:bg-base-200/60 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+                  className={`flex w-full flex-col items-stretch gap-2.5 px-4 py-3 text-left transition-colors sm:flex-row sm:items-center sm:justify-between sm:gap-4 ${
+                    isCollapsed ? 'bg-base-100 hover:bg-base-200/50' : 'bg-base-200/80'
+                  }`}
                 >
                   <span className="flex min-w-0 items-center gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-box border border-base-300 bg-base-200 text-base-content/60">
+                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-field text-base-content/60 ${
+                      isCollapsed ? 'bg-base-200' : 'bg-base-100'
+                    }`}>
                       <Building2 className="h-4 w-4" aria-hidden="true" />
                     </span>
                     <span className="min-w-0">
@@ -319,7 +331,7 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
           })}
 
           {remainingNotes > 0 && (
-            <div className="card card-border bg-base-100 px-3 py-3 text-center">
+            <div className="border-t border-base-300 bg-base-200/40 px-3 py-3 text-center">
               <button
                 type="button"
                 onClick={() => setVisibleCount((current) => Math.min(current + NOTE_PAGE_SIZE, allFilteredNotes.length))}

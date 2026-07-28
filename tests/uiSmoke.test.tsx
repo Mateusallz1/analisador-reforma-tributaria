@@ -66,6 +66,11 @@ const tests: UiTestCase[] = [
 
         const groupedList = container.querySelector('#results-grouped-list');
         assert(groupedList, 'Lista agrupada de documentos não foi renderizada');
+        assertEquals(
+          groupedList.getAttribute('data-company-layout'),
+          'compact-list',
+          'Empresas devem compartilhar uma lista compacta em vez de cartões isolados',
+        );
 
         const groupToggle = container.querySelector<HTMLButtonElement>('button[aria-controls^="group-content-"]');
         assert(groupToggle, 'Empresa não foi renderizada como nível hierárquico recolhível');
