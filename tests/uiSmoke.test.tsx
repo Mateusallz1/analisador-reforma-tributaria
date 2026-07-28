@@ -82,6 +82,15 @@ const tests: UiTestCase[] = [
           'Categorias de itens do resumo empresarial não reconciliam com o total',
         );
         assert(groupSummaryText.includes('1 nota exige ação'), 'Selo de ação não informa sua unidade em notas');
+        const companyToggles = Array.from(
+          container.querySelectorAll<HTMLButtonElement>('button[aria-controls^="group-content-"]'),
+        );
+        const betaToggle = companyToggles.find((button) => button.textContent?.includes('Beta Distribuidora de Bebidas Ltda'));
+        assert(betaToggle, 'Empresa conforme não foi renderizada');
+        const betaSummaryText = betaToggle.textContent?.replace(/\s+/g, ' ').trim() || '';
+        assert(betaSummaryText.includes('1 item: 1 conforme'), 'Resumo empresarial omitiu categoria relevante');
+        assert(!betaSummaryText.includes('0 para revisar'), 'Resumo empresarial não deve exibir categoria vazia');
+        assert(!betaSummaryText.includes('0 fora do escopo'), 'Resumo empresarial não deve exibir categoria vazia');
         assert(
           groupedList.textContent?.includes('Empresa não identificada'),
           'Documentos incompletos devem aparecer como um grupo da lista principal',

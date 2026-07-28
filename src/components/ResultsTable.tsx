@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ArrowDownLeft, ArrowUpRight, Building2, ChevronDown, ChevronRight, FileSpreadsheet } from 'lucide-react';
 import type { DataIntegrityStatus, NFeAnalysis } from '../types';
-import { calculateItemStats } from '../utils/analysisStats';
+import { calculateItemStats, type ItemStats } from '../utils/analysisStats';
 import { formatCnpjOrCpf } from '../utils/nfeParser';
 import { getFilteredResultGroups } from '../utils/resultFilters';
 import type { DocTypeFilter, StatusFilter, TypeFilter } from '../utils/resultFilters';
@@ -23,6 +23,24 @@ interface ResultSection {
   document: string;
   notes: NFeAnalysis[];
   incomplete?: boolean;
+}
+
+function formatCompanyItemSummary(stats: ItemStats): string {
+  const categories: string[] = [];
+  const total = `${stats.totalItems} ${stats.totalItems === 1 ? 'item' : 'itens'}`;
+  const actionableItems = stats.pendingItems + stats.nonCompliantItems;
+
+  if (stats.compliantItems > 0) {
+    categories.push(`${stats.compliantItems} ${stats.compliantItems === 1 ? 'conforme' : 'conformes'}`);
+  }
+  if (actionableItems > 0) {
+    categories.push(`${actionableItems} para revisar`);
+  }
+  if (stats.outOfScopeItems > 0) {
+    categories.push(`${stats.outOfScopeItems} fora do escopo`);
+  }
+
+  return categories.length > 0 ? `${total}: ${categories.join(', ')}` : total;
 }
 
 function PartySummary({
@@ -279,10 +297,7 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
                         <span className="text-base-content/20" aria-hidden="true">•</span>
                         <span>{section.notes.length} {section.notes.length === 1 ? 'nota' : 'notas'}</span>
                         <span className="text-base-content/20" aria-hidden="true">•</span>
-                        <span>
-                          {stats.totalItems} {stats.totalItems === 1 ? 'item' : 'itens'}: {stats.compliantItems} {stats.compliantItems === 1 ? 'conforme' : 'conformes'}, {' '}
-                          {actionableItems} para revisar, {stats.outOfScopeItems} fora do escopo
-                        </span>
+                        <span>{formatCompanyItemSummary(stats)}</span>
                         <span className="text-base-content/20" aria-hidden="true">•</span>
                         <span className="font-semibold text-base-content/70">
                           {stats.complianceRate}% conforme
