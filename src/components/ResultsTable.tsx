@@ -284,7 +284,7 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
                           {actionableItems} para revisar, {stats.outOfScopeItems} fora do escopo
                         </span>
                         <span className="text-base-content/20" aria-hidden="true">•</span>
-                        <span className={stats.complianceRate === 100 ? 'font-semibold text-emerald-700' : 'font-semibold text-amber-700'}>
+                        <span className="font-semibold text-base-content/70">
                           {stats.complianceRate}% conforme
                         </span>
                       </span>

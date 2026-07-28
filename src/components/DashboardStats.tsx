@@ -17,7 +17,7 @@ export default function DashboardStats({ results, grouped, onReset }: DashboardS
 
   const metrics = [
     { id: 'kpi-total', label: 'Itens analisados', value: stats.totalItems, detail: `${stats.applicableItems} aplicáveis`, tone: 'text-base-content' },
-    { id: 'kpi-compliant', label: 'Conformidade dos itens', value: `${stats.complianceRate}%`, detail: `${stats.compliantItems} de ${stats.applicableItems} itens`, tone: 'text-emerald-700' },
+    { id: 'kpi-compliant', label: 'Conformidade dos itens', value: `${stats.complianceRate}%`, detail: `${stats.compliantItems} de ${stats.applicableItems} itens`, tone: 'text-base-content' },
     { id: 'kpi-non-compliant', label: 'Itens para revisar', value: actionableItems, detail: 'pendências fiscais', tone: 'text-rose-700' },
     { id: 'kpi-out-of-scope', label: 'Itens fora do escopo', value: stats.outOfScopeItems, detail: 'sem grupo IBSCBS', tone: 'text-base-content/70' },
   ];
