@@ -31,34 +31,31 @@ function ProcessingStatus({ message, progress, onCancel }: ProcessingStatusProps
 
   return (
     <div
-      className="flex min-h-[360px] flex-col items-center justify-center rounded-lg border border-slate-200 bg-white p-8"
+      className="card min-h-[360px] items-center justify-center border border-base-300 bg-base-100 p-8"
       role="status"
       aria-live="polite"
     >
-      <div className="mb-4 h-11 w-11 animate-spin rounded-full border-4 border-slate-100 border-t-slate-800" />
-      <p className="text-sm font-semibold text-slate-700">{message}</p>
+      <span className="loading loading-spinner loading-lg mb-4" aria-hidden="true" />
+      <p className="text-sm font-semibold text-base-content">{message}</p>
 
       {progress && (
         <div className="mt-4 w-full max-w-sm">
-          <div
-            className="h-2 overflow-hidden rounded-full bg-slate-100"
+          <progress
+            className="progress progress-neutral w-full"
             role="progressbar"
             aria-label="Progresso do processamento"
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={progressPercent || 0}
-          >
-            <div
-              className="h-full rounded-full bg-slate-800 transition-[width] duration-200"
-              style={{ width: (progressPercent || 0) + '%' }}
-            />
-          </div>
-          <div className="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500">
+            value={progressPercent || 0}
+            max={100}
+          />
+          <div className="mt-2 flex items-center justify-between gap-3 text-xs text-base-content/60">
             <span>{progress.processed} de {progress.total} arquivos</span>
             <span>{progressPercent || 0}%</span>
           </div>
           {progress.currentFile && (
-            <p className="mt-1 truncate text-center text-xs text-slate-400" title={progress.currentFile}>
+            <p className="mt-1 truncate text-center text-xs text-base-content/50" title={progress.currentFile}>
               {progress.currentFile}
             </p>
           )}
@@ -69,7 +66,7 @@ function ProcessingStatus({ message, progress, onCancel }: ProcessingStatusProps
         <button
           type="button"
           onClick={onCancel}
-          className="mt-5 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+          className="btn btn-ghost btn-sm mt-5"
         >
           <X className="h-3.5 w-3.5" aria-hidden="true" />
           Cancelar
@@ -197,32 +194,32 @@ export default function App() {
   const processingErrorCount = errors.length - duplicateErrorCount;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+    <div className="min-h-screen bg-base-200 font-sans text-base-content">
+      <header className="navbar border-b border-base-300 bg-base-100 px-0">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-2 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-white">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-box bg-neutral text-neutral-content">
               <Scale className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-base font-bold tracking-tight text-slate-900">
+              <h1 className="text-base font-bold text-base-content">
                 Analisador da Reforma Tributária
               </h1>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-base-content/60">
                 Análise local de IBS/CBS em XML ou ZIP de documentos fiscais.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-medium">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="badge badge-outline badge-sm gap-1.5">
+              <span className="status status-success" />
               Local
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-mono">
+            <span className="badge badge-ghost badge-sm font-mono">
               {results.length} docs
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-mono">
+            <span className="badge badge-ghost badge-sm font-mono">
               {totalItems} itens
             </span>
           </div>
@@ -234,13 +231,14 @@ export default function App() {
           <div
             id="error-list-container"
             className={
-              'mb-6 rounded-lg border p-4 ' +
+              'alert mb-6 items-start ' +
               (processingErrorCount > 0
-                ? 'border-rose-200 bg-rose-50'
-                : 'border-amber-200 bg-amber-50')
+                ? 'alert-error'
+                : 'alert-warning')
             }
           >
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-800">
+            <div className="w-full">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
               <AlertCircle
                 className={processingErrorCount > 0 ? 'h-4 w-4 text-rose-500' : 'h-4 w-4 text-amber-500'}
                 aria-hidden="true"
@@ -256,7 +254,7 @@ export default function App() {
                 <div
                   key={`${err.fileName}-${idx}`}
                   className={
-                    'flex items-center justify-between gap-3 rounded border bg-white/70 p-2 text-xs ' +
+                    'flex items-center justify-between gap-3 rounded-box border border-base-300 bg-base-100/80 p-2 text-xs ' +
                     (err.kind === 'DUPLICATE'
                       ? 'border-amber-100 text-amber-800'
                       : 'border-rose-100 text-rose-700')
@@ -281,6 +279,7 @@ export default function App() {
                 </div>
               ))}
             </div>
+            </div>
           </div>
         )}
 
@@ -288,13 +287,13 @@ export default function App() {
           <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="space-y-5">
               <div className="max-w-3xl">
-                <p className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+                <p className="mb-2 text-xs font-bold uppercase text-base-content/50">
                   Análise local
                 </p>
-                <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+                <h2 className="text-2xl font-bold text-base-content">
                   Envie XMLs de NF-e/NFC-e/NFS-e para analisar IBS/CBS.
                 </h2>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-base-content/60">
                   O app identifica o grupo IBSCBS, confere CST e cClassTrib contra a base local
                   e agrupa o resultado pela empresa em foco da operação.
                 </p>
@@ -312,12 +311,13 @@ export default function App() {
             </div>
 
             <aside className="space-y-4">
-              <div className="rounded-lg border border-slate-200 bg-white p-4">
+              <div className="card card-border bg-base-100">
+                <div className="card-body gap-0 p-4">
                 <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
                   <FlaskConical className="h-4 w-4 text-slate-500" />
                   Amostras
                 </div>
-                <p className="mb-4 text-xs leading-relaxed text-slate-500">
+                <p className="mb-4 text-xs leading-relaxed text-base-content/60">
                   Use {SAMPLE_NFES.length} notas simuladas para conferir o fluxo sem arquivos próprios.
                 </p>
                 <button
@@ -325,19 +325,22 @@ export default function App() {
                   onClick={handleLoadSamples}
                   id="btn-load-samples"
                   disabled={isLoading}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-slate-800 disabled:bg-slate-300"
+                  className="btn btn-neutral btn-sm w-full"
                 >
                   <Database className="h-3.5 w-3.5" />
                   Carregar amostras
                 </button>
+                </div>
               </div>
 
-              <div className="rounded-lg border border-slate-200 bg-white p-4">
-                <h3 className="mb-2 text-sm font-semibold text-slate-800">Critério aplicado</h3>
-                <p className="text-xs leading-relaxed text-slate-500">
+              <div className="card card-border bg-base-100">
+                <div className="card-body gap-0 p-4">
+                <h3 className="mb-2 text-sm font-semibold">Critério aplicado</h3>
+                <p className="text-xs leading-relaxed text-base-content/60">
                   Saída usa o emitente como foco. Entrada usa o destinatário. A conformidade é
                   calculada por item fiscal com base em IBSCBS, CST e cClassTrib.
                 </p>
+                </div>
               </div>
             </aside>
           </section>
@@ -349,10 +352,10 @@ export default function App() {
               onReset={handleResetAnalysis}
             />
 
-            <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 border-b border-base-300 pb-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-base font-bold text-slate-900">Relatório de conformidade</h2>
-                <p className="mt-0.5 text-xs text-slate-500">
+                <h2 className="text-base font-bold">Relatório de conformidade</h2>
+                <p className="mt-0.5 text-xs text-base-content/60">
                   Selecione um documento para consultar o diagnóstico e as classificações.
                 </p>
               </div>
@@ -362,7 +365,7 @@ export default function App() {
                   type="button"
                   onClick={handleLoadSamples}
                   disabled={isLoading}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60"
+                  className="btn btn-outline btn-sm"
                 >
                   <Database className="h-4 w-4 text-slate-500" />
                   Amostras
@@ -370,7 +373,7 @@ export default function App() {
 
                 <label
                   htmlFor="append-nfe-file-input"
-                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                  className="btn btn-outline btn-sm"
                 >
                   <FileText className="h-4 w-4 text-slate-500" />
                   Adicionar arquivos

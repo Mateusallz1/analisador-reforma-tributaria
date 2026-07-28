@@ -7,8 +7,8 @@ interface StatusBadgeProps {
 export function StatusBadge({ status }: StatusBadgeProps) {
   if (status === 'CONFORME') {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">
-        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+      <span className="badge badge-sm gap-1.5 border-emerald-200 bg-emerald-50 text-[11px] font-semibold text-emerald-800">
+        <span className="status status-success status-xs" />
         Conforme
       </span>
     );
@@ -16,8 +16,8 @@ export function StatusBadge({ status }: StatusBadgeProps) {
 
   if (status === 'AUTORIZADA_COM_PENDENCIAS') {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-100 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
-        <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
+      <span className="badge badge-sm gap-1.5 border-amber-200 bg-amber-50 text-[11px] font-semibold text-amber-800">
+        <span className="status status-warning status-xs" />
         Autorizada c/ pendências
       </span>
     );
@@ -25,16 +25,16 @@ export function StatusBadge({ status }: StatusBadgeProps) {
 
   if (status === 'NÃO_CONFORME') {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-md border border-rose-100 bg-rose-50 px-2 py-0.5 text-[11px] font-semibold text-rose-700">
-        <span className="w-1.5 h-1.5 bg-rose-500 rounded-full" />
+      <span className="badge badge-sm gap-1.5 border-rose-200 bg-rose-50 text-[11px] font-semibold text-rose-800">
+        <span className="status status-error status-xs" />
         Não conforme
       </span>
     );
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">
-      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full" />
+    <span className="badge badge-ghost badge-sm gap-1.5 text-[11px] font-semibold">
+      <span className="status status-xs" />
       Fora do escopo
     </span>
   );
@@ -47,7 +47,7 @@ interface ItemStatusBadgeProps {
 export function ItemStatusBadge({ status }: ItemStatusBadgeProps) {
   if (status === 'conforme') {
     return (
-      <span className="inline-flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+      <span className="badge badge-ghost badge-xs text-[10px] font-semibold">
         Conforme
       </span>
     );
@@ -55,7 +55,7 @@ export function ItemStatusBadge({ status }: ItemStatusBadgeProps) {
 
   if (status === 'nao_conforme_valor') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-100">
+      <span className="badge badge-xs border-amber-200 bg-amber-50 text-[10px] font-semibold text-amber-800">
         Falha de valor
       </span>
     );
@@ -63,7 +63,7 @@ export function ItemStatusBadge({ status }: ItemStatusBadgeProps) {
 
   if (status === 'incompleto') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-100">
+      <span className="badge badge-xs border-amber-200 bg-amber-50 text-[10px] font-semibold text-amber-800">
         Incompleto
       </span>
     );
@@ -71,7 +71,7 @@ export function ItemStatusBadge({ status }: ItemStatusBadgeProps) {
 
   if (status === 'fora_vigencia') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-100">
+      <span className="badge badge-xs border-rose-200 bg-rose-50 text-[10px] font-semibold text-rose-800">
         Fora de vigência
       </span>
     );
@@ -79,14 +79,14 @@ export function ItemStatusBadge({ status }: ItemStatusBadgeProps) {
 
   if (status === 'classificacao_invalida') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-100">
+      <span className="badge badge-xs border-rose-200 bg-rose-50 text-[10px] font-semibold text-rose-800">
         Classificação inválida
       </span>
     );
   }
 
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+    <span className="badge badge-ghost badge-xs text-[10px] font-semibold">
       Fora do escopo
     </span>
   );

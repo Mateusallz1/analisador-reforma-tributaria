@@ -47,20 +47,20 @@ function MenuButton({ children, isSelected, onClick, className }: MenuButtonProp
 }
 
 function getStatusButtonClass(status: StatusFilter): string {
-  const base = 'inline-flex min-w-[150px] items-center justify-between gap-2 rounded-lg border px-3.5 py-2 text-sm font-semibold shadow-sm transition-colors';
+  const base = 'btn btn-sm min-w-[150px] justify-between';
 
-  if (status === 'CONFORME') return base + ' border-emerald-200 bg-emerald-50/50 text-emerald-800';
-  if (status === 'NÃO_CONFORME') return base + ' border-rose-200 bg-rose-50/50 text-rose-800';
-  if (status === 'AUTORIZADA_COM_PENDENCIAS') return base + ' border-amber-200 bg-amber-50/50 text-amber-800';
-  if (status === 'N/A') return base + ' border-slate-300 bg-slate-50 text-slate-700';
-  return base + ' border-slate-200 bg-white text-slate-800';
+  if (status === 'CONFORME') return base + ' btn-success btn-soft';
+  if (status === 'NÃO_CONFORME') return base + ' btn-error btn-soft';
+  if (status === 'AUTORIZADA_COM_PENDENCIAS') return base + ' btn-warning btn-soft';
+  if (status === 'N/A') return base + ' btn-ghost';
+  return base + ' btn-outline';
 }
 
 function getMenuOptionClass(isSelected: boolean, selectedClass: string, withIcon = false): string {
   const base = withIcon
-    ? 'flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium transition-colors hover:bg-slate-50'
-    : 'w-full px-4 py-2.5 text-left text-sm font-medium transition-colors hover:bg-slate-50';
-  return base + (isSelected ? ' ' + selectedClass : ' text-slate-600');
+    ? 'flex w-full items-center gap-2 rounded-field px-3 py-2 text-left text-sm font-medium hover:bg-base-200'
+    : 'w-full rounded-field px-3 py-2 text-left text-sm font-medium hover:bg-base-200';
+  return base + (isSelected ? ' ' + selectedClass : ' text-base-content/70');
 }
 
 export function ResultsFilters({
@@ -101,10 +101,10 @@ export function ResultsFilters({
         />
       )}
 
-      <div className="relative z-20 border-y border-slate-200 bg-white px-0 py-3">
+      <div className="relative z-20 border-y border-base-300 bg-base-100 px-0 py-3">
         <div className="flex flex-col items-stretch justify-between gap-3 lg:flex-row lg:items-center">
           <div className="relative min-w-0 flex-1 lg:max-w-xl">
-            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+            <span className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3 text-base-content/40">
               <Search className="h-4 w-4" aria-hidden="true" />
             </span>
             <input
@@ -114,7 +114,7 @@ export function ResultsFilters({
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por nota, CNPJ ou razão social"
               aria-label="Buscar notas por número, CNPJ ou razão social"
-              className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2 pl-9 pr-4 text-sm shadow-sm transition-all placeholder:text-slate-400 hover:bg-white focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400"
+              className="input input-bordered input-sm w-full bg-base-100 pl-9"
             />
           </div>
 
@@ -160,19 +160,19 @@ export function ResultsFilters({
                 <div
                   id={statusMenuId}
                   role="menu"
-                  className="absolute right-0 mt-1.5 w-64 divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+                  className="menu absolute right-0 mt-1.5 w-64 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg"
                 >
                   <MenuButton
                     isSelected={statusFilter === 'ALL'}
                     onClick={() => { setStatusFilter('ALL'); setOpenDropdown('NONE'); }}
-                    className={getMenuOptionClass(statusFilter === 'ALL', 'bg-slate-50 font-bold text-slate-900')}
+                    className={getMenuOptionClass(statusFilter === 'ALL', 'bg-neutral font-bold text-neutral-content')}
                   >
                     Todos os status
                   </MenuButton>
                   <MenuButton
                     isSelected={statusFilter === 'CONFORME'}
                     onClick={() => { setStatusFilter('CONFORME'); setOpenDropdown('NONE'); }}
-                    className={getMenuOptionClass(statusFilter === 'CONFORME', 'bg-emerald-50/40 font-bold text-emerald-700', true)}
+                    className={getMenuOptionClass(statusFilter === 'CONFORME', 'bg-success/15 font-bold text-success', true)}
                   >
                     <CheckCircle2 className="h-4 w-4 text-emerald-500" aria-hidden="true" />
                     Conforme
@@ -180,7 +180,7 @@ export function ResultsFilters({
                   <MenuButton
                     isSelected={statusFilter === 'AUTORIZADA_COM_PENDENCIAS'}
                     onClick={() => { setStatusFilter('AUTORIZADA_COM_PENDENCIAS'); setOpenDropdown('NONE'); }}
-                    className={getMenuOptionClass(statusFilter === 'AUTORIZADA_COM_PENDENCIAS', 'bg-amber-50/30 font-bold text-amber-800', true)}
+                    className={getMenuOptionClass(statusFilter === 'AUTORIZADA_COM_PENDENCIAS', 'bg-warning/15 font-bold text-warning', true)}
                   >
                     <AlertTriangle className="h-4 w-4 text-amber-500" aria-hidden="true" />
                     Autorizada c/ pendências
@@ -188,7 +188,7 @@ export function ResultsFilters({
                   <MenuButton
                     isSelected={statusFilter === 'NÃO_CONFORME'}
                     onClick={() => { setStatusFilter('NÃO_CONFORME'); setOpenDropdown('NONE'); }}
-                    className={getMenuOptionClass(statusFilter === 'NÃO_CONFORME', 'bg-rose-50/30 font-bold text-rose-800', true)}
+                    className={getMenuOptionClass(statusFilter === 'NÃO_CONFORME', 'bg-error/15 font-bold text-error', true)}
                   >
                     <XCircle className="h-4 w-4 text-rose-500" aria-hidden="true" />
                     Não conforme
@@ -196,7 +196,7 @@ export function ResultsFilters({
                   <MenuButton
                     isSelected={statusFilter === 'N/A'}
                     onClick={() => { setStatusFilter('N/A'); setOpenDropdown('NONE'); }}
-                    className={getMenuOptionClass(statusFilter === 'N/A', 'bg-slate-50 font-bold text-slate-800')}
+                    className={getMenuOptionClass(statusFilter === 'N/A', 'bg-base-200 font-bold text-base-content')}
                   >
                     Fora do escopo
                   </MenuButton>
@@ -211,16 +211,16 @@ export function ResultsFilters({
               aria-expanded={openDropdown === 'MORE'}
               aria-controls={advancedPanelId}
               className={
-                'inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-sm font-semibold shadow-sm transition-colors ' +
+                'btn btn-sm ' +
                 (hasAdvancedFilters
-                  ? 'border-slate-400 bg-slate-50 text-slate-900'
-                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50')
+                  ? 'btn-neutral'
+                  : 'btn-outline')
               }
             >
               <SlidersHorizontal className="h-4 w-4 text-slate-500" aria-hidden="true" />
               Mais filtros
               {hasAdvancedFilters && (
-                <span className="h-1.5 w-1.5 rounded-full bg-slate-700" aria-label="Filtros adicionais ativos" />
+                <span className="status status-xs" aria-label="Filtros adicionais ativos" />
               )}
             </button>
           </div>
@@ -231,14 +231,14 @@ export function ResultsFilters({
             id={advancedPanelId}
             role="dialog"
             aria-label="Mais filtros de documentos"
-            className="mt-3 grid gap-3 border-t border-slate-100 pt-3 sm:grid-cols-2"
+            className="mt-3 grid gap-3 border-t border-base-300 pt-3 sm:grid-cols-2"
           >
-            <label className="flex items-center justify-between gap-3 text-xs font-semibold text-slate-600">
+            <label className="flex items-center justify-between gap-3 text-xs font-semibold text-base-content/70">
               Tipo de operação
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
-                className="min-w-[170px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400"
+                className="select select-bordered select-sm min-w-[170px]"
                 aria-label="Filtrar por tipo de operação"
               >
                 <option value="ALL">Todos os tipos</option>
@@ -247,12 +247,12 @@ export function ResultsFilters({
               </select>
             </label>
 
-            <label className="flex items-center justify-between gap-3 text-xs font-semibold text-slate-600">
+            <label className="flex items-center justify-between gap-3 text-xs font-semibold text-base-content/70">
               Modelo do documento
               <select
                 value={docTypeFilter}
                 onChange={(e) => setDocTypeFilter(e.target.value as DocTypeFilter)}
-                className="min-w-[170px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400"
+                className="select select-bordered select-sm min-w-[170px]"
                 aria-label="Filtrar por modelo do documento"
               >
                 <option value="ALL">Todos os modelos</option>
@@ -265,15 +265,15 @@ export function ResultsFilters({
         )}
 
         {hasActiveFilters && (
-          <div className="mt-3 flex flex-col items-start justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-500 sm:flex-row sm:items-center">
+          <div className="mt-3 flex flex-col items-start justify-between gap-2 border-t border-base-300 pt-3 text-xs text-base-content/60 sm:flex-row sm:items-center">
             <span>
-              Filtrado: <strong className="text-slate-700">{totalProcessedFiltered}</strong> de{' '}
-              <strong className="text-slate-700">{totalProcessed}</strong> itens
+              Filtrado: <strong>{totalProcessedFiltered}</strong> de{' '}
+              <strong>{totalProcessed}</strong> itens
             </span>
             <button
               type="button"
               onClick={clearFilters}
-              className="font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline"
+              className="btn btn-link btn-xs px-0"
             >
               Limpar filtros
             </button>

@@ -60,10 +60,10 @@ export default function UploadSection({ onFilesSelected, isLoading }: UploadSect
         onDragLeave={handleDrag}
         onDrop={handleDrop}
         onClick={triggerFileInput}
-        className={`relative flex min-h-[360px] w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-14 transition-colors ${
+        className={`card relative flex min-h-[360px] w-full cursor-pointer flex-col items-center justify-center border-2 border-dashed px-6 py-14 transition-colors ${
           isDragActive
-            ? 'border-slate-500 bg-slate-100 text-slate-900'
-            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600'
+            ? 'border-neutral bg-neutral/5 text-base-content'
+            : 'border-base-300 bg-base-100 text-base-content/70 hover:border-neutral/50'
         } ${isLoading ? 'pointer-events-none opacity-50' : ''}`}
       >
         <input
@@ -77,37 +77,36 @@ export default function UploadSection({ onFilesSelected, isLoading }: UploadSect
         />
 
         <div className="mb-5 flex gap-3">
-          <div className="rounded-lg border border-slate-200 bg-white p-3 text-slate-500">
+          <div className="rounded-box border border-base-300 bg-base-200 p-3 text-base-content/60">
             <Upload className="h-7 w-7" />
           </div>
-          <div className="rounded-lg border border-slate-200 bg-white p-3 text-slate-500">
+          <div className="rounded-box border border-base-300 bg-base-200 p-3 text-base-content/60">
             <FileArchive className="h-7 w-7" />
           </div>
         </div>
 
-        <h3 className="mb-1 text-center text-lg font-semibold text-slate-800">
+        <h3 className="mb-1 text-center text-lg font-semibold text-base-content">
           Envie XMLs ou ZIPs
         </h3>
-        <p className="mb-6 max-w-md text-center text-sm leading-relaxed text-slate-500">
+        <p className="mb-6 max-w-md text-center text-sm leading-relaxed text-base-content/60">
           Arraste os arquivos para cá ou selecione XMLs de NF-e/NFC-e/NFS-e e pacotes ZIP.
         </p>
 
         <button
           type="button"
           id="btn-upload-trigger"
-          className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+          className="btn btn-neutral"
           disabled={isLoading}
         >
           {isLoading ? 'Analisando...' : 'Selecionar arquivos'}
         </button>
 
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-slate-100 pt-5 text-xs text-slate-500">
-          <span className="flex items-center gap-1.5 font-medium">
-            <FileText className="h-3.5 w-3.5 text-slate-400" /> XML
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-base-300 pt-5 text-xs text-base-content/60">
+          <span className="badge badge-ghost badge-sm gap-1.5">
+            <FileText className="h-3.5 w-3.5" /> XML
           </span>
-          <span className="h-1 w-1 rounded-full bg-slate-200" />
-          <span className="flex items-center gap-1.5 font-medium">
-            <FileArchive className="h-3.5 w-3.5 text-slate-400" /> ZIP
+          <span className="badge badge-ghost badge-sm gap-1.5">
+            <FileArchive className="h-3.5 w-3.5" /> ZIP
           </span>
         </div>
       </div>

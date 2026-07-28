@@ -70,6 +70,13 @@ const tests: UiTestCase[] = [
         const groupToggle = container.querySelector<HTMLButtonElement>('button[aria-controls^="group-content-"]');
         assert(groupToggle, 'Empresa não foi renderizada como nível hierárquico recolhível');
         assertEquals(groupToggle.getAttribute('aria-expanded'), 'false', 'Empresa deve iniciar recolhida');
+        const groupSummaryText = groupToggle.textContent?.replace(/\s+/g, ' ').trim() || '';
+        assert(groupSummaryText.includes('3 notas'), 'Resumo empresarial não informa a quantidade de notas');
+        assert(
+          groupSummaryText.includes('3 itens: 1 conforme, 1 para revisar, 1 fora do escopo'),
+          'Categorias de itens do resumo empresarial não reconciliam com o total',
+        );
+        assert(groupSummaryText.includes('1 nota exige ação'), 'Selo de ação não informa sua unidade em notas');
         assert(
           groupedList.textContent?.includes('Empresa não identificada'),
           'Documentos incompletos devem aparecer como um grupo da lista principal',
