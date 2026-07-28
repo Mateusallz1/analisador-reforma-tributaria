@@ -68,7 +68,7 @@ function OperationSummary({ note }: { note: NFeAnalysis }) {
   const isSaida = note.tipoNota === 'SAÍDA';
 
   return (
-    <span className="badge badge-ghost badge-sm w-fit gap-1 text-[11px] font-medium">
+    <span className="inline-flex w-fit items-center gap-1 text-xs font-medium text-base-content/70">
       {isSaida ? (
         <ArrowUpRight className="h-3 w-3 opacity-60" aria-hidden="true" />
       ) : (
@@ -86,6 +86,7 @@ function DocumentRow({ note, selected, onSelect }: { note: NFeAnalysis; selected
       aria-expanded={selected}
       aria-controls={`document-detail-${note.id}`}
       data-note-layer="summary"
+      data-note-layout="audit-grid"
       className={`grid w-full min-w-[1100px] grid-cols-[24px_minmax(160px,.95fr)_100px_110px_minmax(180px,1fr)_minmax(180px,1fr)_170px] items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-base-200/60 ${selected ? 'bg-base-200' : 'bg-base-100'}`}
     >
       <ChevronRight className={`mt-0.5 h-4 w-4 text-base-content/40 transition-transform ${selected ? 'rotate-90' : ''}`} aria-hidden="true" />
@@ -94,7 +95,6 @@ function DocumentRow({ note, selected, onSelect }: { note: NFeAnalysis; selected
           <strong className="font-mono text-sm text-base-content">Nº {note.numeroNota || 'N/A'}</strong>
           <span className="badge badge-outline badge-xs text-[10px] font-semibold">{note.docType}</span>
         </span>
-        <span className="mt-1 block truncate text-[10px] text-base-content/45" title={note.fileName}>{note.fileName}</span>
       </span>
       <OperationSummary note={note} />
       <EmissionSummary note={note} />
@@ -112,6 +112,7 @@ function MobileDocumentRow({ note, selected, onSelect }: { note: NFeAnalysis; se
       aria-expanded={selected}
       aria-controls={`document-detail-${note.id}`}
       data-note-layer="summary"
+      data-note-layout="audit-grid"
       className={`w-full px-3 py-3 text-left ${selected ? 'bg-base-200' : 'bg-base-100'}`}
     >
       <span className="flex items-start justify-between gap-3">

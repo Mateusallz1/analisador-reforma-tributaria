@@ -96,9 +96,11 @@ const tests: UiTestCase[] = [
         const documentButton = container.querySelector<HTMLButtonElement>('button[data-note-layer="summary"]');
         assert(documentButton, 'Documento não foi renderizado como controle selecionável');
         assertEquals(documentButton.getAttribute('aria-expanded'), 'false');
+        assertEquals(documentButton.getAttribute('data-note-layout'), 'audit-grid');
         assert(documentButton.textContent?.includes('Alfa Implementos Industriais S.A.'), 'Primeira camada não exibe o emitente');
         assert(documentButton.textContent?.includes('Beta Distribuidora de Bebidas Ltda'), 'Primeira camada não exibe o destinatário');
         assert(!documentButton.textContent?.includes('cClassTrib'), 'Classificação de item vazou para a primeira camada');
+        assert(!documentButton.textContent?.includes('.xml'), 'Nome técnico do arquivo não deve competir com os dados prioritários da nota');
 
         flushSync(() => {
           documentButton.click();
@@ -106,6 +108,7 @@ const tests: UiTestCase[] = [
 
         const detailPanel = container.querySelector<HTMLElement>('[data-detail-layout="inline"]');
         assert(detailPanel, 'Detalhe inline do documento não abriu');
+        assertEquals(detailPanel.getAttribute('data-detail-surface'), 'inset');
         assert(detailPanel.closest('[id^="group-content-"]'), 'Detalhe deve permanecer dentro da empresa selecionada');
         const itemHeaders = Array.from(detailPanel.querySelectorAll('th')).map((header) => header.textContent?.trim());
         assertEquals(itemHeaders.join('|'), 'Item|Produto / serviço|CST|Classificação|Status|Diagnóstico da tabela oficial');

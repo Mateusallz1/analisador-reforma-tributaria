@@ -16,7 +16,8 @@ export function NoteDetailPanel({ note, onClose }: NoteDetailPanelProps) {
       aria-label={`Itens da nota ${note.numeroNota || note.fileName}`}
       data-detail-layout="inline"
       data-item-layer="items"
-      className="border-t border-base-300 bg-base-200/60 lg:min-w-[1100px]"
+      data-detail-surface="inset"
+      className="border-t border-base-300 bg-base-200/60 pb-3 lg:min-w-[1100px] lg:pb-4"
     >
       <div className="flex items-center justify-between gap-3 px-6 py-3">
         <h3 className="text-[10px] font-semibold uppercase text-base-content/60">
@@ -39,42 +40,40 @@ export function NoteDetailPanel({ note, onClose }: NoteDetailPanelProps) {
         </p>
       ) : (
         <>
-          <div className="hidden px-6 pb-4 lg:block">
-            <div className="overflow-hidden rounded-box border border-base-300 bg-base-100">
-              <table className="table table-sm w-full table-fixed text-left text-xs">
-                <thead className="bg-base-200 text-[10px] font-semibold text-base-content/60">
-                  <tr>
-                    <th className="w-14 px-3 py-2.5">Item</th>
-                    <th className="w-[24%] px-3 py-2.5">Produto / serviço</th>
-                    <th className="w-20 px-3 py-2.5">CST</th>
-                    <th className="w-28 px-3 py-2.5">Classificação</th>
-                    <th className="w-40 px-3 py-2.5">Status</th>
-                    <th className="px-3 py-2.5">Diagnóstico da tabela oficial</th>
+          <div className="mx-6 hidden overflow-hidden rounded-field border border-base-300 bg-base-100 lg:block">
+            <table className="table table-sm w-full table-fixed text-left text-xs">
+              <thead className="bg-base-200 text-[10px] font-semibold text-base-content/60">
+                <tr>
+                  <th className="w-14 px-4 py-2.5">Item</th>
+                  <th className="w-[24%] px-3 py-2.5">Produto / serviço</th>
+                  <th className="w-20 px-3 py-2.5">CST</th>
+                  <th className="w-28 px-3 py-2.5">Classificação</th>
+                  <th className="w-40 px-3 py-2.5">Status</th>
+                  <th className="px-3 py-2.5">Diagnóstico da tabela oficial</th>
+                </tr>
+              </thead>
+              <tbody className="text-base-content/70">
+                {items.map((item) => (
+                  <tr key={item.numeroItem} className="align-top">
+                    <td className="px-4 py-3 font-mono text-base-content/60">#{item.numeroItem}</td>
+                    <td className="px-3 py-3 font-medium text-base-content">{item.descricaoProduto}</td>
+                    <td className="px-3 py-3 font-mono" title={item.cstDesc}>
+                      {item.contemIBSCBS && item.cst ? item.cst : 'ausente'}
+                    </td>
+                    <td className="px-3 py-3 font-mono" title={item.cClassTribDesc}>
+                      {item.contemIBSCBS && item.cClassTrib ? item.cClassTrib : 'ausente'}
+                    </td>
+                    <td className="px-3 py-3"><ItemStatusBadge status={item.itemStatus} /></td>
+                    <td className="px-3 py-3 text-[11px] leading-relaxed">
+                      {item.validationReason || 'Nota não possui informações da Reforma Tributária.'}
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="text-base-content/70">
-                  {items.map((item) => (
-                    <tr key={item.numeroItem} className="align-top">
-                      <td className="px-3 py-3 font-mono text-base-content/60">#{item.numeroItem}</td>
-                      <td className="px-3 py-3 font-medium text-base-content">{item.descricaoProduto}</td>
-                      <td className="px-3 py-3 font-mono" title={item.cstDesc}>
-                        {item.contemIBSCBS && item.cst ? item.cst : 'ausente'}
-                      </td>
-                      <td className="px-3 py-3 font-mono" title={item.cClassTribDesc}>
-                        {item.contemIBSCBS && item.cClassTrib ? item.cClassTrib : 'ausente'}
-                      </td>
-                      <td className="px-3 py-3"><ItemStatusBadge status={item.itemStatus} /></td>
-                      <td className="px-3 py-3 text-[11px] leading-relaxed">
-                        {item.validationReason || 'Nota não possui informações da Reforma Tributária.'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
 
-          <div className="divide-y divide-base-300 border-t border-base-300 bg-base-100 lg:hidden">
+          <div className="mx-3 divide-y divide-base-300 overflow-hidden rounded-field border border-base-300 bg-base-100 lg:hidden">
             {items.map((item) => (
               <div key={item.numeroItem} className="px-4 py-4">
                 <div className="flex items-start justify-between gap-3">
