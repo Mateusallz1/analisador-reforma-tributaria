@@ -14,6 +14,13 @@ interface TestReport {
 }
 
 const HOST = '127.0.0.1';
+const pagePath = Deno.args[0] || '/tests/browser.html';
+const reportTimeoutMs = Number(Deno.args[1] || 20000);
+const suiteLabel = Deno.args[2] || 'Engine fiscal';
+
+if (!pagePath.startsWith('/') || !Number.isFinite(reportTimeoutMs) || reportTimeoutMs <= 0) {
+  throw new Error('Argumentos inválidos para o runner de testes browser.');
+}
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -100,6 +107,7 @@ function startChrome(chromeExecutable: string, debugPort: number, userDataDir: s
       '--headless=new',
       '--disable-gpu',
       '--disable-extensions',
+      '--enable-precise-memory-info',
       '--no-first-run',
       '--no-default-browser-check',
       `--remote-debugging-address=${HOST}`,
@@ -232,7 +240,8 @@ let chrome: Deno.ChildProcess | undefined;
 let client: CdpClient | undefined;
 
 try {
-  await waitForHttp(`http://${HOST}:${vitePort}/tests/browser.html`);
+  const testUrl = `http://${HOST}:${vitePort}${pagePath}`;
+  await waitForHttp(testUrl);
 
   const chromeExecutable = await getChromeExecutable();
   chrome = startChrome(chromeExecutable, chromeDebugPort, userDataDir);
@@ -242,9 +251,9 @@ try {
   await client.send('Page.enable');
   await client.send('Runtime.enable');
   await client.send('Log.enable');
-  await client.send('Page.navigate', { url: `http://${HOST}:${vitePort}/tests/browser.html` });
+  await client.send('Page.navigate', { url: testUrl });
 
-  const report = await readReport(client);
+  const report = await readReport(client, reportTimeoutMs);
   report.results.forEach((result) => {
     const marker = result.status === 'passed' ? 'ok' : 'fail';
     console.log(`${marker} - ${result.name}${result.message ? `: ${result.message}` : ''}`);
@@ -254,7 +263,7 @@ try {
     throw new Error(`${report.failed}/${report.total} teste(s) falharam.`);
   }
 
-  console.log(`Engine fiscal: ${report.total}/${report.total} testes passaram.`);
+  console.log(`${suiteLabel}: ${report.total}/${report.total} testes passaram.`);
 } finally {
   client?.close();
   if (chrome) stopProcess(chrome);

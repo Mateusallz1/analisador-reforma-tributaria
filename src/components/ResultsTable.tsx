@@ -105,6 +105,7 @@ function DocumentRow({ note, selected, onSelect }: { note: NFeAnalysis; selected
       aria-controls={`document-detail-${note.id}`}
       data-note-layer="summary"
       data-note-layout="audit-grid"
+      data-note-viewport="desktop"
       className={`grid w-full min-w-[1100px] grid-cols-[24px_minmax(160px,.95fr)_100px_110px_minmax(180px,1fr)_minmax(180px,1fr)_170px] items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-base-200/60 ${selected ? 'bg-base-200' : 'bg-base-100'}`}
     >
       <ChevronRight className={`mt-0.5 h-4 w-4 text-base-content/40 transition-transform ${selected ? 'rotate-90' : ''}`} aria-hidden="true" />
@@ -131,6 +132,7 @@ function MobileDocumentRow({ note, selected, onSelect }: { note: NFeAnalysis; se
       aria-controls={`document-detail-${note.id}`}
       data-note-layer="summary"
       data-note-layout="audit-grid"
+      data-note-viewport="mobile"
       className={`w-full px-3 py-3 text-left ${selected ? 'bg-base-200' : 'bg-base-100'}`}
     >
       <span className="flex items-start justify-between gap-3">
@@ -173,7 +175,7 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
   const [openDropdown, setOpenDropdown] = useState<ResultsDropdown>('NONE');
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
-  const [visibleCount, setVisibleCount] = useState(NOTE_PAGE_SIZE);
+  const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
 
   const filtered = useMemo(() => getFilteredResultGroups(allResults, {
     searchTerm,
@@ -204,10 +206,12 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
   }, [filtered.activeGroups, filtered.matchesWithoutCnpj]);
 
   const allFilteredNotes = useMemo(() => sections.flatMap((section) => section.notes), [sections]);
-  const remainingNotes = Math.max(0, allFilteredNotes.length - visibleCount);
 
   useEffect(() => {
-    setVisibleCount(NOTE_PAGE_SIZE);
+    setVisibleCounts({});
+  }, [allFilteredNotes]);
+
+  useEffect(() => {
     if (selectedNoteId && !allFilteredNotes.some((note) => note.id === selectedNoteId)) {
       setSelectedNoteId(null);
     }
@@ -224,8 +228,6 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
   const toggleNote = (noteId: string) => {
     setSelectedNoteId((current) => current === noteId ? null : noteId);
   };
-
-  let renderedCount = 0;
 
   return (
     <div className="space-y-3">
@@ -257,11 +259,9 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
           data-company-layout="compact-list"
         >
           {sections.map((section) => {
-            const available = Math.max(0, visibleCount - renderedCount);
-            const visibleNotes = section.notes.slice(0, available);
-            renderedCount += visibleNotes.length;
-            if (visibleNotes.length === 0) return null;
-
+            const visibleCount = visibleCounts[section.id] ?? NOTE_PAGE_SIZE;
+            const visibleNotes = section.notes.slice(0, visibleCount);
+            const remainingNotes = Math.max(0, section.notes.length - visibleNotes.length);
             const isCollapsed = collapsedGroups[section.id] !== false;
             const actionableCount = section.notes.filter((note) =>
               note.status === 'NÃO_CONFORME' || note.status === 'AUTORIZADA_COM_PENDENCIAS'
@@ -345,24 +345,27 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
                         </div>
                       );
                     })}
+
+                    {remainingNotes > 0 && (
+                      <div className="border-t border-base-300 bg-base-200/40 px-3 py-3 text-center">
+                        <button
+                          type="button"
+                          onClick={() => setVisibleCounts((current) => ({
+                            ...current,
+                            [section.id]: Math.min(visibleCount + NOTE_PAGE_SIZE, section.notes.length),
+                          }))}
+                          className="btn btn-outline btn-sm"
+                        >
+                          Mostrar mais {Math.min(NOTE_PAGE_SIZE, remainingNotes)} {Math.min(NOTE_PAGE_SIZE, remainingNotes) === 1 ? 'nota' : 'notas'}
+                        </button>
+                        <span className="ml-2 text-[11px] text-base-content/50">{remainingNotes} restantes</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </section>
             );
           })}
-
-          {remainingNotes > 0 && (
-            <div className="border-t border-base-300 bg-base-200/40 px-3 py-3 text-center">
-              <button
-                type="button"
-                onClick={() => setVisibleCount((current) => Math.min(current + NOTE_PAGE_SIZE, allFilteredNotes.length))}
-                className="btn btn-outline btn-sm"
-              >
-                Mostrar mais {Math.min(NOTE_PAGE_SIZE, remainingNotes)} {Math.min(NOTE_PAGE_SIZE, remainingNotes) === 1 ? 'nota' : 'notas'}
-              </button>
-              <span className="ml-2 text-[11px] text-base-content/50">{remainingNotes} restantes</span>
-            </div>
-          )}
         </div>
       )}
     </div>
