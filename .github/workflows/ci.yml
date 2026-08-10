@@ -39,3 +39,6 @@ jobs:
 
       - name: Run project checks
         run: npm run check
+
+      - name: Run 5,000-document volume test
+        run: npm run test:volume

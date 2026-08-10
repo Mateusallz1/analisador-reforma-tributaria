@@ -31,6 +31,7 @@ deno task dev      # servidor Vite local
 deno task lint     # TypeScript sem emitir arquivos
 deno task build    # build de producao em dist/
 deno task test     # testes da engine fiscal em browser headless
+deno task test:volume # homologacao com 5.000 XMLs em browser headless
 deno task check    # lint + test + build
 deno task preview  # preview do build
 deno task clean    # remove dist/ e server.js
@@ -45,6 +46,7 @@ npm install
 npm run dev
 npm run lint
 npm run test
+npm run test:volume
 npm run build
 npm run check
 ```
@@ -60,6 +62,19 @@ npm run test
 ```
 
 Pre-requisito adicional: Chrome ou Edge instalado. Se o navegador estiver em um caminho não padrão, defina `CHROME_PATH` apontando para o executável.
+
+### Homologacao de volume
+
+O teste de volume gera um ZIP deterministico com 5.000 XMLs e valida processamento, agrupamento por empresa, paginacao, filtros e tempos de interacao:
+
+```bash
+deno task test:volume
+# ou
+npm run test:volume
+```
+
+O workflow de CI executa essa homologacao separadamente depois do gate principal para que uma regressao de escala seja identificada sem misturar seu diagnostico com os testes funcionais.
+
 ## Configuracao
 
 O processamento roda localmente no navegador. Nenhuma variável de ambiente é necessária para analisar XMLs ou ZIPs.
