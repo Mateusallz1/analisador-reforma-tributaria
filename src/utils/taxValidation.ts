@@ -22,6 +22,9 @@ interface TaxCstEntry {
 interface TaxBase extends Partial<TaxBaseInfo> {
   versao?: string;
   fonteOriginal?: string;
+  dataReferencia?: string;
+  fonteOficialTabela?: string;
+  fonteTecnica?: string;
   fonteLegalBase?: string;
   csts?: TaxCstEntry[];
 }
@@ -51,6 +54,9 @@ const taxBase = baseCompleta as TaxBase;
 export const TAX_BASE_INFO: TaxBaseInfo = {
   version: taxBase.versao || 'desconhecida',
   source: taxBase.fonteOriginal || 'Base fiscal local',
+  referenceDate: taxBase.dataReferencia || '',
+  classificationSource: taxBase.fonteOficialTabela || '',
+  technicalSource: taxBase.fonteTecnica || '',
   legalSource: taxBase.fonteLegalBase || '',
 };
 

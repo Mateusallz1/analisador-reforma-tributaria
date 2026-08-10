@@ -88,6 +88,11 @@ const tests: UiTestCase[] = [
           dialog.textContent?.includes('Somente itens de documentos que possuem o grupo IBSCBS'),
           'Modal não informa a condição de entrada na avaliação de conformidade',
         );
+        assert(
+          dialog.textContent?.includes('planilha oficial CST/cClassTrib com referência de 15/04/2026'),
+          'Modal não identifica o snapshot oficial usado pela análise',
+        );
+        assertEquals(dialog.querySelectorAll('#about-official-sources a[target="_blank"]').length, 3);
 
         const closeButton = dialog.querySelector<HTMLButtonElement>('button[aria-label="Fechar informações"]');
         assert(closeButton, 'Modal não possui ação de fechamento acessível');
@@ -111,6 +116,20 @@ const tests: UiTestCase[] = [
           null,
           'Modal não fechou com Escape',
         );
+
+        const samplesButton = container.querySelector<HTMLButtonElement>('#btn-load-samples');
+        assert(samplesButton, 'Ação de amostras não foi encontrada para validar as fontes do relatório');
+        flushSync(() => {
+          samplesButton.click();
+        });
+
+        const officialSources = container.querySelector<HTMLElement>('#official-sources');
+        assert(officialSources, 'Relatório não exibe as fontes oficiais usadas na classificação');
+        assert(
+          officialSources.textContent?.includes('cClassTrib_2026_04_15.xlsx'),
+          'Relatório não informa a versão da planilha incorporada',
+        );
+        assertEquals(officialSources.querySelectorAll('a[target="_blank"]').length, 3);
       } finally {
         flushSync(() => root.unmount());
         container.remove();

@@ -6,6 +6,7 @@ import {
   CircleHelp,
   CircleMinus,
   Database,
+  ExternalLink,
   FileText,
   Menu,
   ScanLine,
@@ -20,6 +21,7 @@ import { getXmlFingerprint, processFiles } from './utils/fileProcessing';
 import type { FileProcessingProgress } from './utils/fileProcessing';
 import { groupAnalysesByEmpresaFoco } from './utils/analysisStats';
 import { getErrorMessage } from './utils/errors';
+import { TAX_BASE_INFO } from './utils/taxValidation';
 import UploadSection from './components/UploadSection';
 import ResultsTable from './components/ResultsTable';
 import DashboardStats from './components/DashboardStats';
@@ -511,6 +513,31 @@ export default function App() {
                     <span className="text-xs">{label}</span>
                   </div>
                 ))}
+              </div>
+
+              <div id="about-official-sources" className="rounded-xl border border-base-300 bg-base-200/45 p-4">
+                <div className="flex items-start gap-2.5">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-base-content/55" aria-hidden="true" />
+                  <div>
+                    <h3 className="font-semibold text-base-content">Fontes oficiais utilizadas</h3>
+                    <p className="mt-1 text-xs">
+                      A análise usa uma cópia local da planilha oficial CST/cClassTrib com referência de{' '}
+                      {TAX_BASE_INFO.referenceDate.split('-').reverse().join('/')}.
+                      A consulta não atualiza essa base automaticamente.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs font-medium">
+                  <a href={TAX_BASE_INFO.classificationSource} target="_blank" rel="noreferrer" className="link inline-flex items-center gap-1">
+                    Tabela CST/cClassTrib <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                  </a>
+                  <a href={TAX_BASE_INFO.technicalSource} target="_blank" rel="noreferrer" className="link inline-flex items-center gap-1">
+                    Informe Técnico <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                  </a>
+                  <a href={TAX_BASE_INFO.legalSource} target="_blank" rel="noreferrer" className="link inline-flex items-center gap-1">
+                    LC 214/2025 <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                  </a>
+                </div>
               </div>
 
               <div className="space-y-4 border-t border-base-300 pt-5">

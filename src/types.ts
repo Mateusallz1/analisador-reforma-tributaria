@@ -30,6 +30,9 @@ export interface CompanyInfo {
 export interface TaxBaseInfo {
   version: string;
   source: string;
+  referenceDate: string;
+  classificationSource: string;
+  technicalSource: string;
   legalSource: string;
 }
 

@@ -1,4 +1,4 @@
-import { Info, RefreshCcw } from 'lucide-react';
+import { ExternalLink, Info, RefreshCcw, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import type { GroupedAnalysis, NFeAnalysis } from '../types';
 import { calculateItemStats } from '../utils/analysisStats';
@@ -64,6 +64,35 @@ export default function DashboardStats({ results, grouped, onReset }: DashboardS
             <div className="stat-desc">{metric.detail}</div>
           </div>
         ))}
+      </div>
+
+      <div id="official-sources" className="flex flex-col gap-3 border-t border-base-300 bg-base-200/45 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 items-start gap-2.5">
+          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-base-content/55" aria-hidden="true" />
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-base-content">Classificação baseada em fontes oficiais</p>
+            <p className="mt-0.5 break-words text-[11px] text-base-content/55" title={taxBase?.source}>
+              Base incorporada: {taxBase?.source || 'referência não informada'}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-x-4 gap-y-2 text-[11px] font-medium">
+          {taxBase?.classificationSource && (
+            <a href={taxBase.classificationSource} target="_blank" rel="noreferrer" className="link inline-flex items-center gap-1">
+              Tabela CST/cClassTrib <ExternalLink className="h-3 w-3" aria-hidden="true" />
+            </a>
+          )}
+          {taxBase?.technicalSource && (
+            <a href={taxBase.technicalSource} target="_blank" rel="noreferrer" className="link inline-flex items-center gap-1">
+              Informe Técnico <ExternalLink className="h-3 w-3" aria-hidden="true" />
+            </a>
+          )}
+          {taxBase?.legalSource && (
+            <a href={taxBase.legalSource} target="_blank" rel="noreferrer" className="link inline-flex items-center gap-1">
+              LC 214/2025 <ExternalLink className="h-3 w-3" aria-hidden="true" />
+            </a>
+          )}
+        </div>
       </div>
 
       {showBaseInfo && (

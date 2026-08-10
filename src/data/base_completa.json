@@ -2,6 +2,9 @@
   "versao": "1.0.0",
   "descricao": "Base de verdade - Codigos de Classificacao Tributaria (cClassTrib) por CST - Reforma Tributaria do Consumo (LC 214/2025)",
   "fonteOriginal": "cClassTrib_2026_04_15.xlsx (planilha oficial, ref. 15-04-2026)",
+  "dataReferencia": "2026-04-15",
+  "fonteOficialTabela": "https://dfe-portal.svrs.rs.gov.br/DFE/TabelaClassificacaoTributaria",
+  "fonteTecnica": "https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=hXzemuyNHW4=",
   "fonteLegalBase": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm",
   "csts": [
     {
