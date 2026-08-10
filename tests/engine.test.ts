@@ -13,6 +13,7 @@ import { parseNFeXml } from '../src/utils/nfeParser.ts';
 import { parseXmlDate } from '../src/utils/xmlHelpers.ts';
 import { getTaxpayerDocumentStatus } from '../src/utils/taxpayerId.ts';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
+import taxBaseData from '../src/data/base_completa.json';
 import { ComplianceStatus, DocType, ItemClassificationStatus, NFeAnalysis, NFeType, ValidationStatus } from '../src/types.ts';
 
 export interface TestCaseResult {
@@ -161,8 +162,8 @@ const tests: TestCase[] = [
     run: () => {
       const results = parseSamples();
       assertEquals(results.length, sampleExpectations.length);
-      assertEquals(results[0].taxBase.version, '1.0.0');
-      assert(results[0].taxBase.source.includes('cClassTrib_2026_04_15.xlsx'), 'Origem da base fiscal não foi preservada');
+      assertEquals(results[0].taxBase.version, '1.1.0');
+      assert(results[0].taxBase.source.includes('cClassTrib 2026-06-22.xlsx'), 'Origem da base fiscal não foi preservada');
       assertEquals('xmlContent' in results[0], false);
 
       sampleExpectations.forEach((expectation) => {
@@ -174,6 +175,24 @@ const tests: TestCase[] = [
         assertEquals(firstItemStatus(result), expectation.itemStatus, `${expectation.fileName}: itemStatus divergente`);
         assertEquals(result.empresaFoco.cnpj, expectation.empresaFocoCnpj, `${expectation.fileName}: empresa em foco divergente`);
       });
+    },
+  },
+  {
+    name: 'base fiscal preserva a integridade da planilha oficial de 22/06/2026',
+    run: () => {
+      const classifications = taxBaseData.csts.flatMap((cst) =>
+        cst.classificacoes.map((classification) => ({ cst: cst.codigo, ...classification }))
+      );
+      const byCode = new Map(classifications.map((classification) => [classification.codigo, classification]));
+      const addedCodes = ['221002', '221003', '221004', '410036', '410037', '550024', '550025', '620007'];
+
+      assertEquals(taxBaseData.dataReferencia, '2026-06-22');
+      assertEquals(taxBaseData.csts.length, 18);
+      assertEquals(classifications.length, 164);
+      assert(addedCodes.every((code) => byCode.has(code)), 'A base convertida não contém todos os novos códigos oficiais');
+      assertEquals(byCode.get('220001')?.dataFimVigencia, '2026-01-01');
+      assert(byCode.get('221002')?.dfesRelacionados.includes('NFeABI'), 'cClassTrib 221002 perdeu o vínculo NFeABI');
+      assert(byCode.get('410037')?.dfesRelacionados.includes('DUIMP'), 'cClassTrib 410037 perdeu o vínculo DUIMP');
     },
   },
   {

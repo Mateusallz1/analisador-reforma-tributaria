@@ -89,7 +89,7 @@ const tests: UiTestCase[] = [
           'Modal não informa a condição de entrada na avaliação de conformidade',
         );
         assert(
-          dialog.textContent?.includes('planilha oficial CST/cClassTrib com referência de 15/04/2026'),
+          dialog.textContent?.includes('planilha oficial CST/cClassTrib com referência de 22/06/2026'),
           'Modal não identifica o snapshot oficial usado pela análise',
         );
         assertEquals(dialog.querySelectorAll('#about-official-sources a[target="_blank"]').length, 3);
@@ -126,7 +126,7 @@ const tests: UiTestCase[] = [
         const officialSources = container.querySelector<HTMLElement>('#official-sources');
         assert(officialSources, 'Relatório não exibe as fontes oficiais usadas na classificação');
         assert(
-          officialSources.textContent?.includes('cClassTrib_2026_04_15.xlsx'),
+          officialSources.textContent?.includes('cClassTrib 2026-06-22.xlsx'),
           'Relatório não informa a versão da planilha incorporada',
         );
         assertEquals(officialSources.querySelectorAll('a[target="_blank"]').length, 3);

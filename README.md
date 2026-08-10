@@ -79,3 +79,21 @@ O workflow de CI executa essa homologacao separadamente depois do gate principal
 
 O processamento roda localmente no navegador. Nenhuma variável de ambiente é necessária para analisar XMLs ou ZIPs.
 
+## Atualizacao da base fiscal
+
+A planilha oficial CST/cClassTrib pode ser convertida para o contrato JSON usado pelo analisador com o script versionado:
+
+```powershell
+.\scripts\convert-cclass-base.ps1 `
+  -InputPath 'src\data\cClassTrib 2026-06-22.xlsx' `
+  -OutputPath 'src\data\base_completa.json' `
+  -ComparePath 'src\data\base_completa.json' `
+  -Version '1.1.0' `
+  -ReferenceDate '2026-06-22' `
+  -PublicationDate '2026-06-23' `
+  -TechnicalVersion 'IT 2025.002 v1.60' `
+  -TechnicalSource 'https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=jxTMMQeEVM8%3D'
+```
+
+O conversor preserva os campos consumidos pela aplicação e informa CSTs e classificações adicionados, removidos ou alterados antes de gravar a nova base. Depois da conversão, execute `npm run check` e `npm run test:volume`.
+

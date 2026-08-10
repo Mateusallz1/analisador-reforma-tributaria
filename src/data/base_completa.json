@@ -1,10 +1,10 @@
 {
-  "versao": "1.0.0",
+  "versao": "1.1.0",
   "descricao": "Base de verdade - Codigos de Classificacao Tributaria (cClassTrib) por CST - Reforma Tributaria do Consumo (LC 214/2025)",
-  "fonteOriginal": "cClassTrib_2026_04_15.xlsx (planilha oficial, ref. 15-04-2026)",
-  "dataReferencia": "2026-04-15",
+  "fonteOriginal": "cClassTrib 2026-06-22.xlsx (planilha oficial, dados de 22-06-2026, publicada em 23-06-2026, IT 2025.002 v1.60)",
+  "dataReferencia": "2026-06-22",
   "fonteOficialTabela": "https://dfe-portal.svrs.rs.gov.br/DFE/TabelaClassificacaoTributaria",
-  "fonteTecnica": "https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=hXzemuyNHW4=",
+  "fonteTecnica": "https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=jxTMMQeEVM8%3D",
   "fonteLegalBase": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm",
   "csts": [
     {
@@ -42,12 +42,13 @@
             "CTEOS",
             "BPE",
             "BPETA",
-            "BPETM",
             "NF3E",
             "NFSE",
             "NFCOM",
             "NFAG",
-            "NFGAS"
+            "NFGAS",
+            "DIR",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art4"
@@ -380,7 +381,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFCE"
+            "NFCE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art110"
@@ -403,7 +405,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFCE"
+            "NFCE",
+            "DUIMP"
           ],
           "anexo": "1",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art125"
@@ -427,7 +430,8 @@
           "dfesRelacionados": [
             "NFE",
             "NFCE",
-            "NFSE"
+            "NFSE",
+            "DUIMP"
           ],
           "anexo": "12",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art144"
@@ -450,7 +454,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFSE"
+            "NFSE",
+            "DUIMP"
           ],
           "anexo": "4",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art144"
@@ -474,7 +479,8 @@
           "dfesRelacionados": [
             "NFE",
             "NFCE",
-            "NFSE"
+            "NFSE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art144"
@@ -498,7 +504,8 @@
           "dfesRelacionados": [
             "NFE",
             "NFCE",
-            "NFSE"
+            "NFSE",
+            "DUIMP"
           ],
           "anexo": "13",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art145"
@@ -521,7 +528,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFSE"
+            "NFSE",
+            "DUIMP"
           ],
           "anexo": "5",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art145"
@@ -544,7 +552,9 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFCE"
+            "NFCE",
+            "DIR",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art146"
@@ -567,7 +577,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFCE"
+            "NFCE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art146"
@@ -589,7 +600,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": "6",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art146"
@@ -612,7 +624,9 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFCE"
+            "NFCE",
+            "DIR",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art146"
@@ -635,7 +649,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFCE"
+            "NFCE",
+            "DUIMP"
           ],
           "anexo": "91471",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art147"
@@ -658,7 +673,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFCE"
+            "NFCE",
+            "DUIMP"
           ],
           "anexo": "15",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art148"
@@ -666,7 +682,7 @@
         {
           "codigo": "200015",
           "descricaoReduzida": "Venda de automóveis de passageiros de fabricação nacional adquiridos por motoristas profissionais ou pessoas com deficiência",
-          "descricaoCompleta": "Venda de automóveis de passageiros de fabricação nacional de, no mínimo, 4 (quatro) portas, inclusive a de acesso ao bagageiro, quando adquiridos por motoristas profissionais que exerçam, comprovadamente, em automóvel de sua propriedade, atividade de condutor autônomo de passageiros, na condição de titular de autorização, permissão ou concessão do poder público, e que destinem o automóvel à utilização na categoria de aluguel (táxi), ou por pessoas com deficiência física, visual, auditiva, deficiência mental severa ou profunda, transtorno do espectro autista, com prejuízos na \n comunicação social e em padrões restritos ou repetitivos de comportamento de nível moderado ou grave, nos termos da legislação relativa à matéria, observado o disposto no art. 149 da Lei Complementar nº 214, de 2025.",
+          "descricaoCompleta": "Venda de automóveis de passageiros de fabricação nacional de, no mínimo, 4 (quatro) portas, inclusive a de acesso ao bagageiro, quando adquiridos por motoristas profissionais que exerçam, comprovadamente, em automóvel de sua propriedade, atividade de condutor autônomo de passageiros, na condição de titular de autorização, permissão ou concessão do poder público, e que destinem o automóvel à utilização na categoria de aluguel (táxi), ou por pessoas com deficiência física, visual, auditiva, deficiência mental severa ou profunda, transtorno do espectro autista, com prejuízos na comunicação social e em padrões restritos ou repetitivos de comportamento de nível moderado ou grave, nos termos da legislação relativa à matéria, observado o disposto no art. 149 da Lei Complementar nº 214, de 2025.",
           "reducaoPercentualIBS": 100.0,
           "reducaoPercentualCBS": 100.0,
           "tipoAliquota": "Padrão",
@@ -795,6 +811,7 @@
           "dfesRelacionados": [
             "NFE",
             "NFCE",
+            "CTE",
             "NF3E",
             "NFSE"
           ],
@@ -1019,7 +1036,8 @@
           "dfesRelacionados": [
             "NFE",
             "NFCE",
-            "NFSE"
+            "NFSE",
+            "DUIMP"
           ],
           "anexo": "4",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art131"
@@ -1043,7 +1061,8 @@
           "dfesRelacionados": [
             "NFE",
             "NFCE",
-            "NFSE"
+            "NFSE",
+            "DUIMP"
           ],
           "anexo": "5",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art132"
@@ -1066,7 +1085,9 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFCE"
+            "NFCE",
+            "DIR",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art133"
@@ -1089,7 +1110,9 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFCE"
+            "NFCE",
+            "DIR",
+            "DUIMP"
           ],
           "anexo": "6",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art133"
@@ -1112,7 +1135,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFCE"
+            "NFCE",
+            "DUIMP"
           ],
           "anexo": "7",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art135"
@@ -1135,7 +1159,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFCE"
+            "NFCE",
+            "DUIMP"
           ],
           "anexo": "8",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art136"
@@ -1158,7 +1183,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFCE"
+            "NFCE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art137"
@@ -1204,7 +1230,8 @@
           "dfesRelacionados": [
             "NFE",
             "NFCE",
-            "NFSE"
+            "NFSE",
+            "DUIMP"
           ],
           "anexo": "9",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art138"
@@ -1227,7 +1254,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFSE"
+            "NFSE",
+            "DUIMP"
           ],
           "anexo": "10",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art139"
@@ -1317,7 +1345,8 @@
           "dfesRelacionados": [
             "NFE",
             "NFSE",
-            "NFCOM"
+            "NFCOM",
+            "DUIMP"
           ],
           "anexo": "11",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art142"
@@ -1528,8 +1557,8 @@
         },
         {
           "codigo": "200053",
-          "descricaoReduzida": "Fornecimento de medicamentos registrados na Anvisa, quando  classificados como soros ou vacinas",
-          "descricaoCompleta": "Fornecimento de medicamentos registrados na Anvisa, quando  classificados como soros ou vacinas, observado o art. 146 da Lei Complementar nº 214, de 2025.",
+          "descricaoReduzida": "Fornecimento de medicamentos registrados na Anvisa, quando classificados como soros ou vacinas",
+          "descricaoCompleta": "Fornecimento de medicamentos registrados na Anvisa, quando classificados como soros ou vacinas, observado o art. 146 da Lei Complementar nº 214, de 2025.",
           "reducaoPercentualIBS": 100.0,
           "reducaoPercentualCBS": 100.0,
           "tipoAliquota": "Padrão",
@@ -1544,7 +1573,9 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFCE"
+            "NFCE",
+            "DIR",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art146"
@@ -1602,7 +1633,7 @@
           "monoDiferimento": false,
           "estornoCredito": false,
           "dataInicioVigencia": "2026-01-01",
-          "dataFimVigencia": null,
+          "dataFimVigencia": "2026-01-01",
           "dfesRelacionados": [
             "NFeABI"
           ],
@@ -1624,7 +1655,7 @@
           "monoDiferimento": false,
           "estornoCredito": false,
           "dataInicioVigencia": "2026-01-01",
-          "dataFimVigencia": null,
+          "dataFimVigencia": "2026-01-01",
           "dfesRelacionados": [
             "NFeABI"
           ],
@@ -1646,7 +1677,7 @@
           "monoDiferimento": false,
           "estornoCredito": false,
           "dataInicioVigencia": "2026-01-01",
-          "dataFimVigencia": null,
+          "dataFimVigencia": "2026-01-01",
           "dfesRelacionados": [
             "NFeABI"
           ],
@@ -1726,6 +1757,72 @@
           ],
           "anexo": "94871",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art487"
+        },
+        {
+          "codigo": "221002",
+          "descricaoReduzida": "Incorporação imobiliária submetida ao regime especial de tributação",
+          "descricaoCompleta": "Incorporação imobiliária submetida ao regime especial de tributação, observado o art. 485 da Lei Complementar nº 214, de 2025.",
+          "reducaoPercentualIBS": 0.0,
+          "reducaoPercentualCBS": 0.0,
+          "tipoAliquota": "Fixa",
+          "tributacaoRegular": false,
+          "creditoPresumido": false,
+          "monoPadrao": false,
+          "monoRetencao": false,
+          "monoRetido": false,
+          "monoDiferimento": false,
+          "estornoCredito": false,
+          "dataInicioVigencia": "2026-01-01",
+          "dataFimVigencia": null,
+          "dfesRelacionados": [
+            "NFeABI"
+          ],
+          "anexo": null,
+          "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art485"
+        },
+        {
+          "codigo": "221003",
+          "descricaoReduzida": "Incorporação imobiliária submetida ao regime especial de tributação",
+          "descricaoCompleta": "Incorporação imobiliária submetida ao regime especial de tributação, observado o art. 485 da Lei Complementar nº 214, de 2025.",
+          "reducaoPercentualIBS": 0.0,
+          "reducaoPercentualCBS": 0.0,
+          "tipoAliquota": "Fixa",
+          "tributacaoRegular": false,
+          "creditoPresumido": false,
+          "monoPadrao": false,
+          "monoRetencao": false,
+          "monoRetido": false,
+          "monoDiferimento": false,
+          "estornoCredito": false,
+          "dataInicioVigencia": "2026-01-01",
+          "dataFimVigencia": null,
+          "dfesRelacionados": [
+            "NFeABI"
+          ],
+          "anexo": null,
+          "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art485"
+        },
+        {
+          "codigo": "221004",
+          "descricaoReduzida": "Alienação de imóvel decorrente de parcelamento do solo",
+          "descricaoCompleta": "Alienação de imóvel decorrente de parcelamento do solo, observado o art. 486 da Lei Complementar nº 214, de 2025.",
+          "reducaoPercentualIBS": 0.0,
+          "reducaoPercentualCBS": 0.0,
+          "tipoAliquota": "Fixa",
+          "tributacaoRegular": false,
+          "creditoPresumido": false,
+          "monoPadrao": false,
+          "monoRetencao": false,
+          "monoRetido": false,
+          "monoDiferimento": false,
+          "estornoCredito": false,
+          "dataInicioVigencia": "2026-01-01",
+          "dataFimVigencia": null,
+          "dfesRelacionados": [
+            "NFeABI"
+          ],
+          "anexo": null,
+          "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art486"
         }
       ]
     },
@@ -1825,12 +1922,12 @@
             "CTEOS",
             "BPE",
             "BPETA",
-            "BPETM",
             "NF3E",
             "NFSE",
             "NFCOM",
             "NFAG",
-            "NFGAS"
+            "NFGAS",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art5"
@@ -1881,14 +1978,13 @@
             "CTEOS",
             "BPE",
             "BPETA",
-            "BPETM",
             "NF3E",
             "NFSE",
-            "NFSVIA",
             "NFCOM",
             "NFAG",
             "NFGAS",
-            "DERE"
+            "DERE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art6"
@@ -2015,7 +2111,9 @@
             "NFE",
             "NFCE",
             "NFSE",
-            "NFCOM"
+            "NFCOM",
+            "DIR",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art9"
@@ -2040,7 +2138,9 @@
             "NFE",
             "NFCE",
             "NFSE",
-            "NFCOM"
+            "NFCOM",
+            "DIR",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art9"
@@ -2048,7 +2148,7 @@
         {
           "codigo": "410010",
           "descricaoReduzida": "Fornecimentos de serviço de comunicação nas modalidades de radiodifusão sonora e de sons e imagens de recepção livre e gratuita",
-          "descricaoCompleta": "Fornecimentos de serviço de comunicação nas modalidades de radiodifusão sonora e de sons e imagens de recepção livre e \n gratuita, observado o art. 9º da Lei Complementar nº 214, de 2025.",
+          "descricaoCompleta": "Fornecimentos de serviço de comunicação nas modalidades de radiodifusão sonora e de sons e imagens de recepção livre e gratuita, observado o art. 9º da Lei Complementar nº 214, de 2025.",
           "reducaoPercentualIBS": 0.0,
           "reducaoPercentualCBS": 0.0,
           "tipoAliquota": "Sem alíquota",
@@ -2429,10 +2529,8 @@
             "CTEOS",
             "BPE",
             "BPETA",
-            "BPETM",
             "NF3E",
             "NFSE",
-            "NFSVIA",
             "NFCOM",
             "NFAG",
             "NFGAS",
@@ -2633,7 +2731,7 @@
         {
           "codigo": "410035",
           "descricaoReduzida": "Fornecimento realizado por nanoempreendedor",
-          "descricaoCompleta": "Fornecimento realizado por nanoempreendedor, observado o art. 226 da Lei Complementar nº 214, de 2025.",
+          "descricaoCompleta": "Fornecimento realizado por nanoempreendedor, observado o art. 26 da Lei Complementar nº 214, de 2025.",
           "reducaoPercentualIBS": 0.0,
           "reducaoPercentualCBS": 0.0,
           "tipoAliquota": "Sem alíquota",
@@ -2655,6 +2753,53 @@
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art26"
+        },
+        {
+          "codigo": "410036",
+          "descricaoReduzida": "Descontos incondicionais",
+          "descricaoCompleta": "Descontos incondicionais, observado o art. 12 da Lei Complementar nº 214, de 2025.",
+          "reducaoPercentualIBS": 0.0,
+          "reducaoPercentualCBS": 0.0,
+          "tipoAliquota": "Sem alíquota",
+          "tributacaoRegular": false,
+          "creditoPresumido": false,
+          "monoPadrao": false,
+          "monoRetencao": false,
+          "monoRetido": false,
+          "monoDiferimento": false,
+          "estornoCredito": false,
+          "dataInicioVigencia": "2026-01-01",
+          "dataFimVigencia": null,
+          "dfesRelacionados": [
+            "NF3E",
+            "NFCOM",
+            "NFAG",
+            "NFGAS"
+          ],
+          "anexo": null,
+          "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art12"
+        },
+        {
+          "codigo": "410037",
+          "descricaoReduzida": "Importação os bens materiais sem incidência de IBS e CBS",
+          "descricaoCompleta": "Importação os bens materiais sem incidência de IBS e CBS, observado o art. 66 da Lei Complementar nº 214, de 2025.",
+          "reducaoPercentualIBS": 0.0,
+          "reducaoPercentualCBS": 0.0,
+          "tipoAliquota": "Sem alíquota",
+          "tributacaoRegular": false,
+          "creditoPresumido": false,
+          "monoPadrao": false,
+          "monoRetencao": false,
+          "monoRetido": false,
+          "monoDiferimento": false,
+          "estornoCredito": false,
+          "dataInicioVigencia": "2026-01-01",
+          "dataFimVigencia": null,
+          "dfesRelacionados": [
+            "DUIMP"
+          ],
+          "anexo": null,
+          "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art66"
         },
         {
           "codigo": "410999",
@@ -2685,7 +2830,8 @@
             "NFSE",
             "NFCOM",
             "NFAG",
-            "NFGAS"
+            "NFGAS",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art4"
@@ -2722,7 +2868,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NF3E"
+            "NF3E",
+            "DUIMP"
           ],
           "anexo": "90281",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art28"
@@ -2759,7 +2906,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFSE"
+            "NFSE",
+            "DUIMP"
           ],
           "anexo": "9",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art138"
@@ -2817,7 +2965,7 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art84"
@@ -2839,7 +2987,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art85"
@@ -2861,7 +3010,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art87"
@@ -2905,7 +3055,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art88"
@@ -2927,7 +3078,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art90"
@@ -2949,7 +3101,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art93"
@@ -2971,7 +3124,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art93"
@@ -2993,7 +3147,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art93"
@@ -3015,7 +3170,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art93"
@@ -3059,7 +3215,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art93"
@@ -3081,7 +3238,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art99"
@@ -3103,7 +3261,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art105"
@@ -3126,15 +3285,16 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFSE"
+            "NFSE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art106"
         },
         {
           "codigo": "550017",
-          "descricaoReduzida": "Regime Tributário para Incentivo à Atividade Econômica Naval",
-          "descricaoCompleta": "Regime Tributário para Incentivo à Atividade Econômica Naval – Renaval, observado o art. 107 da Lei Complementar nº 214, de 2025.",
+          "descricaoReduzida": "Regime Tributário para Incentivo à Atividade Naval - Renaval (Art. 107, I)",
+          "descricaoCompleta": "Fornecimentos de embarcações registradas ou pré-registradas no Registro Especial Brasileiro - REB para incorporação ao ativo imobilizado de adquirente sujeito ao regime regular do IBS e da CBS, observado o art. 107 da Lei Complementar nº 214, de 2025.",
           "reducaoPercentualIBS": 0.0,
           "reducaoPercentualCBS": 0.0,
           "tipoAliquota": "Sem alíquota",
@@ -3148,7 +3308,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art107"
@@ -3170,7 +3331,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art109"
@@ -3192,7 +3354,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art443"
@@ -3214,7 +3377,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art461"
@@ -3236,7 +3400,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art82"
@@ -3244,7 +3409,7 @@
         {
           "codigo": "550022",
           "descricaoReduzida": "Regime Especial de Incentivos para a Produção de Hidrogênio de Baixa Emissão de Carbono (Rehidro)",
-          "descricaoCompleta": "Regime Especial de Incentivos para a Produção de Hidrogênio de Baixa Emissão de Carbono (Rehidro),  observado o art. 106 da Lei Complementar nº 214, de 2025.",
+          "descricaoCompleta": "Regime Especial de Incentivos para a Produção de Hidrogênio de Baixa Emissão de Carbono (Rehidro), observado o art. 106 da Lei Complementar nº 214, de 2025.",
           "reducaoPercentualIBS": 0.0,
           "reducaoPercentualCBS": 0.0,
           "tipoAliquota": "Sem alíquota",
@@ -3259,7 +3424,8 @@
           "dataFimVigencia": null,
           "dfesRelacionados": [
             "NFE",
-            "NFSE"
+            "NFSE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art106"
@@ -3281,10 +3447,55 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": null,
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art172"
+        },
+        {
+          "codigo": "550024",
+          "descricaoReduzida": "Regime Tributário para Incentivo à Atividade Naval - Renaval (Art. 107, II)",
+          "descricaoCompleta": "Importações e nas aquisições no mercado interno de máquinas, equipamentos e veículos destinados a utilização nas atividades de que trata o inciso IIIdo art. 107 efetuadas para incorporação a seu ativo imobilizado, observado o art. 107 da Lei Complementar nº 214, de 2025.",
+          "reducaoPercentualIBS": 0.0,
+          "reducaoPercentualCBS": 0.0,
+          "tipoAliquota": "Sem alíquota",
+          "tributacaoRegular": true,
+          "creditoPresumido": false,
+          "monoPadrao": false,
+          "monoRetencao": false,
+          "monoRetido": false,
+          "monoDiferimento": false,
+          "estornoCredito": false,
+          "dataInicioVigencia": "2026-01-01",
+          "dataFimVigencia": null,
+          "dfesRelacionados": [
+            "DUIMP"
+          ],
+          "anexo": null,
+          "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art107"
+        },
+        {
+          "codigo": "550025",
+          "descricaoReduzida": "Regime Tributário para Incentivo à Atividade Naval - Renaval (Art. 107, III)",
+          "descricaoCompleta": "Importações e nas aquisições no mercado interno de matérias-primas, produtos intermediários, partes, peças e componentes para utilização na construção, conservação, modernização e reparo de embarcações pré-registradas ou registradas no REB, observado o art. 107 da Lei Complementar nº 214, de 2025.",
+          "reducaoPercentualIBS": 0.0,
+          "reducaoPercentualCBS": 0.0,
+          "tipoAliquota": "Sem alíquota",
+          "tributacaoRegular": true,
+          "creditoPresumido": false,
+          "monoPadrao": false,
+          "monoRetencao": false,
+          "monoRetido": false,
+          "monoDiferimento": false,
+          "estornoCredito": false,
+          "dataInicioVigencia": "2026-01-01",
+          "dataFimVigencia": null,
+          "dfesRelacionados": [
+            "DUIMP"
+          ],
+          "anexo": null,
+          "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art107"
         }
       ]
     },
@@ -3317,7 +3528,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": "91721",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art172"
@@ -3339,7 +3551,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": "91722",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art178"
@@ -3353,7 +3566,7 @@
           "tipoAliquota": "Uniforme setorial",
           "tributacaoRegular": false,
           "creditoPresumido": false,
-          "monoPadrao": true,
+          "monoPadrao": false,
           "monoRetencao": false,
           "monoRetido": false,
           "monoDiferimento": true,
@@ -3361,7 +3574,8 @@
           "dataInicioVigencia": "2026-01-01",
           "dataFimVigencia": null,
           "dfesRelacionados": [
-            "NFE"
+            "NFE",
+            "DUIMP"
           ],
           "anexo": "91723",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art178"
@@ -3375,7 +3589,7 @@
           "tipoAliquota": "Uniforme setorial",
           "tributacaoRegular": false,
           "creditoPresumido": false,
-          "monoPadrao": true,
+          "monoPadrao": false,
           "monoRetencao": false,
           "monoRetido": true,
           "monoDiferimento": false,
@@ -3432,6 +3646,28 @@
           ],
           "anexo": "91726",
           "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art180"
+        },
+        {
+          "codigo": "620007",
+          "descricaoReduzida": "Perecimento, deteriorização, roubo, furto ou extravio no regime monofásico",
+          "descricaoCompleta": "Perecimento, deteriorização, roubo, furto ou extravio no regime monofásico sem estorno de crédito, observado o art. 47 da Lei Complementar nº 214, de 2025.",
+          "reducaoPercentualIBS": 0.0,
+          "reducaoPercentualCBS": 0.0,
+          "tipoAliquota": "Sem alíquota",
+          "tributacaoRegular": false,
+          "creditoPresumido": false,
+          "monoPadrao": false,
+          "monoRetencao": false,
+          "monoRetido": false,
+          "monoDiferimento": false,
+          "estornoCredito": false,
+          "dataInicioVigencia": "2026-01-01",
+          "dataFimVigencia": null,
+          "dfesRelacionados": [
+            "NFE"
+          ],
+          "anexo": null,
+          "fonteLegal": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art47"
         }
       ]
     },
@@ -3782,8 +4018,8 @@
         },
         {
           "codigo": "820008",
-          "descricaoReduzida": "Documento com informações de fornecimento, mas com tributação realizada em fatura anterior",
-          "descricaoCompleta": "Documento com informações de fornecimento, mas com tributação realizada em fatura anterior, observado o art. 10 da Lei Complementar nº 214, de 2025.",
+          "descricaoReduzida": "Documento com informações de fornecimento de serviço continuado, mas com tributação realizada em fatura anterior",
+          "descricaoCompleta": "Documento com informações de fornecimento de serviço continuado, mas com tributação realizada em fatura anterior, observado o art. 10 da Lei Complementar nº 214, de 2025.",
           "reducaoPercentualIBS": 0.0,
           "reducaoPercentualCBS": 0.0,
           "tipoAliquota": "Sem alíquota",
