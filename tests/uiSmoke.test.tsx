@@ -1,5 +1,6 @@
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
+import App from '../src/App.tsx';
 import ResultsTable from '../src/components/ResultsTable.tsx';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
 import { parseNFeXml } from '../src/utils/nfeParser.ts';
@@ -37,7 +38,85 @@ function renderResultsTable() {
   return { container, root };
 }
 
+function renderApp() {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  flushSync(() => {
+    root.render(<App />);
+  });
+
+  return { container, root };
+}
+
 const tests: UiTestCase[] = [
+  {
+    name: 'UI replica a moldura do scanner sem remover ações locais',
+    run: () => {
+      const { container, root } = renderApp();
+
+      try {
+        assert(
+          container.textContent?.includes('Analisador da Reforma Tributária'),
+          'Título do produto não foi renderizado',
+        );
+        assert(container.querySelector('#drop-zone'), 'Área de upload não foi renderizada');
+        assert(container.querySelector('#btn-load-samples'), 'Ação de amostras não foi preservada');
+        assert(
+          container.querySelector('button[aria-label="Ir para o scanner"]'),
+          'Navegação para o scanner não foi renderizada',
+        );
+
+        const aboutButton = container.querySelector<HTMLButtonElement>('button[aria-label="Sobre a ferramenta"]');
+        assert(aboutButton, 'Acesso às informações da ferramenta não foi renderizado');
+
+        flushSync(() => {
+          aboutButton.click();
+        });
+
+        const dialog = container.querySelector<HTMLElement>('[role="dialog"][aria-labelledby="about-title"]');
+        assert(dialog, 'Modal informativo não abriu');
+        assert(
+          dialog.textContent?.includes('não substitui validação oficial'),
+          'Modal não preserva o posicionamento de analisador não oficial',
+        );
+        assert(dialog.textContent?.includes('Conforme'), 'Modal não explica o estado conforme');
+        assert(dialog.textContent?.includes('Para revisar'), 'Modal não explica os estados acionáveis');
+        assert(dialog.textContent?.includes('Fora do escopo'), 'Modal não explica itens fora do escopo');
+        assert(
+          dialog.textContent?.includes('Somente itens de documentos que possuem o grupo IBSCBS'),
+          'Modal não informa a condição de entrada na avaliação de conformidade',
+        );
+
+        const closeButton = dialog.querySelector<HTMLButtonElement>('button[aria-label="Fechar informações"]');
+        assert(closeButton, 'Modal não possui ação de fechamento acessível');
+
+        flushSync(() => {
+          closeButton.click();
+        });
+
+        assertEquals(container.querySelector('[role="dialog"][aria-labelledby="about-title"]'), null);
+
+        flushSync(() => {
+          aboutButton.click();
+        });
+        assert(container.querySelector('[role="dialog"][aria-labelledby="about-title"]'), 'Modal não reabriu');
+
+        flushSync(() => {
+          document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        });
+        assertEquals(
+          container.querySelector('[role="dialog"][aria-labelledby="about-title"]'),
+          null,
+          'Modal não fechou com Escape',
+        );
+      } finally {
+        flushSync(() => root.unmount());
+        container.remove();
+      }
+    },
+  },
   {
     name: 'UI renderiza hierarquia empresa-documentos, detalhe inline e filtros acessíveis',
     run: () => {

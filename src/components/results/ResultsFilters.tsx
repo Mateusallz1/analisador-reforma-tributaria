@@ -91,7 +91,7 @@ export function ResultsFilters({
         />
       )}
 
-      <div className="relative z-20 border-b border-base-300 bg-base-100 px-0 py-2.5">
+      <div className="relative z-20 rounded-2xl border border-base-300 bg-base-100 px-4 py-3 shadow-sm shadow-base-content/5">
         <div className="flex flex-col items-stretch justify-between gap-3 lg:flex-row lg:items-center">
           <div className="relative min-w-0 flex-1 lg:max-w-xl">
             <span className="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3 text-base-content/40">
@@ -150,7 +150,7 @@ export function ResultsFilters({
                 <div
                   id={statusMenuId}
                   role="menu"
-                  className="menu absolute right-0 mt-1.5 w-64 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg"
+                  className="menu absolute right-0 mt-1.5 w-64 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg"
                 >
                   <MenuButton
                     isSelected={statusFilter === 'ALL'}

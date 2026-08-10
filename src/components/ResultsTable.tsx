@@ -247,7 +247,7 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
       />
 
       {sections.length === 0 ? (
-        <div className="card card-border bg-base-100 px-6 py-12 text-center">
+        <div className="rounded-2xl border border-base-300 bg-base-100 px-6 py-12 text-center shadow-sm">
           <FileSpreadsheet className="mx-auto mb-3 h-9 w-9 text-base-content/25" aria-hidden="true" />
           <h4 className="text-sm font-semibold">Nenhuma nota corresponde aos filtros</h4>
           <p className="mt-1 text-sm text-base-content/60">Remova ou altere os filtros para ver outros documentos.</p>
@@ -255,7 +255,7 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
       ) : (
         <div
           id="results-grouped-list"
-          className="overflow-hidden rounded-box border border-base-300 bg-base-100"
+          className="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-md shadow-base-content/5"
           data-company-layout="compact-list"
         >
           {sections.map((section) => {

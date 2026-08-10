@@ -23,7 +23,7 @@ export default function DashboardStats({ results, grouped, onReset }: DashboardS
   ];
 
   return (
-    <div id="analysis-summary" className="card card-border overflow-hidden bg-base-100">
+    <div id="analysis-summary" className="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-md shadow-base-content/5">
       <div className="flex flex-col gap-2 border-b border-base-300 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/60">
           <span><strong className="text-base-content">{results.length}</strong> documentos</span>
@@ -58,7 +58,7 @@ export default function DashboardStats({ results, grouped, onReset }: DashboardS
 
       <div className="grid grid-cols-2 divide-x divide-y divide-base-300 sm:grid-cols-4 sm:divide-y-0">
         {metrics.map((metric) => (
-          <div key={metric.id} id={metric.id} className="stat px-4 py-3">
+          <div key={metric.id} id={metric.id} className="stat min-w-0 px-4 py-4">
             <div className="stat-title text-[10px] font-semibold uppercase">{metric.label}</div>
             <div className={`stat-value text-xl ${metric.tone}`}>{metric.value}</div>
             <div className="stat-desc">{metric.detail}</div>

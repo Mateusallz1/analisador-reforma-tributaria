@@ -1,10 +1,17 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
+  BookOpen,
+  CheckCircle2,
+  CircleHelp,
+  CircleMinus,
   Database,
   FileText,
-  FlaskConical,
+  Menu,
+  ScanLine,
   Scale,
+  ShieldCheck,
+  TriangleAlert,
   X,
 } from 'lucide-react';
 import { NFeAnalysis, FileProcessingError } from './types';
@@ -31,7 +38,7 @@ function ProcessingStatus({ message, progress, onCancel }: ProcessingStatusProps
 
   return (
     <div
-      className="card min-h-[360px] items-center justify-center border border-base-300 bg-base-100 p-8"
+      className="flex min-h-[280px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-base-300 bg-base-200/35 p-8"
       role="status"
       aria-live="polite"
     >
@@ -82,7 +89,28 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [processingProgress, setProcessingProgress] = useState<FileProcessingProgress>();
   const [canCancelProcessing, setCanCancelProcessing] = useState(false);
+  const [isNavigationOpen, setIsNavigationOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const processingAbortController = useRef<AbortController | null>(null);
+  const aboutCloseButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!isAboutOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsAboutOpen(false);
+    };
+
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', closeOnEscape);
+    aboutCloseButtonRef.current?.focus();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isAboutOpen]);
 
   const groupedResults = useMemo(() => {
     return groupAnalysesByEmpresaFoco(results);
@@ -189,34 +217,92 @@ export default function App() {
   const duplicateErrorCount = errors.filter((error) => error.kind === 'DUPLICATE').length;
   const processingErrorCount = errors.length - duplicateErrorCount;
 
+  const scrollToScanner = () => {
+    setIsNavigationOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-base-200 font-sans text-base-content">
-      <header className="navbar border-b border-base-300 bg-base-100 px-0">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-2 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-box bg-neutral text-neutral-content">
-              <Scale className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-base font-bold text-base-content">
-                Analisador da Reforma Tributária
-              </h1>
-              <p className="text-xs text-base-content/60">
-                Análise local de IBS/CBS em XML ou ZIP de documentos fiscais.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center text-xs">
-            <span className="badge badge-outline badge-sm gap-1.5">
-              <span className="status status-success" />
-              Local
-            </span>
-          </div>
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-16 flex-col border-r border-base-300 bg-base-100 lg:flex">
+        <div className="flex h-16 items-center justify-center border-b border-base-300">
+          <Scale className="h-5 w-5 text-base-content/70" aria-hidden="true" />
         </div>
-      </header>
+        <nav className="flex flex-1 flex-col gap-1 p-2" aria-label="Navegação principal">
+          <button
+            type="button"
+            onClick={scrollToScanner}
+            className="btn btn-ghost btn-square"
+            title="Scanner"
+            aria-label="Ir para o scanner"
+          >
+            <ScanLine className="h-5 w-5" aria-hidden="true" />
+          </button>
+          <div className="divider my-1" />
+          <button
+            type="button"
+            onClick={() => setIsAboutOpen(true)}
+            className="btn btn-ghost btn-square"
+            title="Sobre a ferramenta"
+            aria-label="Sobre a ferramenta"
+          >
+            <CircleHelp className="h-5 w-5" aria-hidden="true" />
+          </button>
+        </nav>
+      </aside>
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      {isNavigationOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <button
+            type="button"
+            className="absolute inset-0 bg-base-content/25"
+            onClick={() => setIsNavigationOpen(false)}
+            aria-label="Fechar navegação"
+          />
+          <aside className="relative flex h-full w-64 flex-col border-r border-base-300 bg-base-100 p-3 shadow-xl">
+            <div className="mb-4 flex h-12 items-center gap-3 border-b border-base-300 px-2 font-bold">
+              <Scale className="h-5 w-5" aria-hidden="true" />
+              Analisador
+            </div>
+            <button type="button" onClick={scrollToScanner} className="btn btn-ghost justify-start">
+              <ScanLine className="h-5 w-5" aria-hidden="true" />
+              Scanner
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsNavigationOpen(false);
+                setIsAboutOpen(true);
+              }}
+              className="btn btn-ghost justify-start"
+            >
+              <CircleHelp className="h-5 w-5" aria-hidden="true" />
+              Sobre a ferramenta
+            </button>
+          </aside>
+        </div>
+      )}
+
+      <div className="min-w-0 lg:pl-16">
+        <header className="navbar sticky top-0 z-30 min-h-16 border-b border-base-300 bg-base-100/95 px-2 shadow-sm backdrop-blur sm:px-4">
+          <button
+            type="button"
+            onClick={() => setIsNavigationOpen(true)}
+            className="btn btn-ghost btn-square lg:hidden"
+            aria-label="Abrir navegação"
+          >
+            <Menu className="h-5 w-5" aria-hidden="true" />
+          </button>
+          <div className="min-w-0 flex-1 px-2 lg:px-4">
+            <h1 className="truncate text-base font-bold">Analisador da Reforma Tributária</h1>
+          </div>
+          <span className="badge badge-outline badge-sm mr-2 gap-1.5 text-[11px]">
+            <span className="status status-success" />
+            Local
+          </span>
+        </header>
+
+        <main className={`mx-auto w-full px-3 py-5 sm:px-6 sm:py-8 ${results.length === 0 ? 'max-w-5xl' : 'max-w-[1500px]'}`}>
         {errors.length > 0 && (
           <div
             id="error-list-container"
@@ -274,65 +360,50 @@ export default function App() {
         )}
 
         {results.length === 0 ? (
-          <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="space-y-5">
-              <div className="max-w-3xl">
-                <p className="mb-2 text-xs font-bold uppercase text-base-content/50">
-                  Análise local
-                </p>
-                <h2 className="text-2xl font-bold text-base-content">
-                  Envie XMLs de NF-e/NFC-e/NFS-e para analisar IBS/CBS.
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-base-content/60">
-                  O app identifica o grupo IBSCBS, confere CST e cClassTrib contra a base local
-                  e agrupa o resultado pela empresa em foco da operação.
-                </p>
+          <section className="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-xl shadow-base-content/10">
+            <div className="p-5 sm:p-8">
+              <h2 className="text-xl font-bold sm:text-2xl">
+                Analise a conformidade das suas notas fiscais
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-base-content/65 sm:text-base">
+                Verifique a presença do grupo IBSCBS e a compatibilidade entre CST e cClassTrib
+                nos XMLs de NF-e, NFC-e e NFS-e.
+              </p>
+              <p className="mt-3 flex items-center gap-1.5 text-xs text-base-content/45">
+                <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                O processamento acontece neste navegador. Seus arquivos não são enviados nem armazenados.
+              </p>
+
+              <div className="mt-6">
+                {isLoading ? (
+                  <ProcessingStatus
+                    message="Processando arquivos..."
+                    progress={processingProgress}
+                    onCancel={canCancelProcessing ? cancelProcessing : undefined}
+                  />
+                ) : (
+                  <UploadSection onFilesSelected={handleFilesSelected} isLoading={isLoading} />
+                )}
               </div>
 
-              {isLoading ? (
-                <ProcessingStatus
-                  message="Processando arquivos..."
-                  progress={processingProgress}
-                  onCancel={canCancelProcessing ? cancelProcessing : undefined}
-                />
-              ) : (
-                <UploadSection onFilesSelected={handleFilesSelected} isLoading={isLoading} />
+              {!isLoading && (
+                <div className="mt-5 flex flex-col gap-3 border-t border-base-300 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="max-w-xl text-xs leading-relaxed text-base-content/55">
+                    Saída usa o emitente como foco; entrada usa o destinatário. O resultado é calculado por item fiscal.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleLoadSamples}
+                    id="btn-load-samples"
+                    disabled={isLoading}
+                    className="btn btn-ghost btn-sm shrink-0"
+                  >
+                    <Database className="h-3.5 w-3.5" aria-hidden="true" />
+                    Testar com {SAMPLE_NFES.length} amostras
+                  </button>
+                </div>
               )}
             </div>
-
-            <aside className="space-y-4">
-              <div className="card card-border bg-base-100">
-                <div className="card-body gap-0 p-4">
-                <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
-                  <FlaskConical className="h-4 w-4 text-slate-500" />
-                  Amostras
-                </div>
-                <p className="mb-4 text-xs leading-relaxed text-base-content/60">
-                  Use {SAMPLE_NFES.length} notas simuladas para conferir o fluxo sem arquivos próprios.
-                </p>
-                <button
-                  type="button"
-                  onClick={handleLoadSamples}
-                  id="btn-load-samples"
-                  disabled={isLoading}
-                  className="btn btn-neutral btn-sm w-full"
-                >
-                  <Database className="h-3.5 w-3.5" />
-                  Carregar amostras
-                </button>
-                </div>
-              </div>
-
-              <div className="card card-border bg-base-100">
-                <div className="card-body gap-0 p-4">
-                <h3 className="mb-2 text-sm font-semibold">Critério aplicado</h3>
-                <p className="text-xs leading-relaxed text-base-content/60">
-                  Saída usa o emitente como foco. Entrada usa o destinatário. A conformidade é
-                  calculada por item fiscal com base em IBSCBS, CST e cClassTrib.
-                </p>
-                </div>
-              </div>
-            </aside>
           </section>
         ) : (
           <section className="space-y-4 pb-10">
@@ -390,7 +461,90 @@ export default function App() {
             )}
           </section>
         )}
-      </main>
+        </main>
+      </div>
+
+      {isAboutOpen && (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-base-content/30 p-0 sm:items-center sm:p-4">
+          <button
+            type="button"
+            className="absolute inset-0"
+            onClick={() => setIsAboutOpen(false)}
+            aria-label="Fechar informações"
+          />
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="about-title"
+            className="relative w-full max-w-2xl rounded-t-2xl border border-base-300 bg-base-100 p-5 shadow-2xl sm:rounded-2xl sm:p-8"
+          >
+            <button
+              ref={aboutCloseButtonRef}
+              type="button"
+              onClick={() => setIsAboutOpen(false)}
+              className="btn btn-ghost btn-circle btn-sm absolute right-4 top-4"
+              aria-label="Fechar informações"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+            <div className="mb-5 flex items-center gap-3 pr-10">
+              <BookOpen className="h-6 w-6 text-base-content/60" aria-hidden="true" />
+              <h2 id="about-title" className="text-xl font-bold">Sobre esta ferramenta</h2>
+            </div>
+            <div className="space-y-4 text-sm leading-relaxed text-base-content/70">
+              <p>
+                O Analisador da Reforma Tributária examina localmente documentos fiscais eletrônicos
+                e apresenta indícios de adequação ao IBS e à CBS.
+              </p>
+              <p>
+                A análise confere a estrutura IBSCBS, CST e cClassTrib com a base fiscal incorporada.
+                Ela apoia a auditoria, mas não substitui validação oficial ou orientação tributária.
+              </p>
+              <div className="grid gap-3 border-t border-base-300 pt-5 sm:grid-cols-3">
+                {[
+                  ['NF-e', 'Nota Fiscal Eletrônica'],
+                  ['NFC-e', 'Nota Fiscal ao Consumidor'],
+                  ['NFS-e', 'Nota Fiscal de Serviços'],
+                ].map(([type, label]) => (
+                  <div key={type} className="rounded-xl border border-base-300 bg-base-200/50 p-3">
+                    <strong className="block text-base-content">{type}</strong>
+                    <span className="text-xs">{label}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-4 border-t border-base-300 pt-5">
+                <p className="rounded-xl border border-base-300 bg-base-200/50 p-3 text-xs">
+                  Somente itens de documentos que possuem o grupo <strong className="font-mono text-base-content">IBSCBS</strong>
+                  {' '}entram na avaliação de conformidade. Quando a nota inteira não possui esse grupo, o resultado é Fora do escopo.
+                </p>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" aria-hidden="true" />
+                  <p>
+                    <strong className="text-base-content">Conforme</strong> é atribuído quando o item possui
+                    o grupo IBSCBS e apresenta CST e cClassTrib compatíveis com a base fiscal utilizada.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <TriangleAlert className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden="true" />
+                  <p>
+                    <strong className="text-base-content">Para revisar</strong> é usado quando há IBSCBS no
+                    documento, mas o grupo está incompleto ou sua classificação é incompatível. Se apenas parte
+                    dos itens possui IBSCBS, os demais ficam incompletos.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CircleMinus className="mt-0.5 h-5 w-5 shrink-0 text-base-content/45" aria-hidden="true" />
+                  <p>
+                    <strong className="text-base-content">Fora do escopo</strong> identifica a nota sem nenhum
+                    grupo IBSCBS. Esse resultado não representa uma conclusão de irregularidade.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

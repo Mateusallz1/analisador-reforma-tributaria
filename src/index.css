@@ -1,4 +1,35 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: lofi --default;
+  themes: cupcake --default;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-width: 320px;
+    font-family: Roboto, "Segoe UI", Arial, sans-serif;
+  }
+
+  button,
+  input,
+  select {
+    letter-spacing: 0;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: color-mix(in oklab, currentColor 20%, transparent);
 }

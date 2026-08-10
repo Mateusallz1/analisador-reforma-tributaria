@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { FileArchive, FileText, Upload } from 'lucide-react';
+import { FileArchive, FileText, FolderUp } from 'lucide-react';
 
 interface UploadSectionProps {
   onFilesSelected: (files: File[]) => void;
@@ -60,10 +60,10 @@ export default function UploadSection({ onFilesSelected, isLoading }: UploadSect
         onDragLeave={handleDrag}
         onDrop={handleDrop}
         onClick={triggerFileInput}
-        className={`card relative flex min-h-[360px] w-full cursor-pointer flex-col items-center justify-center border-2 border-dashed px-6 py-14 transition-colors ${
+        className={`relative flex min-h-[280px] w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 py-10 transition-colors sm:px-8 ${
           isDragActive
             ? 'border-neutral bg-neutral/5 text-base-content'
-            : 'border-base-300 bg-base-100 text-base-content/70 hover:border-neutral/50'
+            : 'border-base-300 bg-base-200/25 text-base-content/70 hover:border-neutral/50 hover:bg-base-200/50'
         } ${isLoading ? 'pointer-events-none opacity-50' : ''}`}
       >
         <input
@@ -76,36 +76,31 @@ export default function UploadSection({ onFilesSelected, isLoading }: UploadSect
           onChange={handleFileInputChange}
         />
 
-        <div className="mb-5 flex gap-3">
-          <div className="rounded-box border border-base-300 bg-base-200 p-3 text-base-content/60">
-            <Upload className="h-7 w-7" />
-          </div>
-          <div className="rounded-box border border-base-300 bg-base-200 p-3 text-base-content/60">
-            <FileArchive className="h-7 w-7" />
-          </div>
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-base-100 text-base-content/65 shadow-sm">
+          <FolderUp className="h-6 w-6" aria-hidden="true" />
         </div>
 
         <h3 className="mb-1 text-center text-lg font-semibold text-base-content">
-          Envie XMLs ou ZIPs
+          Solte arquivos .xml ou .zip aqui
         </h3>
-        <p className="mb-6 max-w-md text-center text-sm leading-relaxed text-base-content/60">
-          Arraste os arquivos para cá ou selecione XMLs de NF-e/NFC-e/NFS-e e pacotes ZIP.
+        <p className="mb-5 max-w-md text-center text-sm leading-relaxed text-base-content/55">
+          Ou selecione os documentos fiscais no seu computador.
         </p>
 
         <button
           type="button"
           id="btn-upload-trigger"
-          className="btn btn-neutral"
+          className="btn btn-neutral rounded-full px-7 shadow-md"
           disabled={isLoading}
         >
           {isLoading ? 'Analisando...' : 'Selecionar arquivos'}
         </button>
 
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-base-300 pt-5 text-xs text-base-content/60">
-          <span className="badge badge-ghost badge-sm gap-1.5">
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-4 text-xs text-base-content/50">
+          <span className="inline-flex items-center gap-1.5">
             <FileText className="h-3.5 w-3.5" /> XML
           </span>
-          <span className="badge badge-ghost badge-sm gap-1.5">
+          <span className="inline-flex items-center gap-1.5">
             <FileArchive className="h-3.5 w-3.5" /> ZIP
           </span>
         </div>

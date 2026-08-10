@@ -17,7 +17,7 @@ export function NoteDetailPanel({ note, onClose }: NoteDetailPanelProps) {
       data-detail-layout="inline"
       data-item-layer="items"
       data-detail-surface="inset"
-      className="border-t border-base-300 bg-base-200/60 pb-3 lg:min-w-[1100px] lg:pb-4"
+      className="border-t border-base-300 bg-base-200/70 pb-3 lg:min-w-[1100px] lg:pb-4"
     >
       <div className="flex items-center justify-between gap-3 px-6 py-3">
         <h3 className="text-[10px] font-semibold uppercase text-base-content/60">
@@ -40,7 +40,7 @@ export function NoteDetailPanel({ note, onClose }: NoteDetailPanelProps) {
         </p>
       ) : (
         <>
-          <div className="mx-6 hidden overflow-hidden rounded-field border border-base-300 bg-base-100 lg:block">
+          <div className="mx-6 hidden overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm lg:block">
             <table className="table table-sm w-full table-fixed text-left text-xs">
               <thead className="bg-base-200 text-[10px] font-semibold text-base-content/60">
                 <tr>
@@ -73,7 +73,7 @@ export function NoteDetailPanel({ note, onClose }: NoteDetailPanelProps) {
             </table>
           </div>
 
-          <div className="mx-3 divide-y divide-base-300 overflow-hidden rounded-field border border-base-300 bg-base-100 lg:hidden">
+          <div className="mx-3 divide-y divide-base-300 overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm lg:hidden">
             {items.map((item) => (
               <div key={item.numeroItem} className="px-4 py-4">
                 <div className="flex items-start justify-between gap-3">
