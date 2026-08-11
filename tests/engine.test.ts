@@ -15,6 +15,7 @@ import { getTaxpayerDocumentStatus } from '../src/utils/taxpayerId.ts';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
 import taxBaseData from '../src/data/base_completa.json';
 import { ComplianceStatus, DocType, ItemClassificationStatus, NFeAnalysis, NFeType, ValidationStatus } from '../src/types.ts';
+import { assert, assertEquals } from './assertions.ts';
 
 export interface TestCaseResult {
   name: string;
@@ -35,18 +36,6 @@ interface SampleExpectation {
   itemStatus: ItemClassificationStatus;
   validationStatus: ValidationStatus;
   empresaFocoCnpj: string;
-}
-
-function assert(condition: unknown, message: string): asserts condition {
-  if (!condition) {
-    throw new Error(message);
-  }
-}
-
-function assertEquals<T>(actual: T, expected: T, message?: string): void {
-  if (actual !== expected) {
-    throw new Error(message || `Esperado ${JSON.stringify(expected)}, recebido ${JSON.stringify(actual)}`);
-  }
 }
 
 function parseSamples(): NFeAnalysis[] {
@@ -210,6 +199,44 @@ const tests: TestCase[] = [
       assertEquals(item.validationReason, 'A tabela oficial não informa DF-e aplicável para esta classificação.');
       assertEquals(result.validationStatus, 'pendente');
       assertEquals(result.status, 'PENDENTE');
+    },
+  },
+  {
+    name: 'identificador da análise é determinístico e baseado no conteúdo',
+    run: () => {
+      const xml = SAMPLE_NFES[0].xmlContent;
+      const original = parseNFeXml(xml, 'original.xml');
+      const renamed = parseNFeXml(xml, 'renomeado.xml');
+      const changed = parseNFeXml(
+        xml.replace(/<nNF>[^<]+<\/nNF>/, '<nNF>999999</nNF>'),
+        'original.xml',
+      );
+
+      assertEquals(original.id, renamed.id, 'Renomear o mesmo XML não deve alterar sua identidade');
+      assert(original.id !== changed.id, 'Conteúdo fiscal diferente deve produzir outra identidade');
+      assert(/^NFe-[0-9a-f]{16}$/.test(original.id), `Formato inesperado para ID determinístico: ${original.id}`);
+    },
+  },
+  {
+    name: 'vigência e tipo de DF-e são validados em casos oficiais limítrofes',
+    run: () => {
+      const expiredXml = SAMPLE_NFES[0].xmlContent
+        .replace('<CST>000</CST>', '<CST>220</CST>')
+        .replace('<cClassTrib>000001</cClassTrib>', '<cClassTrib>220001</cClassTrib>');
+      const expired = parseNFeXml(expiredXml, 'NFe_classificacao_expirada.xml');
+
+      assertEquals(expired.itens?.[0]?.itemStatus, 'fora_vigencia');
+      assertEquals(expired.itens?.[0]?.validationStatus, 'inválido');
+      assert(expired.itens?.[0]?.validationReason?.includes('fora da vigência'), 'Fim de vigência não foi explicado');
+
+      const wrongDfeXml = SAMPLE_NFES[0].xmlContent
+        .replace('<CST>000</CST>', '<CST>410</CST>')
+        .replace('<cClassTrib>000001</cClassTrib>', '<cClassTrib>410037</cClassTrib>');
+      const wrongDfe = parseNFeXml(wrongDfeXml, 'NFe_classificacao_de_DUIMP.xml');
+
+      assertEquals(wrongDfe.itens?.[0]?.itemStatus, 'classificacao_invalida');
+      assertEquals(wrongDfe.itens?.[0]?.validationStatus, 'inválido');
+      assert(wrongDfe.itens?.[0]?.validationReason?.includes('Permitidos: DUIMP'), 'DF-e oficial permitido não foi explicado');
     },
   },
   {

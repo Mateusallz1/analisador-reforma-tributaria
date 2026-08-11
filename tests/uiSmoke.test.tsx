@@ -5,21 +5,12 @@ import ResultsTable from '../src/components/ResultsTable.tsx';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
 import { parseNFeXml } from '../src/utils/nfeParser.ts';
 import type { NFeAnalysis } from '../src/types.ts';
+import { assert, assertEquals } from './assertions.ts';
 import type { TestCaseResult } from './engine.test.ts';
 
 interface UiTestCase {
   name: string;
   run: () => void;
-}
-
-function assert(condition: unknown, message: string): asserts condition {
-  if (!condition) throw new Error(message);
-}
-
-function assertEquals<T>(actual: T, expected: T, message?: string): void {
-  if (actual !== expected) {
-    throw new Error(message || `Esperado ${JSON.stringify(expected)}, recebido ${JSON.stringify(actual)}`);
-  }
 }
 
 function parseSamples(): NFeAnalysis[] {
