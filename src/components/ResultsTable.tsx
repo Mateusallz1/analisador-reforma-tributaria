@@ -264,7 +264,7 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
             const remainingNotes = Math.max(0, section.notes.length - visibleNotes.length);
             const isCollapsed = collapsedGroups[section.id] !== false;
             const actionableCount = section.notes.filter((note) =>
-              note.status === 'NÃO_CONFORME' || note.status === 'AUTORIZADA_COM_PENDENCIAS'
+              note.status === 'NÃO_CONFORME' || note.status === 'AUTORIZADA_COM_PENDENCIAS' || note.status === 'PENDENTE'
             ).length;
             const stats = calculateItemStats(section.notes);
             const actionableItems = stats.pendingItems + stats.nonCompliantItems;

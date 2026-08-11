@@ -23,6 +23,15 @@ export function StatusBadge({ status }: StatusBadgeProps) {
     );
   }
 
+  if (status === 'PENDENTE') {
+    return (
+      <span className="badge badge-sm gap-1.5 border-amber-200 bg-amber-50 text-[11px] font-semibold text-amber-800">
+        <span className="status status-warning status-xs" />
+        Pendente
+      </span>
+    );
+  }
+
   if (status === 'NÃO_CONFORME') {
     return (
       <span className="badge badge-sm gap-1.5 border-rose-200 bg-rose-50 text-[11px] font-semibold text-rose-800">
@@ -65,6 +74,14 @@ export function ItemStatusBadge({ status }: ItemStatusBadgeProps) {
     return (
       <span className="badge badge-xs border-amber-200 bg-amber-50 text-[10px] font-semibold text-amber-800">
         Incompleto
+      </span>
+    );
+  }
+
+  if (status === 'pendente') {
+    return (
+      <span className="badge badge-xs border-amber-200 bg-amber-50 text-[10px] font-semibold text-amber-800">
+        Pendente
       </span>
     );
   }

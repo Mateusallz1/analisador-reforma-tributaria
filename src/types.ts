@@ -6,13 +6,13 @@ export type NFeType = 'ENTRADA' | 'SAÍDA';
 
 export type DocType = 'NFe' | 'NFCe' | 'NFSe';
 
-export type ValidationStatus = 'válido' | 'inválido' | 'incompleto' | 'N/A';
+export type ValidationStatus = 'válido' | 'inválido' | 'incompleto' | 'pendente' | 'N/A';
 
 export type DataIntegrityStatus = 'VALID' | 'MISSING' | 'INVALID' | 'NOT_VERIFIABLE';
 
 export type DocumentLayout = 'NFE' | 'NFSE_ABRASF' | 'NFSE_NATIONAL';
 
-export type ComplianceStatus = 'CONFORME' | 'NÃO_CONFORME' | 'AUTORIZADA_COM_PENDENCIAS' | 'N/A';
+export type ComplianceStatus = 'CONFORME' | 'NÃO_CONFORME' | 'AUTORIZADA_COM_PENDENCIAS' | 'PENDENTE' | 'N/A';
 
 export type ItemClassificationStatus =
   | 'conforme'
@@ -20,6 +20,7 @@ export type ItemClassificationStatus =
   | 'fora_vigencia'
   | 'classificacao_invalida'
   | 'incompleto'
+  | 'pendente'
   | 'N/A';
 
 export interface CompanyInfo {
