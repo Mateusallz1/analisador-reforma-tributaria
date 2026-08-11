@@ -4,7 +4,7 @@
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "tsc --noEmit",
+    "lint": "tsc --noEmit && deno lint --rules-exclude=no-sloppy-imports src tests scripts",
     "clean": "deno run --allow-write scripts/clean.ts",
     "test": "deno run --allow-run --allow-net=127.0.0.1 --allow-read --allow-env --allow-write scripts/run-browser-tests.ts",
     "test:volume": "deno run --allow-run --allow-net=127.0.0.1 --allow-read --allow-env --allow-write scripts/run-browser-tests.ts /tests/volume.html 120000 \"Volume fiscal\"",

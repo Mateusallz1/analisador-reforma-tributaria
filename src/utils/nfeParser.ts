@@ -2,6 +2,7 @@ import { DataIntegrityStatus, DocumentLayout, NFeAnalysis, NFeType, DocType, Com
 import { formatEmissionDate, getElementsByLocalName, getTagValue, parseXmlDate } from './xmlHelpers';
 import { TAX_BASE_INFO, analyzeTaxCompliance } from './taxValidation';
 import { getTaxpayerDocumentStatus } from './taxpayerId';
+import { getXmlFingerprint } from './xmlFingerprint';
 /**
  * Formats CNPJ with mask (XX.XXX.XXX/XXXX-XX) or CPF (XXX.XXX.XXX-XX)
  */
@@ -172,7 +173,7 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
   } = taxValidation;
 
   return {
-    id: `${numeroNota}-${cnpjEmitente}-${fileName}-${Math.random().toString(36).substr(2, 4)}`,
+    id: `${docType}-${getXmlFingerprint(xmlText)}`,
     fileName,
     numeroNota,
     dataEmissao,
@@ -199,5 +200,4 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     taxBase: TAX_BASE_INFO,
   };
 }
-
 

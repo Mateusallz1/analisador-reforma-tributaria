@@ -221,7 +221,7 @@ export default function App() {
 
   const scrollToScanner = () => {
     setIsNavigationOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    globalThis.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (

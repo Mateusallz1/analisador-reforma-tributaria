@@ -1,6 +1,9 @@
 import { FileProcessingError, NFeAnalysis } from '../types';
 import { getErrorMessage } from './errors';
 import { parseNFeXml } from './nfeParser';
+import { getXmlFingerprint } from './xmlFingerprint';
+
+export { getXmlFingerprint, normalizeXmlForFingerprint } from './xmlFingerprint';
 
 export interface FileProcessingProgress {
   processed: number;
@@ -63,25 +66,6 @@ export function getZipLimitError(entries: readonly ZipEntryLimitInfo[]): string 
   return undefined;
 }
 
-export function normalizeXmlForFingerprint(xmlText: string): string {
-  return xmlText
-    .replace(/\r\n?/g, '\n')
-    .replace(/>\s+</g, '><')
-    .trim();
-}
-
-export function getXmlFingerprint(xmlText: string): string {
-  const normalizedXml = normalizeXmlForFingerprint(xmlText);
-  let hash = 14695981039346656037n;
-
-  for (let index = 0; index < normalizedXml.length; index += 1) {
-    hash ^= BigInt(normalizedXml.charCodeAt(index));
-    hash = BigInt.asUintN(64, hash * 1099511628211n);
-  }
-
-  return hash.toString(16).padStart(16, '0');
-}
-
 function duplicateError(fileName: string): FileProcessingError {
   return {
     fileName,
@@ -116,11 +100,11 @@ export async function processFiles(
     reportProgress(currentFile);
   };
 
-  const addXmlResult = async (
+  const addXmlResult = (
     xmlContent: string,
     analysisFileName: string,
     displayFileName: string,
-  ): Promise<void> => {
+  ): void => {
     const contentFingerprint = getXmlFingerprint(xmlContent);
 
     if (knownFingerprints.has(contentFingerprint)) {
@@ -166,7 +150,7 @@ export async function processFiles(
       try {
         const xmlContent = await file.text();
         if (!isCancelled()) {
-          await addXmlResult(xmlContent, file.name, file.name);
+          addXmlResult(xmlContent, file.name, file.name);
         }
       } catch (err: unknown) {
         if (!isCancelled()) {
@@ -225,7 +209,7 @@ export async function processFiles(
             const xmlContent = await zip.files[xmlPath].async('string');
             if (!isCancelled()) {
               const pureFileName = xmlPath.split('/').pop() || xmlPath;
-              await addXmlResult(xmlContent, pureFileName, file.name + ' -> ' + xmlPath);
+              addXmlResult(xmlContent, pureFileName, file.name + ' -> ' + xmlPath);
             }
           } catch (err: unknown) {
             if (!isCancelled()) {

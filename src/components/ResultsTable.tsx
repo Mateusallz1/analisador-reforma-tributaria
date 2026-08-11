@@ -267,7 +267,6 @@ export default function ResultsTable({ allResults }: ResultsTableProps) {
               note.status === 'NÃO_CONFORME' || note.status === 'AUTORIZADA_COM_PENDENCIAS' || note.status === 'PENDENTE'
             ).length;
             const stats = calculateItemStats(section.notes);
-            const actionableItems = stats.pendingItems + stats.nonCompliantItems;
             const showComplianceRate = stats.applicableItems > 1;
 
             return (

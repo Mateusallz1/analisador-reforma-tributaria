@@ -4,7 +4,7 @@ import ResultsTable from '../src/components/ResultsTable.tsx';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
 import { processFiles } from '../src/utils/fileProcessing.ts';
 import { getFilteredResultGroups } from '../src/utils/resultFilters.ts';
-import type { NFeAnalysis } from '../src/types.ts';
+import { assert } from './assertions.ts';
 
 interface VolumeMetrics {
   archiveMs: number;
@@ -40,10 +40,6 @@ const DOCUMENT_COUNT = 5000;
 const PAGE_SIZE = 100;
 const PROCESSING_BUDGET_MS = 60000;
 const INTERACTION_BUDGET_MS = 5000;
-
-function assert(condition: unknown, message: string): asserts condition {
-  if (!condition) throw new Error(message);
-}
 
 function uniqueXml(xml: string, index: number): string {
   const noteNumber = String(1_000_000 + index);
@@ -208,7 +204,7 @@ const report: BrowserTestReport = {
   results: [result],
 };
 
-window.__ENGINE_TEST_RESULTS__ = report;
+globalThis.__ENGINE_TEST_RESULTS__ = report;
 document.body.innerHTML = `<pre>${JSON.stringify(report, null, 2)}</pre>`;
 
 if (!report.passed) {

@@ -26,7 +26,7 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function getFreePort(): Promise<number> {
+function getFreePort(): number {
   const listener = Deno.listen({ hostname: HOST, port: 0 });
   const port = (listener.addr as Deno.NetAddr).port;
   listener.close();
@@ -65,7 +65,7 @@ async function findExecutable(candidates: string[], envNames: string[]): Promise
   return candidates[candidates.length - 1];
 }
 
-async function getChromeExecutable(): Promise<string> {
+function getChromeExecutable(): Promise<string> {
   if (Deno.build.os === 'windows') {
     return findExecutable([
       'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
@@ -232,8 +232,8 @@ function stopProcess(process: Deno.ChildProcess): void {
   }
 }
 
-const vitePort = await getFreePort();
-const chromeDebugPort = await getFreePort();
+const vitePort = getFreePort();
+const chromeDebugPort = getFreePort();
 const userDataDir = await Deno.makeTempDir({ prefix: 'nfe-engine-tests-' });
 const vite = startVite(vitePort);
 let chrome: Deno.ChildProcess | undefined;

@@ -24,7 +24,7 @@ const report: BrowserTestReport = {
   results,
 };
 
-window.__ENGINE_TEST_RESULTS__ = report;
+globalThis.__ENGINE_TEST_RESULTS__ = report;
 
 document.body.innerHTML = `<pre>${JSON.stringify(report, null, 2)}</pre>`;
 
