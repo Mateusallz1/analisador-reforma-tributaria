@@ -70,6 +70,21 @@ function firstItemStatus(result: NFeAnalysis): ItemClassificationStatus {
   return itemStatus;
 }
 
+function assertParseError(xml: string, expectedMessage: string): void {
+  let actualMessage = '';
+
+  try {
+    parseNFeXml(xml, 'documento-invalido.xml');
+  } catch (error) {
+    actualMessage = error instanceof Error ? error.message : String(error);
+  }
+
+  assert(
+    actualMessage.includes(expectedMessage),
+    `Erro esperado contendo "${expectedMessage}", recebido: "${actualMessage || 'nenhum erro'}"`,
+  );
+}
+
 const sampleExpectations: SampleExpectation[] = [
   {
     fileName: 'NFe_35260661585865000108_Saida_Conforme.xml',
@@ -259,7 +274,7 @@ const tests: TestCase[] = [
       assert(missingDate.itens?.some((item) => item.validationReason?.includes('Data de emissão')), 'A pendência de data deve ser explicada');
 
       const nationalNfse = parseNFeXml([
-        '<DPS><infDPS>',
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
         '<nDPS>9001</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi>',
         '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
         '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
@@ -271,6 +286,60 @@ const tests: TestCase[] = [
       assertEquals(nationalNfse.numeroNota, '9001');
       assertEquals(nationalNfse.nomeEmitente, 'Prestador Nacional');
       assertEquals(nationalNfse.nomeDestinatario, 'Tomador Nacional');
+
+      const generatedNationalNfse = parseNFeXml([
+        '<NFSe xmlns="http://www.sped.fazenda.gov.br/nfse"><infNFSe>',
+        '<nNFSe>9002</nNFSe><dhEmi>2026-05-30T10:00:00-03:00</dhEmi>',
+        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
+        '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
+        '</infNFSe></NFSe>',
+      ].join(''), 'NFSe_Nacional.xml');
+
+      assertEquals(generatedNationalNfse.docType, 'NFSe');
+      assertEquals(generatedNationalNfse.documentLayout, 'NFSE_NATIONAL');
+      assertEquals(generatedNationalNfse.numeroNota, '9002');
+    },
+  },
+  {
+    name: 'parser rejeita coincidências de tags sem uma estrutura fiscal suportada',
+    run: () => {
+      assertParseError(
+        '<Documento><ide><mod>55</mod></ide><Prestador><Rps>1</Rps></Prestador></Documento>',
+        'Formato XML não reconhecido',
+      );
+      assertParseError(
+        '<DPS><infDPS><nDPS>1</nDPS></infDPS></DPS>',
+        'Namespace inválido de NFS-e padrão nacional',
+      );
+      assertParseError(
+        '<NFe xmlns="urn:documento-nao-fiscal"><infNFe><ide><mod>55</mod></ide></infNFe></NFe>',
+        'Namespace inválido de NF-e/NFC-e',
+      );
+      assertParseError(
+        '<NFe xmlns="http://www.portalfiscal.inf.br/nfe"><infNFe><ide xmlns=""><mod>55</mod></ide></infNFe></NFe>',
+        'Namespace inválido de NF-e/NFC-e',
+      );
+      assertParseError(
+        '<NFe xmlns="http://www.portalfiscal.inf.br/nfe"><infNFe><ide><mod>57</mod></ide></infNFe></NFe>',
+        '55 (NF-e) ou 65 (NFC-e)',
+      );
+      assertParseError(
+        [
+          '<EnviarLoteRpsEnvio xmlns="http://www.abrasf.org.br/nfse.xsd">',
+          '<LoteRps><ListaRps><Rps><InfRps><Numero>1</Numero></InfRps></Rps></ListaRps></LoteRps>',
+          '</EnviarLoteRpsEnvio>',
+        ].join(''),
+        'nenhuma NFS-e emitida',
+      );
+      assertParseError(
+        [
+          '<ConsultarNfseResposta xmlns="http://www.abrasf.org.br/nfse.xsd"><ListaNfse>',
+          '<CompNfse><Nfse><InfNfse><Numero>1</Numero></InfNfse></Nfse></CompNfse>',
+          '<CompNfse><Nfse><InfNfse><Numero>2</Numero></InfNfse></Nfse></CompNfse>',
+          '</ListaNfse></ConsultarNfseResposta>',
+        ].join(''),
+        'mais de uma NFS-e ABRASF',
+      );
     },
   },
   {
