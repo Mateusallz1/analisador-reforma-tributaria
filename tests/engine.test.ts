@@ -196,6 +196,23 @@ const tests: TestCase[] = [
     },
   },
   {
+    name: 'classificação sem DF-e definido na tabela oficial permanece pendente',
+    run: () => {
+      const xml = SAMPLE_NFES[0].xmlContent
+        .replace('<CST>000</CST>', '<CST>410</CST>')
+        .replace('<cClassTrib>000001</cClassTrib>', '<cClassTrib>410011</cClassTrib>');
+      const result = parseNFeXml(xml, 'NFe_classificacao_sem_dfe.xml');
+      const item = result.itens?.[0];
+
+      assert(item, 'Item com classificação sem DF-e não foi analisado');
+      assertEquals(item.itemStatus, 'pendente');
+      assertEquals(item.validationStatus, 'pendente');
+      assertEquals(item.validationReason, 'A tabela oficial não informa DF-e aplicável para esta classificação.');
+      assertEquals(result.validationStatus, 'pendente');
+      assertEquals(result.status, 'PENDENTE');
+    },
+  },
+  {
     name: 'integridade de datas, identificadores e layout DPS é reportada sem falso positivo fiscal',
     run: () => {
       assertEquals(parseXmlDate('2026-02-29'), null);

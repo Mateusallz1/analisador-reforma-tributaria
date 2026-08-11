@@ -132,6 +132,12 @@ export function ResultsFilters({
                       Autorizada c/ pendências
                     </>
                   )}
+                  {statusFilter === 'PENDENTE' && (
+                    <>
+                      <AlertTriangle className="h-3.5 w-3.5 text-amber-500" aria-hidden="true" />
+                      Pendente
+                    </>
+                  )}
                   {statusFilter === 'NÃO_CONFORME' && (
                     <>
                       <XCircle className="h-3.5 w-3.5 text-rose-500" aria-hidden="true" />
@@ -174,6 +180,14 @@ export function ResultsFilters({
                   >
                     <AlertTriangle className="h-4 w-4 text-amber-500" aria-hidden="true" />
                     Autorizada c/ pendências
+                  </MenuButton>
+                  <MenuButton
+                    isSelected={statusFilter === 'PENDENTE'}
+                    onClick={() => { setStatusFilter('PENDENTE'); setOpenDropdown('NONE'); }}
+                    className={getMenuOptionClass(statusFilter === 'PENDENTE', true)}
+                  >
+                    <AlertTriangle className="h-4 w-4 text-amber-500" aria-hidden="true" />
+                    Pendente
                   </MenuButton>
                   <MenuButton
                     isSelected={statusFilter === 'NÃO_CONFORME'}

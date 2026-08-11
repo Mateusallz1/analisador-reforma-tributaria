@@ -199,59 +199,64 @@ export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate, em
                 }
 
                 if (!isVigente) {
-                itemValStatus = 'inválido';
-                itemStatus = 'fora_vigencia';
-                itemValReason = `Código de classificação fora da vigência original (Início: ${classFound.dataInicioVigencia || 'N/A'}, Fim: ${classFound.dataFimVigencia || 'vigência aberta'}).`;
-              } else {
-                const dfes: string[] = classFound.dfesRelacionados || [];
-                const dfeAllowed = dfes.some((d: string) => d.toUpperCase() === siglaDfe);
+                  itemValStatus = 'inválido';
+                  itemStatus = 'fora_vigencia';
+                  itemValReason = `Código de classificação fora da vigência original (Início: ${classFound.dataInicioVigencia || 'N/A'}, Fim: ${classFound.dataFimVigencia || 'vigência aberta'}).`;
+                } else {
+                  const dfes: string[] = classFound.dfesRelacionados || [];
+                  const dfeAllowed = dfes.some((d: string) => d.toUpperCase() === siglaDfe);
 
-                if (dfeAllowed) {
-                  const expectedIBS = typeof classFound.reducaoPercentualIBS === 'number' ? classFound.reducaoPercentualIBS : 0.0;
-                  const expectedCBS = typeof classFound.reducaoPercentualCBS === 'number' ? classFound.reducaoPercentualCBS : 0.0;
-
-                  let declaredIBS = 0.0;
-                  const hasIBSUF = getElementsByLocalName(det, 'gIBSUF').length > 0;
-                  if (hasIBSUF) {
-                    declaredIBS = extractPRedAliq(det, 'gIBSUF');
-                  } else {
-                    const hasIBSMun = getElementsByLocalName(det, 'gIBSMun').length > 0;
-                    if (hasIBSMun) {
-                      declaredIBS = extractPRedAliq(det, 'gIBSMun');
-                    }
-                  }
-
-                  const declaredCBS = extractPRedAliq(det, 'gCBS');
-
-                  const ibsMatch = Math.abs(declaredIBS - expectedIBS) < 0.0001;
-                  const cbsMatch = Math.abs(declaredCBS - expectedCBS) < 0.0001;
-
-                  if (ibsMatch && cbsMatch) {
-                    itemValStatus = 'válido';
+                  if (dfes.length === 0) {
+                    itemValStatus = 'pendente';
+                    itemStatus = 'pendente';
                     itemCClassTribDesc = classFound.descricaoReduzida || classFound.descricaoCompleta;
-                    itemValReason = `Código de classificação "${itemCClassTrib}" válido para o CST "${itemCst}" e permitido para ${docType}.`;
-                    itemStatus = 'conforme';
+                    itemValReason = 'A tabela oficial não informa DF-e aplicável para esta classificação.';
+                  } else if (dfeAllowed) {
+                    const expectedIBS = typeof classFound.reducaoPercentualIBS === 'number' ? classFound.reducaoPercentualIBS : 0.0;
+                    const expectedCBS = typeof classFound.reducaoPercentualCBS === 'number' ? classFound.reducaoPercentualCBS : 0.0;
+
+                    let declaredIBS = 0.0;
+                    const hasIBSUF = getElementsByLocalName(det, 'gIBSUF').length > 0;
+                    if (hasIBSUF) {
+                      declaredIBS = extractPRedAliq(det, 'gIBSUF');
+                    } else {
+                      const hasIBSMun = getElementsByLocalName(det, 'gIBSMun').length > 0;
+                      if (hasIBSMun) {
+                        declaredIBS = extractPRedAliq(det, 'gIBSMun');
+                      }
+                    }
+
+                    const declaredCBS = extractPRedAliq(det, 'gCBS');
+
+                    const ibsMatch = Math.abs(declaredIBS - expectedIBS) < 0.0001;
+                    const cbsMatch = Math.abs(declaredCBS - expectedCBS) < 0.0001;
+
+                    if (ibsMatch && cbsMatch) {
+                      itemValStatus = 'válido';
+                      itemCClassTribDesc = classFound.descricaoReduzida || classFound.descricaoCompleta;
+                      itemValReason = `Código de classificação "${itemCClassTrib}" válido para o CST "${itemCst}" e permitido para ${docType}.`;
+                      itemStatus = 'conforme';
+                    } else {
+                      itemValStatus = 'inválido';
+                      itemCClassTribDesc = classFound.descricaoReduzida || classFound.descricaoCompleta;
+
+                      const p: string[] = [];
+                      if (!ibsMatch) {
+                        p.push(`IBS declarado: ${declaredIBS}% (esperado: ${expectedIBS}%)`);
+                      }
+                      if (!cbsMatch) {
+                        p.push(`CBS declarado: ${declaredCBS}% (esperado: ${expectedCBS}%)`);
+                      }
+                      itemValReason = `Inconsistência de redução de alíquota. ${p.join(', ')}.`;
+                      itemStatus = 'nao_conforme_valor';
+                    }
                   } else {
                     itemValStatus = 'inválido';
                     itemCClassTribDesc = classFound.descricaoReduzida || classFound.descricaoCompleta;
-
-                    const p: string[] = [];
-                    if (!ibsMatch) {
-                      p.push(`IBS declarado: ${declaredIBS}% (esperado: ${expectedIBS}%)`);
-                    }
-                    if (!cbsMatch) {
-                      p.push(`CBS declarado: ${declaredCBS}% (esperado: ${expectedCBS}%)`);
-                    }
-                    itemValReason = `Inconsistência de redução de alíquota. ${p.join(', ')}.`;
-                    itemStatus = 'nao_conforme_valor';
+                    itemValReason = `Inconsistência: O código de classificação "${itemCClassTrib}" não é permitido para o tipo de documento "${docType}" (usado em documento indevido). Permitidos: ${dfes.join(', ')}.`;
+                    itemStatus = 'classificacao_invalida';
                   }
-                } else {
-                  itemValStatus = 'inválido';
-                  itemCClassTribDesc = classFound.descricaoReduzida || classFound.descricaoCompleta;
-                  itemValReason = `Inconsistência: O código de classificação "${itemCClassTrib}" não é permitido para o tipo de documento "${docType}" (usado em documento indevido). Permitidos: ${dfes.join(', ')}.`;
-                  itemStatus = 'classificacao_invalida';
                 }
-              }
               }
             } else {
               itemValStatus = 'inválido';
@@ -304,6 +309,7 @@ export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate, em
       if (itens.length > 0) {
         const hasInvalid = itens.some((item) => item.validationStatus === 'inválido');
         const hasIncomplete = itens.some((item) => item.validationStatus === 'incompleto');
+        const hasPending = itens.some((item) => item.validationStatus === 'pendente');
 
         if (hasInvalid) {
           validationStatus = 'inválido';
@@ -313,6 +319,10 @@ export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate, em
           validationStatus = 'incompleto';
           const countIncomplete = itens.filter((item) => item.validationStatus === 'incompleto').length;
           validationReason = `Encontrado(s) ${countIncomplete} item(ns) com classificação incompleta / sem grupo IBSCBS informado.`;
+        } else if (hasPending) {
+          validationStatus = 'pendente';
+          const countPending = itens.filter((item) => item.validationStatus === 'pendente').length;
+          validationReason = `Encontrado(s) ${countPending} item(ns) sem definição de DF-e aplicável na tabela oficial.`;
         } else {
           validationStatus = 'válido';
           validationReason = 'Todos os itens possuem CST e Código de Classificação (cClassTrib) válidos e consistentes para este tipo de documento.';
@@ -344,6 +354,8 @@ export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate, em
   let status: ComplianceStatus = 'N/A';
   if (contemIBSCBS && validationStatus === 'válido') {
     status = 'CONFORME';
+  } else if (contemIBSCBS && validationStatus === 'pendente') {
+    status = 'PENDENTE';
   } else if (contemIBSCBS && (validationStatus === 'inválido' || validationStatus === 'incompleto')) {
     status = temProtocolo ? 'AUTORIZADA_COM_PENDENCIAS' : 'NÃO_CONFORME';
   }
