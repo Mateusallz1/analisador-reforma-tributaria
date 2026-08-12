@@ -265,7 +265,6 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
 
   const taxValidation = analyzeTaxCompliance({
     xmlDoc,
-    xmlText,
     docType,
     emissaoDate,
     emissionDateStatus,
