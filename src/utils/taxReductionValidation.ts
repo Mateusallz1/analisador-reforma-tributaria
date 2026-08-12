@@ -370,3 +370,303 @@ export function validateTaxReductions(root: Element, input: TaxReductionInput): 
 
   return { status: 'conforme' };
 }
+
+interface NfseComponentConfig {
+  groupName: string;
+  rateName: string;
+  reductionName: string;
+  effectiveRateName: string;
+  totalPath: string[];
+  amountName: string;
+  label: string;
+  expectedReduction: DecimalValue | null;
+}
+
+function getDirectPath(parent: Element, localNames: string[]): Element | null {
+  let current: Element | null = parent;
+  for (const localName of localNames) {
+    if (!current) return null;
+    current = getDirectChild(current, localName);
+  }
+  return current;
+}
+
+function validateNfseComponent(
+  values: Element,
+  totals: Element,
+  vBC: DecimalField,
+  config: NfseComponentConfig,
+  reductor: DecimalField,
+): ComponentCheck {
+  if (!config.expectedReduction) {
+    return {
+      component: config.label,
+      status: 'pendente',
+      reason: 'percentual de redução da classificação não está disponível na base oficial.',
+    };
+  }
+
+  const group = getDirectGroup(values, config.groupName);
+  if (!group) {
+    return {
+      component: config.label,
+      status: 'incompleto',
+      reason: `grupo ${config.groupName} ausente na NFS-e emitida.`,
+    };
+  }
+
+  const baseRate = getDirectDecimal(group, config.rateName);
+  const declaredReduction = getDirectDecimal(group, config.reductionName);
+  const effectiveRate = getDirectDecimal(group, config.effectiveRateName);
+  const amount = getDirectDecimal(getDirectPath(totals, config.totalPath) || totals, config.amountName);
+  const missingFields: string[] = [];
+
+  if (baseRate.status !== 'valid') missingFields.push(config.rateName);
+  if (declaredReduction.status === 'invalid' || (config.expectedReduction && compare(config.expectedReduction, ZERO) > 0 && declaredReduction.status !== 'valid')) {
+    missingFields.push(config.reductionName);
+  }
+  if (effectiveRate.status !== 'valid') missingFields.push(config.effectiveRateName);
+  if (vBC.status !== 'valid') missingFields.push('vBC');
+  if (amount.status !== 'valid') missingFields.push(config.amountName);
+
+  if (missingFields.length > 0) {
+    return {
+      component: config.label,
+      status: 'incompleto',
+      reason: `campo(s) obrigatório(s) ausente(s) ou inválido(s): ${missingFields.join(', ')}.`,
+    };
+  }
+
+  const reduction = declaredReduction.status === 'valid' ? declaredReduction.value : ZERO;
+  if (!isWithinPercentRange(baseRate.value) || !isWithinPercentRange(reduction) || !isWithinPercentRange(effectiveRate.value)) {
+    return {
+      component: config.label,
+      status: 'nao_conforme',
+      reason: `alíquota fora do intervalo permitido: base ${decimalLabel(baseRate)}, redução ${decimalLabel(declaredReduction)}, efetiva ${decimalLabel(effectiveRate)}.`,
+    };
+  }
+
+  if (compare(reduction, config.expectedReduction) !== 0) {
+    return {
+      component: config.label,
+      status: 'nao_conforme',
+      reason: `${config.reductionName} declarado ${decimalLabel(declaredReduction)}% diverge do esperado ${config.expectedReduction.raw}%.`,
+    };
+  }
+
+  if (reductor.status !== 'valid' || !isWithinPercentRange(reductor.value)) {
+    return {
+      component: config.label,
+      status: 'incompleto',
+      reason: 'pRedutor ausente ou inválido na NFS-e emitida.',
+    };
+  }
+
+  const expectedEffective = expectedEffectiveRateWithReductor(baseRate.value, reduction, reductor.value);
+  if (compare(roundToScale(effectiveRate.value, 4), roundToScale(expectedEffective, 4)) !== 0) {
+    return {
+      component: config.label,
+      status: 'nao_conforme',
+      reason: `${config.effectiveRateName} declarado ${decimalLabel(effectiveRate)}% diverge do calculado ${formatExpected(expectedEffective, 4)}%.`,
+    };
+  }
+
+  const expectedAmount = divide(multiply(vBC.value, effectiveRate.value), ONE_HUNDRED);
+  const declaredAmount = roundToScale(amount.value, 2);
+  const calculatedAmount = roundToScale(expectedAmount, 2);
+  const amountDifference = subtract(declaredAmount, calculatedAmount);
+  const tolerance = parseDecimal('0.01').value as DecimalValue;
+  if (compare(roundToScale(amountDifference, 2), tolerance) > 0 || compare(roundToScale(amountDifference, 2), multiply(tolerance, createDecimal(-1n, 1n, '-1'))) < 0) {
+    return {
+      component: config.label,
+      status: 'nao_conforme',
+      reason: `${config.amountName} declarado ${decimalLabel(amount)} diverge do calculado em ${formatExpected(calculatedAmount, 2)}.`,
+    };
+  }
+
+  return { component: config.label, status: 'conforme' };
+}
+
+function expectedEffectiveRateWithReductor(
+  baseRate: DecimalValue,
+  reduction: DecimalValue,
+  reductor: DecimalValue,
+): DecimalValue {
+  return multiply(
+    expectedEffectiveRate(baseRate, reduction),
+    divide(subtract(ONE_HUNDRED, reductor), ONE_HUNDRED),
+  );
+}
+
+function validateNfseAggregate(totals: Element): ComponentCheck[] {
+  const gIBS = getDirectGroup(totals, 'gIBS');
+  const gIBSUFTot = gIBS ? getDirectGroup(gIBS, 'gIBSUFTot') : null;
+  const gIBSMunTot = gIBS ? getDirectGroup(gIBS, 'gIBSMunTot') : null;
+  const gCBS = getDirectGroup(totals, 'gCBS');
+  const ufAmount = gIBSUFTot ? getDirectDecimal(gIBSUFTot, 'vIBSUF') : { status: 'missing' as const };
+  const munAmount = gIBSMunTot ? getDirectDecimal(gIBSMunTot, 'vIBSMun') : { status: 'missing' as const };
+  const cbsAmount = gCBS ? getDirectDecimal(gCBS, 'vCBS') : { status: 'missing' as const };
+  const checks: ComponentCheck[] = [];
+
+  if (ufAmount.status !== 'valid') {
+    checks.push({ component: 'IBS UF', status: 'incompleto', reason: 'totalizador vIBSUF ausente ou inválido.' });
+  }
+  if (munAmount.status !== 'valid') {
+    checks.push({ component: 'IBS Município', status: 'incompleto', reason: 'totalizador vIBSMun ausente ou inválido.' });
+  }
+  if (cbsAmount.status !== 'valid') {
+    checks.push({ component: 'CBS', status: 'incompleto', reason: 'totalizador vCBS ausente ou inválido.' });
+  }
+
+  const vIBSTot = gIBS ? getDirectDecimal(gIBS, 'vIBSTot') : { status: 'missing' as const };
+  if (vIBSTot.status !== 'valid') {
+    checks.push({ component: 'IBS total', status: 'incompleto', reason: 'totalizador vIBSTot ausente ou inválido.' });
+  } else if (ufAmount.status === 'valid' && munAmount.status === 'valid') {
+    const expectedTotal = add(ufAmount.value, munAmount.value);
+    if (compare(roundToScale(vIBSTot.value, 2), roundToScale(expectedTotal, 2)) !== 0) {
+      checks.push({
+        component: 'IBS total',
+        status: 'nao_conforme',
+        reason: `vIBSTot declarado ${vIBSTot.raw} diverge da soma calculada ${formatExpected(expectedTotal, 2)}.`,
+      });
+    }
+  }
+
+  return checks;
+}
+
+function validateNfseDifferenceFields(root: Element): ComponentCheck[] {
+  const fields = [
+    {
+      parent: getDirectPath(root, ['totCIBS', 'gIBS', 'gIBSUFTot']),
+      name: 'vDifUF',
+      label: 'Diferimento IBS UF',
+    },
+    {
+      parent: getDirectPath(root, ['totCIBS', 'gIBS', 'gIBSMunTot']),
+      name: 'vDifMun',
+      label: 'Diferimento IBS Município',
+    },
+    {
+      parent: getDirectPath(root, ['totCIBS', 'gCBS']),
+      name: 'vDifCBS',
+      label: 'Diferimento CBS',
+    },
+  ];
+
+  return fields.flatMap(({ parent, name, label }): ComponentCheck[] => {
+    const value = parent ? getDirectDecimal(parent, name) : { status: 'missing' as const };
+    if (value.status !== 'valid') {
+      return [{
+        component: label,
+        status: 'incompleto' as const,
+        reason: `${name} ausente ou inválido no totalizador da NFS-e.`,
+      }];
+    }
+
+    if (compare(value.value, ZERO) !== 0) {
+      return [{
+        component: label,
+        status: 'pendente' as const,
+        reason: `${name} informado com valor ${value.raw}; o cálculo de diferimento ainda não é validado nesta etapa.`,
+      }];
+    }
+
+    return [];
+  });
+}
+
+export function validateNfseTaxReductions(root: Element, input: TaxReductionInput): TaxReductionValidationResult {
+  const values = getDirectGroup(root, 'valores');
+  const hasGeneratedValues = !!values && !!getDirectGroup(values, 'uf');
+  if (!hasGeneratedValues) {
+    return {
+      status: 'pendente',
+      reason: 'o XML contém apenas os dados declarados no DPS; os valores calculados da NFS-e emitida não foram informados.',
+    };
+  }
+
+  const totals = getDirectGroup(root, 'totCIBS');
+  if (!totals) {
+    return {
+      status: 'incompleto',
+      reason: 'grupo totCIBS ausente na NFS-e emitida.',
+    };
+  }
+
+  const adjustmentTags = ['gTribRegular', 'gTribCompraGov', 'gIBSCredPres', 'gCBSCredPres'];
+  if (hasDescendant(root, adjustmentTags)) {
+    return {
+      status: 'pendente',
+      reason: 'o XML contém grupos de tributação complementar ou ajustes ainda não calculados por esta etapa.',
+    };
+  }
+
+  const expectedIBS = getExpectedReduction(input.expectedIBS);
+  const expectedCBS = getExpectedReduction(input.expectedCBS);
+  const vBC = getDirectDecimal(values, 'vBC');
+  const reductor = getDirectDecimal(root, 'pRedutor');
+  const normalizedReductor = reductor.status === 'missing'
+    ? { status: 'valid' as const, raw: '0', value: ZERO }
+    : reductor;
+  const checks = [
+    validateNfseComponent(values, totals, vBC, {
+      groupName: 'uf',
+      rateName: 'pIBSUF',
+      reductionName: 'pRedAliqUF',
+      effectiveRateName: 'pAliqEfetUF',
+      totalPath: ['gIBS', 'gIBSUFTot'],
+      amountName: 'vIBSUF',
+      label: 'IBS UF',
+      expectedReduction: expectedIBS,
+    }, normalizedReductor),
+    validateNfseComponent(values, totals, vBC, {
+      groupName: 'mun',
+      rateName: 'pIBSMun',
+      reductionName: 'pRedAliqMun',
+      effectiveRateName: 'pAliqEfetMun',
+      totalPath: ['gIBS', 'gIBSMunTot'],
+      amountName: 'vIBSMun',
+      label: 'IBS Município',
+      expectedReduction: expectedIBS,
+    }, normalizedReductor),
+    validateNfseComponent(values, totals, vBC, {
+      groupName: 'fed',
+      rateName: 'pCBS',
+      reductionName: 'pRedAliqCBS',
+      effectiveRateName: 'pAliqEfetCBS',
+      totalPath: ['gCBS'],
+      amountName: 'vCBS',
+      label: 'CBS',
+      expectedReduction: expectedCBS,
+    }, normalizedReductor),
+    ...validateNfseDifferenceFields(root),
+    ...validateNfseAggregate(totals),
+  ];
+
+  const incomplete = checks.filter((check) => check.status === 'incompleto');
+  if (incomplete.length > 0) {
+    return {
+      status: 'incompleto',
+      reason: incomplete.map((check) => `${check.component}: ${check.reason}`).join(' '),
+    };
+  }
+
+  const pending = checks.filter((check) => check.status === 'pendente');
+  if (pending.length > 0) {
+    return {
+      status: 'pendente',
+      reason: pending.map((check) => `${check.component}: ${check.reason}`).join(' '),
+    };
+  }
+
+  const invalid = checks.filter((check) => check.status === 'nao_conforme');
+  if (invalid.length > 0) {
+    return {
+      status: 'nao_conforme',
+      reason: invalid.map((check) => `${check.component}: ${check.reason}`).join(' '),
+    };
+  }
+
+  return { status: 'conforme' };
+}
