@@ -1,6 +1,7 @@
 import { ComplianceStatus, DataIntegrityStatus, DocType, ItemClassificationStatus, ItemValidation, TaxBaseInfo, ValidationStatus } from '../types';
 import baseCompleta from '../data/base_completa.json' with { type: 'json' };
-import { extractPRedAliq, getElementsByLocalName, getTagValue, parseXmlDate } from './xmlHelpers';
+import { getElementsByLocalName, getTagValue, parseXmlDate } from './xmlHelpers';
+import { validateTaxReductions } from './taxReductionValidation';
 
 interface TaxClassificationEntry {
   codigo: string;
@@ -158,15 +159,38 @@ export function analyzeTaxCompliance({ xmlDoc, docType, emissaoDate, emissionDat
 
   if (docType === 'NFe' || docType === 'NFCe' || docType === 'NFSe') {
     let detElements: Element[] = getElementsByLocalName(xmlDoc, 'det');
+    const nfseServiceElements = docType === 'NFSe'
+      ? [
+        ...getElementsByLocalName(xmlDoc, 'Servico'),
+        ...getElementsByLocalName(xmlDoc, 'serv'),
+      ]
+      : [];
+    const nfseTaxElements = docType === 'NFSe' ? getElementsByLocalName(xmlDoc, 'IBSCBS') : [];
+    const nfseServiceDescription = docType === 'NFSe'
+      ? getTagValue(xmlDoc, 'xDescServ') || getTagValue(xmlDoc, 'Discriminacao') || getTagValue(xmlDoc, 'xServ') || getTagValue(xmlDoc, 'xDesc')
+      : null;
+    const nfseDescriptionElement = docType === 'NFSe'
+      ? getElementsByLocalName(xmlDoc, 'xDescServ')[0] ||
+        getElementsByLocalName(xmlDoc, 'Discriminacao')[0] ||
+        getElementsByLocalName(xmlDoc, 'xServ')[0] ||
+        getElementsByLocalName(xmlDoc, 'xDesc')[0]
+      : null;
+    const nfseServiceItemCount = nfseServiceElements.length > 0
+      ? nfseServiceElements.length
+      : nfseDescriptionElement?.parentElement
+        ? 1
+        : 0;
 
     if (detElements.length === 0 && docType === 'NFSe') {
-      const servicos = getElementsByLocalName(xmlDoc, 'Servico');
-      if (servicos.length > 0) {
-        detElements = servicos;
+      if (nfseServiceElements.length > 0) {
+        detElements = nfseServiceElements;
+      } else if (nfseServiceDescription) {
+        if (nfseDescriptionElement?.parentElement) {
+          detElements = [nfseDescriptionElement.parentElement];
+        }
       } else {
-        const ibscbsTags = getElementsByLocalName(xmlDoc, 'IBSCBS');
-        if (ibscbsTags.length > 0) {
-          detElements = ibscbsTags;
+        if (nfseTaxElements.length > 0) {
+          detElements = nfseTaxElements;
         }
       }
     }
@@ -187,14 +211,22 @@ export function analyzeTaxCompliance({ xmlDoc, docType, emissaoDate, emissionDat
           numeroItem = rawItemNo ? parseInt(rawItemNo, 10) : (i + 1);
           descricaoProduto = prodElement ? (getTagValue(prodElement, 'xProd') || 'Produto sem descrição') : 'Produto sem descrição';
         } else if (detLocalName.toLowerCase() === 'servico') {
-          descricaoProduto = getTagValue(det, 'Discriminacao') || getTagValue(det, 'discriminacao') || getTagValue(det, 'xServ') || 'Serviço prestado';
+          descricaoProduto = getTagValue(det, 'Discriminacao') || getTagValue(det, 'xDescServ') || getTagValue(det, 'xServ') || 'Serviço prestado';
+        } else if (detLocalName.toLowerCase() === 'serv') {
+          descricaoProduto = getTagValue(det, 'xDescServ') || getTagValue(det, 'Discriminacao') || getTagValue(det, 'xServ') || 'Serviço prestado';
         } else if (detLocalName.toLowerCase() === 'ibscbs') {
-          descricaoProduto = 'Tributação de Reforma Tributária';
+          descricaoProduto = nfseServiceDescription || 'Tributação de Reforma Tributária';
         } else {
-          descricaoProduto = getTagValue(det, 'xProd') || getTagValue(det, 'Discriminacao') || det.tagName || 'Item de serviço/produto';
+          descricaoProduto = getTagValue(det, 'xProd') || getTagValue(det, 'xDescServ') || getTagValue(det, 'Discriminacao') || getTagValue(det, 'xServ') || det.tagName || 'Item de serviço/produto';
         }
 
-        const ibscbsElement = detLocalName.toLowerCase() === 'ibscbs' ? det : getElementsByLocalName(det, 'IBSCBS')[0];
+        const nestedIbscbsElement = detLocalName.toLowerCase() === 'ibscbs' ? det : getElementsByLocalName(det, 'IBSCBS')[0];
+        const documentIbscbsElement = docType === 'NFSe' &&
+          nfseServiceItemCount === 1 &&
+          nfseTaxElements.length === 1
+          ? nfseTaxElements[0]
+          : undefined;
+        const ibscbsElement = nestedIbscbsElement || documentIbscbsElement;
         const itemHasIBSCBS = !!ibscbsElement;
 
         let itemCst: string | undefined = undefined;
@@ -257,42 +289,35 @@ export function analyzeTaxCompliance({ xmlDoc, docType, emissaoDate, emissionDat
                     itemCClassTribDesc = classFound.descricaoReduzida || classFound.descricaoCompleta;
                     itemValReason = 'A tabela oficial não informa DF-e aplicável para esta classificação.';
                   } else if (dfeAllowed) {
-                    const expectedIBS = typeof classFound.reducaoPercentualIBS === 'number' ? classFound.reducaoPercentualIBS : 0.0;
-                    const expectedCBS = typeof classFound.reducaoPercentualCBS === 'number' ? classFound.reducaoPercentualCBS : 0.0;
+                    const reductionValidation = (docType === 'NFe' || docType === 'NFCe')
+                      ? validateTaxReductions(ibscbsElement, {
+                        expectedIBS: classFound.reducaoPercentualIBS,
+                        expectedCBS: classFound.reducaoPercentualCBS,
+                      })
+                      : {
+                        status: 'pendente' as const,
+                        reason: 'A validação específica de redução para NFS-e ainda não está disponível nesta etapa.',
+                      };
 
-                    let declaredIBS = 0.0;
-                    const hasIBSUF = getElementsByLocalName(det, 'gIBSUF').length > 0;
-                    if (hasIBSUF) {
-                      declaredIBS = extractPRedAliq(det, 'gIBSUF');
-                    } else {
-                      const hasIBSMun = getElementsByLocalName(det, 'gIBSMun').length > 0;
-                      if (hasIBSMun) {
-                        declaredIBS = extractPRedAliq(det, 'gIBSMun');
-                      }
-                    }
-
-                    const declaredCBS = extractPRedAliq(det, 'gCBS');
-
-                    const ibsMatch = Math.abs(declaredIBS - expectedIBS) < 0.0001;
-                    const cbsMatch = Math.abs(declaredCBS - expectedCBS) < 0.0001;
-
-                    if (ibsMatch && cbsMatch) {
+                    if (reductionValidation.status === 'conforme') {
                       itemValStatus = 'válido';
                       itemCClassTribDesc = classFound.descricaoReduzida || classFound.descricaoCompleta;
                       itemValReason = `Código de classificação "${itemCClassTrib}" válido para o CST "${itemCst}" e permitido para ${docType}.`;
                       itemStatus = 'conforme';
+                    } else if (reductionValidation.status === 'pendente') {
+                      itemValStatus = 'pendente';
+                      itemCClassTribDesc = classFound.descricaoReduzida || classFound.descricaoCompleta;
+                      itemValReason = `Classificação encontrada, mas a apuração permanece pendente. ${reductionValidation.reason}`;
+                      itemStatus = 'pendente';
+                    } else if (reductionValidation.status === 'incompleto') {
+                      itemValStatus = 'incompleto';
+                      itemCClassTribDesc = classFound.descricaoReduzida || classFound.descricaoCompleta;
+                      itemValReason = `Dados fiscais insuficientes para confirmar a redução. ${reductionValidation.reason}`;
+                      itemStatus = 'incompleto';
                     } else {
                       itemValStatus = 'inválido';
                       itemCClassTribDesc = classFound.descricaoReduzida || classFound.descricaoCompleta;
-
-                      const p: string[] = [];
-                      if (!ibsMatch) {
-                        p.push(`IBS declarado: ${declaredIBS}% (esperado: ${expectedIBS}%)`);
-                      }
-                      if (!cbsMatch) {
-                        p.push(`CBS declarado: ${declaredCBS}% (esperado: ${expectedCBS}%)`);
-                      }
-                      itemValReason = `Inconsistência de redução de alíquota. ${p.join(', ')}.`;
+                      itemValReason = `Inconsistência fiscal comprovada. ${reductionValidation.reason}`;
                       itemStatus = 'nao_conforme_valor';
                     }
                   } else {

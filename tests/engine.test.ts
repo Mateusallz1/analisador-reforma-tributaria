@@ -11,6 +11,7 @@ import {
 } from '../src/utils/fileProcessing.ts';
 import { parseNFeXml } from '../src/utils/nfeParser.ts';
 import { parseXmlDate } from '../src/utils/xmlHelpers.ts';
+import { validateTaxReductions } from '../src/utils/taxReductionValidation.ts';
 import { getTaxpayerDocumentStatus } from '../src/utils/taxpayerId.ts';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
 import taxBaseData from '../src/data/base_completa.json';
@@ -373,6 +374,36 @@ const tests: TestCase[] = [
       assertEquals(nationalNfse.nomeEmitente, 'Prestador Nacional');
       assertEquals(nationalNfse.nomeDestinatario, 'Tomador Nacional');
 
+      const nationalNfseWithService = parseNFeXml([
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<nDPS>9003</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi>',
+        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
+        '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
+        '<serv><cServ><xDescServ>Consultoria em processos tributários</xDescServ></cServ></serv>',
+        '</infDPS></DPS>',
+      ].join(''), 'NFSe_DPS_com_servico.xml');
+
+      assertEquals(nationalNfseWithService.itens?.length, 1);
+      assertEquals(nationalNfseWithService.itens?.[0]?.descricaoProduto, 'Consultoria em processos tributários');
+      assertEquals(nationalNfseWithService.itens?.[0]?.itemStatus, 'N/A');
+
+      const nationalNfseWithServiceAndTax = parseNFeXml([
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<nDPS>9004</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi>',
+        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
+        '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
+        '<serv><cServ><xDescServ>Consultoria em processos tributários</xDescServ></cServ></serv>',
+        '<IBSCBS><CST>000</CST><cClassTrib>000001</cClassTrib></IBSCBS>',
+        '</infDPS></DPS>',
+      ].join(''), 'NFSe_DPS_com_servico_e_tributacao.xml');
+
+      assertEquals(nationalNfseWithServiceAndTax.itens?.length, 1);
+      assertEquals(nationalNfseWithServiceAndTax.itens?.[0]?.descricaoProduto, 'Consultoria em processos tributários');
+      assertEquals(nationalNfseWithServiceAndTax.itens?.[0]?.contemIBSCBS, true);
+      assertEquals(nationalNfseWithServiceAndTax.itens?.[0]?.cst, '000');
+      assertEquals(nationalNfseWithServiceAndTax.itens?.[0]?.cClassTrib, '000001');
+      assertEquals(nationalNfseWithServiceAndTax.itens?.[0]?.itemStatus, 'pendente');
+
       const generatedNationalNfse = parseNFeXml([
         '<NFSe xmlns="http://www.sped.fazenda.gov.br/nfse"><infNFSe>',
         '<nNFSe>9002</nNFSe><dhEmi>2026-05-30T10:00:00-03:00</dhEmi>',
@@ -555,6 +586,154 @@ const tests: TestCase[] = [
       assertEquals(result.itens?.[1]?.itemStatus, 'conforme');
       assertEquals(result.itens?.[0]?.numeroItem, 1);
       assertEquals(result.itens?.[1]?.numeroItem, 2);
+    },
+  },
+  {
+    name: 'redução valida pAliqEfet e valores monetários por componente',
+    run: () => {
+      const sample = SAMPLE_NFES.find((item) => item.fileName === 'NFe_43260699999999000100_Entrada_Conforme.xml');
+      assert(sample, 'Amostra com redução não encontrada');
+
+      const wrongEffectiveRate = parseNFeXml(
+        sample.xmlContent.replace('<pAliqEfet>0.0400</pAliqEfet>', '<pAliqEfet>0.0500</pAliqEfet>'),
+        'NFe_reducao_aliquota_efetiva_invalida.xml',
+      );
+      assertEquals(wrongEffectiveRate.itens?.[0]?.itemStatus, 'nao_conforme_valor');
+      assert(wrongEffectiveRate.itens?.[0]?.validationReason?.includes('IBS UF'), 'A divergência deve identificar o componente IBS UF');
+      assert(wrongEffectiveRate.itens?.[0]?.validationReason?.includes('pAliqEfet'), 'A divergência deve identificar pAliqEfet');
+
+      const wrongAmount = parseNFeXml(
+        sample.xmlContent.replace('<vCBS>10.80</vCBS>', '<vCBS>10.82</vCBS>'),
+        'NFe_reducao_valor_cbs_invalido.xml',
+      );
+      assertEquals(wrongAmount.itens?.[0]?.itemStatus, 'nao_conforme_valor');
+      assert(wrongAmount.itens?.[0]?.validationReason?.includes('CBS'), 'A divergência deve identificar o componente CBS');
+      assert(wrongAmount.itens?.[0]?.validationReason?.includes('vCBS'), 'A divergência deve identificar vCBS');
+
+      const amountAtTolerance = parseNFeXml(
+        sample.xmlContent.replace('<vCBS>10.80</vCBS>', '<vCBS>10.81</vCBS>'),
+        'NFe_reducao_valor_cbs_no_limite.xml',
+      );
+      assertEquals(amountAtTolerance.itens?.[0]?.itemStatus, 'conforme', 'Diferença de R$ 0,01 deve permanecer dentro da tolerância');
+    },
+  },
+  {
+    name: 'redução sem pRedAliq fica incompleta e ajustes não suportados ficam pendentes',
+    run: () => {
+      const sample = SAMPLE_NFES.find((item) => item.fileName === 'NFe_43260699999999000100_Entrada_Conforme.xml');
+      assert(sample, 'Amostra com redução não encontrada');
+
+      const missingReduction = parseNFeXml(
+        sample.xmlContent.replace('<pRedAliq>60.0000</pRedAliq>', ''),
+        'NFe_reducao_sem_percentual.xml',
+      );
+      assertEquals(missingReduction.itens?.[0]?.itemStatus, 'incompleto');
+      assert(missingReduction.itens?.[0]?.validationReason?.includes('pRedAliq'), 'A ausência de pRedAliq deve ser explicada');
+
+      const unsupportedAdjustment = parseNFeXml(
+        sample.xmlContent.replace('<vIBSUF>1.20</vIBSUF>', '<vDif>0.01</vDif><vIBSUF>1.20</vIBSUF>'),
+        'NFe_reducao_com_ajuste_pendente.xml',
+      );
+      assertEquals(unsupportedAdjustment.itens?.[0]?.itemStatus, 'pendente');
+      assert(unsupportedAdjustment.itens?.[0]?.validationReason?.includes('ajustes fiscais'), 'O ajuste não suportado deve ficar pendente');
+    },
+  },
+  {
+    name: 'redução valida IBS municipal e o total agregado de IBS',
+    run: () => {
+      const sample = SAMPLE_NFES.find((item) => item.fileName === 'NFe_43260699999999000100_Entrada_Conforme.xml');
+      assert(sample, 'Amostra com redução não encontrada');
+
+      const wrongMunicipalRate = parseNFeXml(
+        sample.xmlContent.replace('<pIBSMun>0.0000</pIBSMun>', '<pIBSMun>0.1000</pIBSMun>'),
+        'NFe_reducao_ibs_municipal_invalida.xml',
+      );
+      assertEquals(wrongMunicipalRate.itens?.[0]?.itemStatus, 'nao_conforme_valor');
+      assert(wrongMunicipalRate.itens?.[0]?.validationReason?.includes('IBS Município'), 'A divergência deve identificar o IBS municipal');
+
+      const wrongTotal = parseNFeXml(
+        sample.xmlContent.replace('<vIBS>1.20</vIBS>', '<vIBS>1.21</vIBS>'),
+        'NFe_reducao_total_ibs_invalido.xml',
+      );
+      assertEquals(wrongTotal.itens?.[0]?.itemStatus, 'nao_conforme_valor');
+      assert(wrongTotal.itens?.[0]?.validationReason?.includes('IBS total'), 'A divergência deve identificar o total de IBS');
+      assert(wrongTotal.itens?.[0]?.validationReason?.includes('vIBS'), 'A divergência deve identificar vIBS');
+
+      const missingTotal = parseNFeXml(
+        sample.xmlContent.replace('<vIBS>1.20</vIBS>', ''),
+        'NFe_reducao_sem_total_ibs.xml',
+      );
+      assertEquals(missingTotal.itens?.[0]?.itemStatus, 'incompleto');
+      assert(missingTotal.itens?.[0]?.validationReason?.includes('vIBS'), 'A ausência de vIBS deve ser identificada');
+    },
+  },
+  {
+    name: 'redução rejeita gRed quando a classificação não prevê redução',
+    run: () => {
+      const sample = SAMPLE_NFES.find((item) => item.fileName === 'NFe_35260661585865000108_Saida_Conforme.xml');
+      assert(sample, 'Amostra sem redução não encontrada');
+
+      const unexpectedReduction = parseNFeXml(
+        sample.xmlContent.replace(
+          '<pCBS>0.9000</pCBS>',
+          '<pCBS>0.9000</pCBS><gRed><pRedAliq>0.0000</pRedAliq><pAliqEfet>0.9000</pAliqEfet></gRed>',
+        ),
+        'NFe_reducao_nao_prevista.xml',
+      );
+      assertEquals(unexpectedReduction.itens?.[0]?.itemStatus, 'nao_conforme_valor');
+      assert(unexpectedReduction.itens?.[0]?.validationReason?.includes('sem redução prevista'), 'A redução indevida deve ser explicada');
+    },
+  },
+  {
+    name: 'redução reporta alíquota efetiva inválida e grupo obrigatório ausente',
+    run: () => {
+      const sample = SAMPLE_NFES.find((item) => item.fileName === 'NFe_43260699999999000100_Entrada_Conforme.xml');
+      assert(sample, 'Amostra com redução não encontrada');
+
+      const malformedEffectiveRate = parseNFeXml(
+        sample.xmlContent.replace('<pAliqEfet>0.0400</pAliqEfet>', '<pAliqEfet>invalido</pAliqEfet>'),
+        'NFe_reducao_aliquota_efetiva_malformada.xml',
+      );
+      assertEquals(malformedEffectiveRate.itens?.[0]?.itemStatus, 'incompleto');
+      assert(malformedEffectiveRate.itens?.[0]?.validationReason?.includes('pAliqEfet'), 'A alíquota efetiva inválida deve ser identificada');
+
+      const missingMunicipalGroup = parseNFeXml(
+        sample.xmlContent.replace(/\s*<gIBSMun>[\s\S]*?<\/gIBSMun>/, ''),
+        'NFe_reducao_sem_ibs_municipal.xml',
+      );
+      assertEquals(missingMunicipalGroup.itens?.[0]?.itemStatus, 'incompleto');
+      assert(missingMunicipalGroup.itens?.[0]?.validationReason?.includes('gIBSMun'), 'O grupo IBS municipal ausente deve ser identificado');
+    },
+  },
+  {
+    name: 'NFS-e com classificação válida permanece pendente sem validador específico',
+    run: () => {
+      const sample = SAMPLE_NFES.find((item) => item.fileName === 'NFSe_2026_Prestador_Incompleto.xml');
+      assert(sample, 'Amostra NFS-e não encontrada');
+
+      const classifiedNfse = parseNFeXml(
+        sample.xmlContent.replace(
+          '<!-- Sem CST e sem cClassTrib para simular status incompleto -->',
+          '<CST>000</CST><cClassTrib>000001</cClassTrib>',
+        ),
+        'NFSe_classificada_sem_validador_especifico.xml',
+      );
+      assertEquals(classifiedNfse.docType, 'NFSe');
+      assertEquals(classifiedNfse.itens?.[0]?.itemStatus, 'pendente');
+      assertEquals(classifiedNfse.validationStatus, 'pendente');
+      assertEquals(classifiedNfse.status, 'PENDENTE');
+      assert(classifiedNfse.itens?.[0]?.validationReason?.includes('NFS-e'), 'A pendência deve indicar o escopo NFS-e');
+    },
+  },
+  {
+    name: 'percentual de redução ausente na base oficial permanece pendente mesmo sem grupos XML',
+    run: () => {
+      const document = new DOMParser().parseFromString('<IBSCBS />', 'application/xml');
+      assert(document?.documentElement, 'Documento XML de teste não foi criado');
+
+      const validation = validateTaxReductions(document.documentElement, {});
+      assertEquals(validation.status, 'pendente');
+      assert(validation.reason?.includes('não está disponível'), 'A ausência do percentual oficial deve ser explicada');
     },
   },
   {
