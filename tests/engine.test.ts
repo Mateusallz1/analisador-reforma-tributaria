@@ -182,6 +182,92 @@ const tests: TestCase[] = [
     },
   },
   {
+    name: 'autorização exige protocolo NF-e válido e vinculado à própria chave de acesso',
+    run: () => {
+      const authorizedSample = SAMPLE_NFES.find((sample) =>
+        sample.fileName === 'NFe_43260688888888000111_Entrada_Autorizada_Pendencias.xml'
+      );
+      const invalidSample = SAMPLE_NFES.find((sample) =>
+        sample.fileName === 'NFe_35260661585865000108_Saida_ClassificacaoInvalida.xml'
+      );
+      const nfseSample = SAMPLE_NFES.find((sample) =>
+        sample.fileName === 'NFSe_2026_Prestador_Incompleto.xml'
+      );
+      assert(authorizedSample, 'Amostra NF-e autorizada não encontrada');
+      assert(invalidSample, 'Amostra NF-e inválida não encontrada');
+      assert(nfseSample, 'Amostra NFS-e incompleta não encontrada');
+
+      for (const statusCode of ['100', '120', '150']) {
+        const xml = authorizedSample.xmlContent.replace(
+          '<cStat>100</cStat>',
+          `<cStat>${statusCode}</cStat>`,
+        );
+        assertEquals(
+          parseNFeXml(xml, `NFe_cStat_${statusCode}.xml`).status,
+          'AUTORIZADA_COM_PENDENCIAS',
+          `cStat ${statusCode} deve comprovar autorização no protocolo vinculado`,
+        );
+      }
+
+      const deniedXml = authorizedSample.xmlContent.replace('<cStat>100</cStat>', '<cStat>110</cStat>');
+      assertEquals(
+        parseNFeXml(deniedXml, 'NFe_denegada.xml').status,
+        'NÃO_CONFORME',
+        'Protocolo de uso denegado não pode ser tratado como autorização',
+      );
+
+      const mismatchedKeyXml = authorizedSample.xmlContent.replace(
+        /<chNFe>(\d{43})\d<\/chNFe>/,
+        (_match, prefix: string) => `<chNFe>${prefix}5</chNFe>`,
+      );
+      assertEquals(
+        parseNFeXml(mismatchedKeyXml, 'NFe_protocolo_outra_chave.xml').status,
+        'NÃO_CONFORME',
+        'Protocolo de outra chave de acesso não pode comprovar autorização',
+      );
+
+      const malformedProtocolXml = authorizedSample.xmlContent.replace(
+        /<nProt>[^<]+<\/nProt>/,
+        '<nProt>protocolo-inválido</nProt>',
+      );
+      assertEquals(
+        parseNFeXml(malformedProtocolXml, 'NFe_protocolo_invalido.xml').status,
+        'NÃO_CONFORME',
+        'Número de protocolo inválido não pode comprovar autorização',
+      );
+
+      const looseProtocolXml = invalidSample.xmlContent.replace(
+        '</nfeProc>',
+        '<nProt>143260000045671</nProt></nfeProc>',
+      );
+      assertEquals(
+        parseNFeXml(looseProtocolXml, 'NFe_tag_protocolo_solto.xml').status,
+        'NÃO_CONFORME',
+        'Tag de protocolo fora de protNFe/infProt deve ser ignorada',
+      );
+
+      const commentedProtocolXml = invalidSample.xmlContent.replace(
+        '</nfeProc>',
+        '<!-- <nProt>143260000045671</nProt> --></nfeProc>',
+      );
+      assertEquals(
+        parseNFeXml(commentedProtocolXml, 'NFe_protocolo_em_comentario.xml').status,
+        'NÃO_CONFORME',
+        'Texto de protocolo em comentário XML deve ser ignorado',
+      );
+
+      const nfseBatchProtocolXml = nfseSample.xmlContent.replace(
+        '</LoteRps>',
+        '<Protocolo>123456789</Protocolo></LoteRps>',
+      );
+      assertEquals(
+        parseNFeXml(nfseBatchProtocolXml, 'NFSe_protocolo_lote.xml').status,
+        'NÃO_CONFORME',
+        'Protocolo de lote NFS-e não comprova autorização da nota',
+      );
+    },
+  },
+  {
     name: 'base fiscal preserva a integridade da planilha oficial de 22/06/2026',
     run: () => {
       const classifications = taxBaseData.csts.flatMap((cst) =>

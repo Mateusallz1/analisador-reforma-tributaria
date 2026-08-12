@@ -43,13 +43,14 @@ export interface TaxValidationResult {
 
 interface TaxAnalysisInput {
   xmlDoc: Document;
-  xmlText: string;
   docType: DocType;
   emissaoDate: Date | null;
   emissionDateStatus: DataIntegrityStatus;
 }
 
 const taxBase = baseCompleta as TaxBase;
+const NFE_NAMESPACE = 'http://www.portalfiscal.inf.br/nfe';
+const NFE_AUTHORIZATION_STATUS_CODES = new Set(['100', '120', '150']);
 
 export const TAX_BASE_INFO: TaxBaseInfo = {
   version: taxBase.versao || 'desconhecida',
@@ -88,19 +89,63 @@ function resolveClassification(baseCsts: TaxCstEntry[], itemCst: string, itemCCl
 
   return { currentCst };
 }
-function getDocumentHasProtocol(xmlDoc: Document, xmlText: string): boolean {
-  return ['nProt', 'Protocolo', 'protocolo', 'protNFe']
-    .some((tagName) => getElementsByLocalName(xmlDoc, tagName).length > 0) ||
-    xmlText.includes('<nProt>') ||
-    xmlText.includes('<Protocolo>') ||
-    xmlText.includes('<protocolo>');
+
+function getElementLocalName(element: Element): string {
+  return element.localName || element.tagName.split(':').pop() || element.tagName;
+}
+
+function getSingleDirectNFeChild(parent: Element, localName: string): Element | null {
+  const children = Array.from(parent.children).filter((element) =>
+    getElementLocalName(element) === localName && element.namespaceURI === NFE_NAMESPACE
+  );
+  return children.length === 1 ? children[0] : null;
+}
+
+function getDirectNFeTagValue(parent: Element, localName: string): string | null {
+  return getSingleDirectNFeChild(parent, localName)?.textContent?.trim() || null;
+}
+
+// Local XML evidence only; this does not replace signature validation or an online SEFAZ consultation.
+function hasMatchingNFeAuthorizationProtocol(xmlDoc: Document, docType: DocType): boolean {
+  if (docType !== 'NFe' && docType !== 'NFCe') return false;
+
+  const root = xmlDoc.documentElement;
+  if (
+    !root ||
+    getElementLocalName(root) !== 'nfeProc' ||
+    root.namespaceURI !== NFE_NAMESPACE
+  ) {
+    return false;
+  }
+
+  const nfeElement = getSingleDirectNFeChild(root, 'NFe');
+  const protocolElement = getSingleDirectNFeChild(root, 'protNFe');
+  if (!nfeElement || !protocolElement) return false;
+
+  const infNFeElement = getSingleDirectNFeChild(nfeElement, 'infNFe');
+  const infProtocolElement = getSingleDirectNFeChild(protocolElement, 'infProt');
+  if (!infNFeElement || !infProtocolElement) return false;
+
+  const accessKeyMatch = /^NFe(\d{44})$/.exec(infNFeElement.getAttribute('Id') || '');
+  if (!accessKeyMatch) return false;
+
+  const accessKey = accessKeyMatch[1];
+  const protocolAccessKey = getDirectNFeTagValue(infProtocolElement, 'chNFe');
+  const protocolNumber = getDirectNFeTagValue(infProtocolElement, 'nProt');
+  const statusCode = getDirectNFeTagValue(infProtocolElement, 'cStat');
+  const expectedModel = docType === 'NFCe' ? '65' : '55';
+
+  return protocolAccessKey === accessKey &&
+    accessKey.slice(20, 22) === expectedModel &&
+    /^\d{15}$/.test(protocolNumber || '') &&
+    NFE_AUTHORIZATION_STATUS_CODES.has(statusCode || '');
 }
 
 function getFallbackStatus(itemHasIBSCBS: boolean, documentHasIBSCBS: boolean): ItemClassificationStatus {
   return itemHasIBSCBS || documentHasIBSCBS ? 'incompleto' : 'N/A';
 }
 
-export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate, emissionDateStatus }: TaxAnalysisInput): TaxValidationResult {
+export function analyzeTaxCompliance({ xmlDoc, docType, emissaoDate, emissionDateStatus }: TaxAnalysisInput): TaxValidationResult {
   let contemIBSCBS = false;
   let cst: string | undefined = undefined;
   let cClassTrib: string | undefined = undefined;
@@ -350,14 +395,14 @@ export function analyzeTaxCompliance({ xmlDoc, xmlText, docType, emissaoDate, em
     }
   }
 
-  const temProtocolo = getDocumentHasProtocol(xmlDoc, xmlText);
+  const hasAuthorizationProtocol = hasMatchingNFeAuthorizationProtocol(xmlDoc, docType);
   let status: ComplianceStatus = 'N/A';
   if (contemIBSCBS && validationStatus === 'válido') {
     status = 'CONFORME';
   } else if (contemIBSCBS && validationStatus === 'pendente') {
     status = 'PENDENTE';
   } else if (contemIBSCBS && (validationStatus === 'inválido' || validationStatus === 'incompleto')) {
-    status = temProtocolo ? 'AUTORIZADA_COM_PENDENCIAS' : 'NÃO_CONFORME';
+    status = hasAuthorizationProtocol ? 'AUTORIZADA_COM_PENDENCIAS' : 'NÃO_CONFORME';
   }
 
   return {
