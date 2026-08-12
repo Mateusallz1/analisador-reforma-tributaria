@@ -727,7 +727,7 @@ const tests: TestCase[] = [
     },
   },
   {
-    name: 'NFS-e com classificação válida permanece pendente sem validador específico',
+    name: 'NFS-e com classificação válida permanece pendente sem valores calculados',
     run: () => {
       const sample = SAMPLE_NFES.find((item) => item.fileName === 'NFSe_2026_Prestador_Incompleto.xml');
       assert(sample, 'Amostra NFS-e não encontrada');
@@ -744,6 +744,87 @@ const tests: TestCase[] = [
       assertEquals(classifiedNfse.validationStatus, 'pendente');
       assertEquals(classifiedNfse.status, 'PENDENTE');
       assert(classifiedNfse.itens?.[0]?.validationReason?.includes('NFS-e'), 'A pendência deve indicar o escopo NFS-e');
+    },
+  },
+  {
+    name: 'NFS-e emitida valida valores IBS/CBS e rejeita totalizador divergente',
+    run: () => {
+      const createNationalNfse = (classification: string, values: string, totals: string) => [
+        '<NFSe xmlns="http://www.sped.fazenda.gov.br/nfse"><infNFSe>',
+        '<nNFSe>9010</nNFSe><dhProc>2026-05-29T10:00:00-03:00</dhProc>',
+        '<emit><CNPJ>04252011000110</CNPJ><xNome>Prestador Nacional</xNome></emit>',
+        '<ext:metadata xmlns:ext="urn:example"><ext:IBSCBS><ext:CST>410</ext:CST><ext:cClassTrib>410037</ext:cClassTrib></ext:IBSCBS></ext:metadata>',
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<dhEmi>2026-05-29T10:00:00-03:00</dhEmi>',
+        '<serv><cServ><cTribNac>010101</cTribNac><xDescServ>Consultoria tributária</xDescServ></cServ></serv>',
+        `<IBSCBS><valores><trib><gIBSCBS>${classification}</gIBSCBS></trib></valores></IBSCBS>`,
+        '</infDPS></DPS>',
+        `<IBSCBS>${values}${totals}</IBSCBS>`,
+        '</infNFSe></NFSe>',
+      ].join('');
+
+      const fullTaxValues = [
+        '<valores><vBC>100.00</vBC>',
+        '<uf><pIBSUF>0.1000</pIBSUF><pAliqEfetUF>0.1000</pAliqEfetUF></uf>',
+        '<mun><pIBSMun>0.0000</pIBSMun><pAliqEfetMun>0.0000</pAliqEfetMun></mun>',
+        '<fed><pCBS>0.9000</pCBS><pAliqEfetCBS>0.9000</pAliqEfetCBS></fed></valores>',
+      ].join('');
+      const fullTaxTotals = [
+        '<totCIBS><gIBS><vIBSTot>0.10</vIBSTot>',
+        '<gIBSUFTot><vDifUF>0.00</vDifUF><vIBSUF>0.10</vIBSUF></gIBSUFTot>',
+        '<gIBSMunTot><vDifMun>0.00</vDifMun><vIBSMun>0.00</vIBSMun></gIBSMunTot></gIBS>',
+        '<gCBS><vDifCBS>0.00</vDifCBS><vCBS>0.90</vCBS></gCBS></totCIBS>',
+      ].join('');
+      const conformNfse = parseNFeXml(
+        createNationalNfse('<CST>000</CST><cClassTrib>000001</cClassTrib>', fullTaxValues, fullTaxTotals),
+        'NFSe_emitida_conforme.xml',
+      );
+
+      assertEquals(conformNfse.itens?.[0]?.cst, '000');
+      assertEquals(conformNfse.itens?.[0]?.cClassTrib, '000001');
+      assertEquals(conformNfse.itens?.[0]?.itemStatus, 'conforme');
+      assertEquals(conformNfse.itens?.[0]?.validationStatus, 'válido');
+
+      const divergentNfse = parseNFeXml(
+        createNationalNfse(
+          '<CST>000</CST><cClassTrib>000001</cClassTrib>',
+          fullTaxValues,
+          fullTaxTotals.replace('<vCBS>0.90</vCBS>', '<vCBS>1.20</vCBS>'),
+        ),
+        'NFSe_emitida_totalizador_divergente.xml',
+      );
+
+      assertEquals(divergentNfse.itens?.[0]?.itemStatus, 'nao_conforme_valor');
+      assert(divergentNfse.itens?.[0]?.validationReason?.includes('vCBS'), 'A divergência do totalizador CBS deve ser explicada');
+
+      const deferredNfse = parseNFeXml(
+        createNationalNfse(
+          '<CST>000</CST><cClassTrib>000001</cClassTrib>',
+          fullTaxValues,
+          fullTaxTotals.replace('<vDifUF>0.00</vDifUF>', '<vDifUF>0.10</vDifUF>'),
+        ),
+        'NFSe_emitida_com_diferimento_pendente.xml',
+      );
+
+      assertEquals(deferredNfse.itens?.[0]?.itemStatus, 'pendente');
+      assert(deferredNfse.itens?.[0]?.validationReason?.includes('vDifUF'), 'O diferimento informado deve permanecer pendente');
+
+      const reducedNfse = parseNFeXml(
+        createNationalNfse(
+          '<CST>200</CST><cClassTrib>200038</cClassTrib>',
+          [
+            '<valores><vBC>100.00</vBC>',
+            '<uf><pIBSUF>0.1000</pIBSUF><pRedAliqUF>60.0000</pRedAliqUF><pAliqEfetUF>0.0400</pAliqEfetUF></uf>',
+            '<mun><pIBSMun>0.0000</pIBSMun><pRedAliqMun>60.0000</pRedAliqMun><pAliqEfetMun>0.0000</pAliqEfetMun></mun>',
+            '<fed><pCBS>0.9000</pCBS><pRedAliqCBS>60.0000</pRedAliqCBS><pAliqEfetCBS>0.3600</pAliqEfetCBS></fed></valores>',
+          ].join(''),
+          '<totCIBS><gIBS><vIBSTot>0.04</vIBSTot><gIBSUFTot><vDifUF>0.00</vDifUF><vIBSUF>0.04</vIBSUF></gIBSUFTot><gIBSMunTot><vDifMun>0.00</vDifMun><vIBSMun>0.00</vIBSMun></gIBSMunTot></gIBS><gCBS><vDifCBS>0.00</vDifCBS><vCBS>0.36</vCBS></gCBS></totCIBS>',
+        ),
+        'NFSe_emitida_com_reducao_conforme.xml',
+      );
+
+      assertEquals(reducedNfse.itens?.[0]?.itemStatus, 'conforme');
+      assertEquals(reducedNfse.itens?.[0]?.validationStatus, 'válido');
     },
   },
   {

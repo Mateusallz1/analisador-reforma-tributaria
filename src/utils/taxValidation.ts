@@ -1,7 +1,7 @@
 import { ComplianceStatus, DataIntegrityStatus, DocType, ItemClassificationStatus, ItemValidation, TaxBaseInfo, ValidationStatus } from '../types';
 import baseCompleta from '../data/base_completa.json' with { type: 'json' };
 import { getElementsByLocalName, getTagValue, parseXmlDate } from './xmlHelpers';
-import { validateTaxReductions } from './taxReductionValidation';
+import { validateNfseTaxReductions, validateTaxReductions } from './taxReductionValidation';
 
 interface TaxClassificationEntry {
   codigo: string;
@@ -158,6 +158,32 @@ function getNfseServiceDetails(serviceElement: Element, xmlDoc: Document): Pick<
   };
 }
 
+interface NfseTaxContext {
+  classificationElement: Element;
+  calculationElement: Element;
+}
+
+function getDirectChildrenByLocalName(parent: Element, localName: string): Element[] {
+  return Array.from(parent.children).filter((child) => getElementLocalName(child) === localName);
+}
+
+function getNfseTaxContext(xmlDoc: Document, serviceCount: number, taxElements: Element[]): NfseTaxContext | null {
+  if (serviceCount !== 1 || taxElements.length === 0) return null;
+
+  const dpsTaxElements = getElementsByLocalName(xmlDoc, 'infDPS')
+    .flatMap((element) => getDirectChildrenByLocalName(element, 'IBSCBS'));
+  const generatedElements = getElementsByLocalName(xmlDoc, 'infNFSe')
+    .flatMap((element) => getDirectChildrenByLocalName(element, 'IBSCBS'));
+  const classificationElement = dpsTaxElements.length === 1 ? dpsTaxElements[0] : null;
+
+  if (!classificationElement || generatedElements.length > 1) return null;
+
+  return {
+    classificationElement,
+    calculationElement: generatedElements[0] || classificationElement,
+  };
+}
+
 export function analyzeTaxCompliance({ xmlDoc, docType, emissaoDate, emissionDateStatus }: TaxAnalysisInput): TaxValidationResult {
   let contemIBSCBS = false;
   let cst: string | undefined = undefined;
@@ -192,6 +218,9 @@ export function analyzeTaxCompliance({ xmlDoc, docType, emissaoDate, emissionDat
       : nfseDescriptionElement?.parentElement
         ? 1
         : 0;
+    const nfseTaxContext = docType === 'NFSe'
+      ? getNfseTaxContext(xmlDoc, nfseServiceItemCount, nfseTaxElements)
+      : null;
 
     if (detElements.length === 0 && docType === 'NFSe') {
       if (nfseServiceElements.length > 0) {
@@ -235,12 +264,10 @@ export function analyzeTaxCompliance({ xmlDoc, docType, emissaoDate, emissionDat
         }
 
         const nestedIbscbsElement = detLocalName.toLowerCase() === 'ibscbs' ? det : getElementsByLocalName(det, 'IBSCBS')[0];
-        const documentIbscbsElement = docType === 'NFSe' &&
-          nfseServiceItemCount === 1 &&
-          nfseTaxElements.length === 1
-          ? nfseTaxElements[0]
-          : undefined;
-        const ibscbsElement = nestedIbscbsElement || documentIbscbsElement;
+        const ibscbsElement = nestedIbscbsElement || nfseTaxContext?.classificationElement;
+        const taxCalculationElement = docType === 'NFSe'
+          ? nfseTaxContext?.calculationElement || ibscbsElement
+          : ibscbsElement;
         const itemHasIBSCBS = !!ibscbsElement;
 
         let itemCst: string | undefined = undefined;
@@ -308,10 +335,10 @@ export function analyzeTaxCompliance({ xmlDoc, docType, emissaoDate, emissionDat
                         expectedIBS: classFound.reducaoPercentualIBS,
                         expectedCBS: classFound.reducaoPercentualCBS,
                       })
-                      : {
-                        status: 'pendente' as const,
-                        reason: 'A validação específica de redução para NFS-e ainda não está disponível nesta etapa.',
-                      };
+                      : validateNfseTaxReductions(taxCalculationElement || ibscbsElement, {
+                        expectedIBS: classFound.reducaoPercentualIBS,
+                        expectedCBS: classFound.reducaoPercentualCBS,
+                      });
 
                     if (reductionValidation.status === 'conforme') {
                       itemValStatus = 'válido';
