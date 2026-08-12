@@ -387,6 +387,27 @@ const tests: TestCase[] = [
       assertEquals(nationalNfseWithService.itens?.[0]?.descricaoProduto, 'Consultoria em processos tributários');
       assertEquals(nationalNfseWithService.itens?.[0]?.itemStatus, 'N/A');
 
+      const nationalNfseWithServiceMetadata = parseNFeXml([
+        '<NFSe xmlns="http://www.sped.fazenda.gov.br/nfse"><infNFSe>',
+        '<nNFSe>4940</nNFSe><dhProc>2026-08-11T16:56:25-03:00</dhProc>',
+        '<xTribNac>Serviços de registros públicos, cartorários e notariais.</xTribNac>',
+        '<xNBS>Serviços notariais e de registro</xNBS>',
+        '<emit><CNPJ>07649362000157</CNPJ><xNome>FOX INLINE TECHNOLOGIES LTDA</xNome></emit>',
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<dhEmi>2026-08-11T16:56:24-03:00</dhEmi>',
+        '<serv><cServ><cTribNac>210101</cTribNac><xDescServ>Venda #42455 - Servidor em Nuvem - Data da Venda 11/08/2026\n\nData em que o servico foi prestado (11/08/2026)</xDescServ><cNBS>113040000</cNBS></cServ></serv>',
+        '</infDPS></DPS>',
+        '</infNFSe></NFSe>',
+      ].join(''), 'NFSe_Nacional_servico_metadata.xml');
+
+      const nationalServiceItem = nationalNfseWithServiceMetadata.itens?.[0];
+      assert(nationalServiceItem, 'NFS-e nacional realista não gerou item de serviço');
+      assertEquals(nationalServiceItem.descricaoProduto, 'Venda #42455 - Servidor em Nuvem - Data da Venda 11/08/2026\n\nData em que o servico foi prestado (11/08/2026)');
+      assertEquals(nationalServiceItem.codigoServico, '210101');
+      assertEquals(nationalServiceItem.codigoNbs, '113040000');
+      assertEquals(nationalServiceItem.descricaoTributacaoNacional, 'Serviços de registros públicos, cartorários e notariais.');
+      assertEquals(nationalServiceItem.descricaoNbs, 'Serviços notariais e de registro');
+
       const nationalNfseWithServiceAndTax = parseNFeXml([
         '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
         '<nDPS>9004</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi>',

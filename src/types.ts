@@ -40,6 +40,10 @@ export interface TaxBaseInfo {
 export interface ItemValidation {
   numeroItem: number;
   descricaoProduto: string;
+  codigoServico?: string;
+  codigoNbs?: string;
+  descricaoTributacaoNacional?: string;
+  descricaoNbs?: string;
   contemIBSCBS: boolean;
   cst?: string;
   cClassTrib?: string;

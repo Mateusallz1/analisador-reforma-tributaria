@@ -146,6 +146,18 @@ function getFallbackStatus(itemHasIBSCBS: boolean, documentHasIBSCBS: boolean): 
   return itemHasIBSCBS || documentHasIBSCBS ? 'incompleto' : 'N/A';
 }
 
+function getNfseServiceDetails(serviceElement: Element, xmlDoc: Document): Pick<
+  ItemValidation,
+  'codigoServico' | 'codigoNbs' | 'descricaoTributacaoNacional' | 'descricaoNbs'
+> {
+  return {
+    codigoServico: getTagValue(serviceElement, 'cTribNac') || getTagValue(serviceElement, 'cServico') || undefined,
+    codigoNbs: getTagValue(serviceElement, 'cNBS') || undefined,
+    descricaoTributacaoNacional: getTagValue(xmlDoc, 'xTribNac') || getTagValue(xmlDoc, 'xTributacao') || undefined,
+    descricaoNbs: getTagValue(xmlDoc, 'xNBS') || undefined,
+  };
+}
+
 export function analyzeTaxCompliance({ xmlDoc, docType, emissaoDate, emissionDateStatus }: TaxAnalysisInput): TaxValidationResult {
   let contemIBSCBS = false;
   let cst: string | undefined = undefined;
@@ -205,6 +217,8 @@ export function analyzeTaxCompliance({ xmlDoc, docType, emissaoDate, emissionDat
         let numeroItem = i + 1;
 
         const detLocalName = det.localName || det.tagName.split(':').pop() || det.tagName;
+        const isNfseService = docType === 'NFSe' && ['servico', 'serv'].includes(detLocalName.toLowerCase());
+        const nfseServiceDetails = isNfseService ? getNfseServiceDetails(det, xmlDoc) : {};
         if (detLocalName.toLowerCase() === 'det') {
           const prodElement = getElementsByLocalName(det, 'prod')[0];
           const rawItemNo = det.getAttribute('nItem');
@@ -363,6 +377,7 @@ export function analyzeTaxCompliance({ xmlDoc, docType, emissaoDate, emissionDat
         itens.push({
           numeroItem,
           descricaoProduto,
+          ...nfseServiceDetails,
           contemIBSCBS: itemHasIBSCBS,
           cst: itemCst,
           cClassTrib: itemCClassTrib,
