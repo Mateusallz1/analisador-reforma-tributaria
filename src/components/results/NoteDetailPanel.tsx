@@ -32,11 +32,16 @@ function ServiceContext({ item }: { item: ItemValidation }) {
 
 export function NoteDetailPanel({ note, onClose }: NoteDetailPanelProps) {
   const items = note.itens || [];
+  const isNfse = note.docType === 'NFSe';
+  const detailLabel = isNfse ? 'serviços da nota' : 'itens da nota';
+  const detailTitle = isNfse ? 'Serviços da nota e classificação' : 'Itens da nota e classificações';
+  const firstColumnLabel = 'Item';
+  const descriptionColumnLabel = isNfse ? 'Serviço prestado' : 'Produto / serviço';
 
   return (
     <section
       id={`document-detail-${note.id}`}
-      aria-label={`Itens da nota ${note.numeroNota || note.fileName}`}
+      aria-label={`${detailTitle} ${note.numeroNota || note.fileName}`}
       data-detail-layout="inline"
       data-item-layer="items"
       data-detail-surface="inset"
@@ -44,14 +49,14 @@ export function NoteDetailPanel({ note, onClose }: NoteDetailPanelProps) {
     >
       <div className="flex items-center justify-between gap-3 px-6 py-3">
         <h3 className="text-[10px] font-semibold uppercase text-base-content/60">
-          Itens da nota e classificações (total: {items.length})
+          {detailTitle} (total: {items.length})
         </h3>
         <button
           type="button"
           onClick={onClose}
           className="btn btn-ghost btn-square btn-xs shrink-0"
-          aria-label="Recolher itens da nota"
-          title="Recolher itens"
+          aria-label={`Recolher ${detailLabel}`}
+          title={`Recolher ${detailLabel}`}
         >
           <X className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -67,8 +72,8 @@ export function NoteDetailPanel({ note, onClose }: NoteDetailPanelProps) {
             <table className="table table-sm w-full table-fixed text-left text-xs">
               <thead className="bg-base-200 text-[10px] font-semibold text-base-content/60">
                 <tr>
-                  <th className="w-14 px-4 py-2.5">Item</th>
-                  <th className="w-[24%] px-3 py-2.5">Produto / serviço</th>
+                  <th className="w-14 px-4 py-2.5">{firstColumnLabel}</th>
+                  <th className="w-[24%] px-3 py-2.5">{descriptionColumnLabel}</th>
                   <th className="w-20 px-3 py-2.5">CST</th>
                   <th className="w-28 px-3 py-2.5">Classificação</th>
                   <th className="w-40 px-3 py-2.5">Status</th>
@@ -104,7 +109,7 @@ export function NoteDetailPanel({ note, onClose }: NoteDetailPanelProps) {
               <div key={item.numeroItem} className="px-4 py-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-[10px] font-semibold uppercase text-base-content/50">Item {item.numeroItem}</div>
+                    <div className="text-[10px] font-semibold uppercase text-base-content/50">{firstColumnLabel} {item.numeroItem}</div>
                     <div className="mt-0.5 whitespace-pre-line text-sm font-medium text-base-content">{item.descricaoProduto}</div>
                     <ServiceContext item={item} />
                   </div>

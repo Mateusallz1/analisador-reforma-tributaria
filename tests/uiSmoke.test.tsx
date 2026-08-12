@@ -1,6 +1,7 @@
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import App from '../src/App.tsx';
+import { NoteDetailPanel } from '../src/components/results/NoteDetailPanel.tsx';
 import ResultsTable from '../src/components/ResultsTable.tsx';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
 import { parseNFeXml } from '../src/utils/nfeParser.ts';
@@ -36,6 +37,18 @@ function renderApp() {
 
   flushSync(() => {
     root.render(<App />);
+  });
+
+  return { container, root };
+}
+
+function renderNoteDetail(note: NFeAnalysis) {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+
+  flushSync(() => {
+    root.render(<NoteDetailPanel note={note} onClose={() => undefined} />);
   });
 
   return { container, root };
@@ -230,6 +243,31 @@ const tests: UiTestCase[] = [
 
         assertEquals(groupToggle.getAttribute('aria-expanded'), 'false', 'Empresa não foi recolhida');
         assertEquals(container.querySelector(groupToggle.getAttribute('aria-controls') || ''), null);
+      } finally {
+        flushSync(() => root.unmount());
+        container.remove();
+      }
+    },
+  },
+  {
+    name: 'UI usa rótulos específicos para serviços NFS-e no detalhamento',
+    run: () => {
+      const sample = SAMPLE_NFES.find((item) => item.fileName === 'NFSe_2026_Prestador_Incompleto.xml');
+      assert(sample, 'Amostra NFS-e não encontrada');
+      const note = parseNFeXml(sample.xmlContent, sample.fileName);
+      const { container, root } = renderNoteDetail(note);
+
+      try {
+        const detailPanel = container.querySelector<HTMLElement>('[data-detail-layout="inline"]');
+        assert(detailPanel, 'Detalhamento da NFS-e não foi renderizado');
+        assert(detailPanel.textContent?.includes('Serviços da nota e classificação (total: 1)'), 'Título específico de NFS-e não foi renderizado');
+        const headers = Array.from(detailPanel.querySelectorAll('th')).map((header) => header.textContent?.trim());
+        assertEquals(headers.join('|'), 'Item|Serviço prestado|CST|Classificação|Status|Diagnóstico da tabela oficial');
+        assert(detailPanel.textContent?.includes('Licenciamento de software de gestao'), 'Descrição do serviço não foi renderizada');
+        assert(
+          detailPanel.querySelector('button[aria-label="Recolher serviços da nota"]'),
+          'Ação de recolher serviços não foi identificada',
+        );
       } finally {
         flushSync(() => root.unmount());
         container.remove();
