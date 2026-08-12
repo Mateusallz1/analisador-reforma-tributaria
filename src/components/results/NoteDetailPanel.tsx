@@ -1,10 +1,33 @@
 import { X } from 'lucide-react';
-import type { NFeAnalysis } from '../../types';
+import type { ItemValidation, NFeAnalysis } from '../../types';
 import { ItemStatusBadge } from './StatusBadges';
 
 interface NoteDetailPanelProps {
   note: NFeAnalysis;
   onClose: () => void;
+}
+
+function ServiceContext({ item }: { item: ItemValidation }) {
+  const hasContext = item.codigoServico || item.codigoNbs || item.descricaoTributacaoNacional || item.descricaoNbs;
+  if (!hasContext) return null;
+
+  return (
+    <div className="mt-1 space-y-0.5 text-[10px] font-normal leading-relaxed text-base-content/55">
+      {(item.codigoServico || item.codigoNbs) && (
+        <div>
+          {item.codigoServico && `cTribNac ${item.codigoServico}`}
+          {item.codigoServico && item.codigoNbs && ' · '}
+          {item.codigoNbs && `NBS ${item.codigoNbs}`}
+        </div>
+      )}
+      {item.descricaoTributacaoNacional && (
+        <div title={item.descricaoTributacaoNacional}>Tributação nacional: {item.descricaoTributacaoNacional}</div>
+      )}
+      {item.descricaoNbs && (
+        <div title={item.descricaoNbs}>NBS: {item.descricaoNbs}</div>
+      )}
+    </div>
+  );
 }
 
 export function NoteDetailPanel({ note, onClose }: NoteDetailPanelProps) {
@@ -56,7 +79,10 @@ export function NoteDetailPanel({ note, onClose }: NoteDetailPanelProps) {
                 {items.map((item) => (
                   <tr key={item.numeroItem} className="align-top">
                     <td className="px-4 py-3 font-mono text-base-content/60">#{item.numeroItem}</td>
-                    <td className="px-3 py-3 font-medium text-base-content">{item.descricaoProduto}</td>
+                    <td className="px-3 py-3 font-medium text-base-content">
+                      <div className="whitespace-pre-line">{item.descricaoProduto}</div>
+                      <ServiceContext item={item} />
+                    </td>
                     <td className="px-3 py-3 font-mono" title={item.cstDesc}>
                       {item.contemIBSCBS && item.cst ? item.cst : 'ausente'}
                     </td>
@@ -79,7 +105,8 @@ export function NoteDetailPanel({ note, onClose }: NoteDetailPanelProps) {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="text-[10px] font-semibold uppercase text-base-content/50">Item {item.numeroItem}</div>
-                    <div className="mt-0.5 text-sm font-medium text-base-content">{item.descricaoProduto}</div>
+                    <div className="mt-0.5 whitespace-pre-line text-sm font-medium text-base-content">{item.descricaoProduto}</div>
+                    <ServiceContext item={item} />
                   </div>
                   <ItemStatusBadge status={item.itemStatus} />
                 </div>
