@@ -283,6 +283,14 @@ export const SAMPLE_NFES: SampleNfe[] = [
                 </gRed>
                 <vIBSUF>0.54</vIBSUF>
               </gIBSUF>
+              <gIBSMun>
+                <pIBSMun>0.0000</pIBSMun>
+                <gRed>
+                  <pRedAliq>40.0000</pRedAliq>
+                  <pAliqEfet>0.0000</pAliqEfet>
+                </gRed>
+                <vIBSMun>0.00</vIBSMun>
+              </gIBSMun>
               <vIBS>0.54</vIBS>
               <gCBS>
                 <pCBS>0.9000</pCBS>

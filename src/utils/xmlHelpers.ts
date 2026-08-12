@@ -48,24 +48,3 @@ export function getTagValue(parent: Element | Document | null, tagName: string):
   const element = getElementsByLocalName(parent, tagName)[0];
   return element?.textContent?.trim() || null;
 }
-
-export function extractPRedAliq(itemElement: Element, groupName: string): number {
-  if (!itemElement) return 0.0;
-
-  let group: Element | null = null;
-  group = getElementsByLocalName(itemElement, groupName)[0] || null;
-
-  if (!group) return 0.0;
-
-  let gRed: Element | null = null;
-  gRed = getElementsByLocalName(group, 'gRed')[0] || null;
-
-  if (!gRed) return 0.0;
-
-  let pRedAliqStr: string | null = null;
-  pRedAliqStr = getElementsByLocalName(gRed, 'pRedAliq')[0]?.textContent || null;
-
-  if (!pRedAliqStr) return 0.0;
-  const parsed = parseFloat(pRedAliqStr);
-  return isNaN(parsed) ? 0.0 : parsed;
-}

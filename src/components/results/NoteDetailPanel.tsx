@@ -36,7 +36,7 @@ export function NoteDetailPanel({ note, onClose }: NoteDetailPanelProps) {
 
       {items.length === 0 ? (
         <p className="border-t border-base-300 bg-base-100 px-6 py-4 text-xs text-base-content/60">
-          Nenhum item fiscal identificado.
+          {note.docType === 'NFSe' ? 'Nenhum serviço identificado.' : 'Nenhum item fiscal identificado.'}
         </p>
       ) : (
         <>
