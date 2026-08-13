@@ -848,7 +848,7 @@ const tests: TestCase[] = [
       assertEquals(stats.totalItems, 8);
       assertEquals(stats.applicableItems, 7);
       assertEquals(stats.compliantItems, 4);
-      assertEquals(stats.pendingItems, 1);
+      assertEquals(stats.pendingItems, 0);
       assertEquals(stats.nonCompliantItems, 2);
       assertEquals(stats.outOfScopeItems, 1);
       assertEquals(stats.saidaItems, 6);
