@@ -49,7 +49,7 @@ export function calculateItemStats(notes: NFeAnalysis[]): ItemStats {
         stats.compliantItems += 1;
       } else if (item.itemStatus === 'N/A' || !item.itemStatus) {
         stats.outOfScopeItems += 1;
-      } else if (item.itemStatus === 'pendente' || note.status === 'AUTORIZADA_COM_PENDENCIAS' || note.status === 'PENDENTE') {
+      } else if (item.itemStatus === 'pendente' || note.status === 'PENDENTE') {
         stats.pendingItems += 1;
       } else {
         stats.nonCompliantItems += 1;

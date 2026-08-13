@@ -841,7 +841,7 @@ const tests: TestCase[] = [
     },
   },
   {
-    name: 'KPIs reconciliam N/A fora do denominador de conformidade',
+    name: 'KPIs preservam falhas de item em notas autorizadas com pendências',
     run: () => {
       const stats = calculateItemStats(parseSamples());
 
