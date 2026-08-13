@@ -841,15 +841,15 @@ const tests: TestCase[] = [
     },
   },
   {
-    name: 'KPIs reconciliam N/A fora do denominador de conformidade',
+    name: 'KPIs preservam falhas de item em notas autorizadas com pendências',
     run: () => {
       const stats = calculateItemStats(parseSamples());
 
       assertEquals(stats.totalItems, 8);
       assertEquals(stats.applicableItems, 7);
       assertEquals(stats.compliantItems, 4);
-      assertEquals(stats.pendingItems, 1);
-      assertEquals(stats.nonCompliantItems, 2);
+      assertEquals(stats.pendingItems, 0);
+      assertEquals(stats.nonCompliantItems, 3);
       assertEquals(stats.outOfScopeItems, 1);
       assertEquals(stats.saidaItems, 6);
       assertEquals(stats.entradaItems, 2);
