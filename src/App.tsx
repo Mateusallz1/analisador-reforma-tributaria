@@ -6,6 +6,7 @@ import {
   CircleHelp,
   CircleMinus,
   Database,
+  Download,
   ExternalLink,
   FileText,
   Menu,
@@ -15,17 +16,28 @@ import {
   TriangleAlert,
   X,
 } from 'lucide-react';
-import { NFeAnalysis, FileProcessingError } from './types';
+import { AnalysisRunInfo, FileProcessingError, NFeAnalysis } from './types';
 import { parseNFeXml } from './utils/nfeParser';
 import { getXmlFingerprint, processFiles } from './utils/fileProcessing';
 import type { FileProcessingProgress } from './utils/fileProcessing';
 import { groupAnalysesByEmpresaFoco } from './utils/analysisStats';
 import { getErrorMessage } from './utils/errors';
 import { TAX_BASE_INFO } from './utils/taxValidation';
+import { buildAnalysisReport } from './utils/analysisReport';
+import { downloadBlob, generateAnalysisReportXlsx } from './utils/analysisReportXlsx';
 import UploadSection from './components/UploadSection';
 import ResultsTable from './components/ResultsTable';
 import DashboardStats from './components/DashboardStats';
 import { SAMPLE_NFES } from './data/samples';
+
+export interface AppDependencies {
+  generateReport?: typeof generateAnalysisReportXlsx;
+  downloadReport?: typeof downloadBlob;
+}
+
+interface AppProps {
+  dependencies?: AppDependencies;
+}
 
 interface ProcessingStatusProps {
   message: string;
@@ -85,12 +97,15 @@ function ProcessingStatus({ message, progress, onCancel }: ProcessingStatusProps
   );
 }
 
-export default function App() {
+export default function App({ dependencies }: AppProps = {}) {
   const [results, setResults] = useState<NFeAnalysis[]>([]);
   const [errors, setErrors] = useState<FileProcessingError[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [processingProgress, setProcessingProgress] = useState<FileProcessingProgress>();
   const [canCancelProcessing, setCanCancelProcessing] = useState(false);
+  const [analysisRun, setAnalysisRun] = useState<AnalysisRunInfo | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
   const [isNavigationOpen, setIsNavigationOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const processingAbortController = useRef<AbortController | null>(null);
@@ -119,6 +134,16 @@ export default function App() {
   }, [results]);
 
   const handleFilesSelected = async (files: File[], append = false) => {
+    if (isExporting) return;
+
+    const startedAt = new Date().toISOString();
+    setExportError(null);
+    setAnalysisRun((current) => ({
+      startedAt: append && current ? current.startedAt : startedAt,
+      completedAt: startedAt,
+      inputFileCount: append && current ? current.inputFileCount + files.length : files.length,
+      cancelled: false,
+    }));
     setIsLoading(true);
     const controller = new AbortController();
     processingAbortController.current = controller;
@@ -144,12 +169,18 @@ export default function App() {
       });
       setResults((previous) => append ? [...previous, ...parsed.results] : parsed.results);
       setErrors((previous) => append ? [...previous, ...parsed.errors] : parsed.errors);
+      setAnalysisRun((current) => current ? {
+        ...current,
+        completedAt: new Date().toISOString(),
+        cancelled: parsed.cancelled,
+      } : current);
     } catch (err: unknown) {
       const processingError = {
         fileName: 'Geral',
         error: getErrorMessage(err, 'Falha ao processar arquivos.'),
       };
       setErrors((previous) => append ? [...previous, processingError] : [processingError]);
+      setAnalysisRun((current) => current ? { ...current, completedAt: new Date().toISOString() } : current);
     } finally {
       if (processingAbortController.current === controller) {
         processingAbortController.current = null;
@@ -165,6 +196,16 @@ export default function App() {
   };
 
   const handleLoadSamples = () => {
+    if (isLoading || isExporting) return;
+
+    const startedAt = new Date().toISOString();
+    setExportError(null);
+    setAnalysisRun({
+      startedAt,
+      completedAt: startedAt,
+      inputFileCount: SAMPLE_NFES.length,
+      cancelled: false,
+    });
     processingAbortController.current = null;
     setCanCancelProcessing(false);
     setProcessingProgress(undefined);
@@ -190,10 +231,12 @@ export default function App() {
 
       setResults(sampleResults);
       setErrors(sampleErrors);
+      setAnalysisRun((current) => current ? { ...current, completedAt: new Date().toISOString() } : current);
     } catch (err: unknown) {
       setErrors([
         { fileName: 'Amostras', error: getErrorMessage(err, 'Falha ao carregar amostras.') },
       ]);
+      setAnalysisRun((current) => current ? { ...current, completedAt: new Date().toISOString() } : current);
     } finally {
       setProcessingProgress(undefined);
       setIsLoading(false);
@@ -201,8 +244,37 @@ export default function App() {
   };
 
   const handleResetAnalysis = () => {
+    if (isExporting) return;
+
     setResults([]);
     setErrors([]);
+    setAnalysisRun(null);
+    setExportError(null);
+  };
+
+  const handleExportAnalysis = async () => {
+    if (results.length === 0 || isExporting) return;
+
+    setIsExporting(true);
+    setExportError(null);
+    try {
+      const generatedAt = new Date().toISOString();
+      const run: AnalysisRunInfo = analysisRun || {
+        startedAt: generatedAt,
+        completedAt: generatedAt,
+        inputFileCount: results.length,
+        cancelled: false,
+      };
+      const report = buildAnalysisReport(results, errors, run, generatedAt);
+      const generateReport = dependencies?.generateReport || generateAnalysisReportXlsx;
+      const triggerDownload = dependencies?.downloadReport || downloadBlob;
+      const workbook = await generateReport(report);
+      triggerDownload(workbook, report.fileName);
+    } catch (err: unknown) {
+      setExportError(getErrorMessage(err, 'Não foi possível gerar o relatório da análise.'));
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const clearSingleError = (index: number) => {
@@ -210,6 +282,8 @@ export default function App() {
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isExporting) return;
+
     if (e.target.files && e.target.files.length > 0) {
       handleFilesSelected(Array.from(e.target.files), true);
       e.target.value = '';
@@ -305,6 +379,24 @@ export default function App() {
         </header>
 
         <main className={`mx-auto w-full px-3 py-5 sm:px-6 sm:py-8 ${results.length === 0 ? 'max-w-5xl' : 'max-w-[1500px]'}`}>
+        {exportError && (
+          <div id="report-error" role="alert" className="alert alert-error mb-6 items-start">
+            <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <div className="font-semibold">Relatório não gerado.</div>
+              <div className="text-sm">{exportError}</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setExportError(null)}
+              className="btn btn-ghost btn-xs btn-square"
+              title="Remover aviso do relatório"
+              aria-label="Remover aviso do relatório"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+        )}
         {errors.length > 0 && (
           <div
             id="error-list-container"
@@ -413,6 +505,7 @@ export default function App() {
               results={results}
               grouped={groupedResults}
               onReset={handleResetAnalysis}
+              isBusy={isLoading || isExporting}
             />
 
             <div className="flex flex-col gap-3 border-b border-base-300 pb-4 sm:flex-row sm:items-center sm:justify-between">
@@ -427,16 +520,28 @@ export default function App() {
                 <button
                   type="button"
                   onClick={handleLoadSamples}
-                  disabled={isLoading}
+                  disabled={isLoading || isExporting}
                   className="btn btn-ghost btn-sm"
                 >
                   <Database className="h-4 w-4 text-base-content/50" />
                   Amostras
                 </button>
 
+                <button
+                  type="button"
+                  onClick={handleExportAnalysis}
+                  disabled={isLoading || isExporting}
+                  className="btn btn-neutral btn-sm"
+                  title="Baixar o relatório da análise atual"
+                >
+                  <Download className="h-4 w-4" aria-hidden="true" />
+                  {isExporting ? 'Gerando...' : 'Baixar relatório'}
+                </button>
+
                 <label
                   htmlFor="append-nfe-file-input"
-                  className="btn btn-neutral btn-sm"
+                  aria-disabled={isLoading || isExporting}
+                  className={`btn btn-neutral btn-sm ${isLoading || isExporting ? 'pointer-events-none opacity-60' : ''}`}
                 >
                   <FileText className="h-4 w-4" />
                   Adicionar arquivos
@@ -446,6 +551,7 @@ export default function App() {
                     multiple
                     accept=".xml,.zip"
                     className="hidden"
+                    disabled={isLoading || isExporting}
                     onChange={handleFileInputChange}
                   />
                 </label>

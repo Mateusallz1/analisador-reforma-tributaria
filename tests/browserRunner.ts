@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-const results = [...await runEngineTests(), ...runUiSmokeTests()];
+const results = [...await runEngineTests(), ...await runUiSmokeTests()];
 const failed = results.filter((result) => result.status === 'failed').length;
 const report: BrowserTestReport = {
   passed: failed === 0,
