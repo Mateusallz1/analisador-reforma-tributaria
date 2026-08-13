@@ -79,6 +79,30 @@ O workflow de CI executa essa homologacao separadamente depois do gate principal
 
 O processamento roda localmente no navegador. Nenhuma variável de ambiente é necessária para analisar XMLs ou ZIPs.
 
+## Deploy em Vercel
+
+O projeto esta preparado para hospedagem estatica na Vercel:
+
+- Framework: `Vite`
+- Install command: `npm ci`
+- Build command: `npm run build`
+- Output directory: `dist`
+- Variaveis de ambiente: nenhuma
+
+Para criar um preview a partir da raiz do projeto:
+
+```bash
+npx vercel
+```
+
+Depois de validar o preview, o deploy de producao pode ser executado com:
+
+```bash
+npx vercel --prod
+```
+
+O deploy deve ser feito somente depois que `npm run check` passar localmente e a CI estiver verde.
+
 ## Atualizacao da base fiscal
 
 A planilha oficial CST/cClassTrib pode ser convertida para o contrato JSON usado pelo analisador com o script versionado:
