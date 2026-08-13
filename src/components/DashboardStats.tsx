@@ -7,9 +7,10 @@ interface DashboardStatsProps {
   results: NFeAnalysis[];
   grouped: GroupedAnalysis[];
   onReset: () => void;
+  isBusy?: boolean;
 }
 
-export default function DashboardStats({ results, grouped, onReset }: DashboardStatsProps) {
+export default function DashboardStats({ results, grouped, onReset, isBusy = false }: DashboardStatsProps) {
   const [showBaseInfo, setShowBaseInfo] = useState(false);
   const stats = calculateItemStats(results);
   const actionableItems = stats.pendingItems + stats.nonCompliantItems;
@@ -48,6 +49,7 @@ export default function DashboardStats({ results, grouped, onReset }: DashboardS
             type="button"
             onClick={onReset}
             id="btn-clear-analysis"
+            disabled={isBusy}
             className="btn btn-ghost btn-sm text-error"
           >
             <RefreshCcw className="h-3.5 w-3.5" aria-hidden="true" />

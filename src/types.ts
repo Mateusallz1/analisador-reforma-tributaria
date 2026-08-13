@@ -99,3 +99,10 @@ export interface FileProcessingError {
   error: string;
   kind?: FileProcessingErrorKind;
 }
+
+export interface AnalysisRunInfo {
+  startedAt: string;
+  completedAt: string;
+  inputFileCount: number;
+  cancelled: boolean;
+}

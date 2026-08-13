@@ -1,17 +1,19 @@
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
-import App from '../src/App.tsx';
+import App, { type AppDependencies } from '../src/App.tsx';
 import { NoteDetailPanel } from '../src/components/results/NoteDetailPanel.tsx';
 import ResultsTable from '../src/components/ResultsTable.tsx';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
 import { parseNFeXml } from '../src/utils/nfeParser.ts';
+import { downloadBlob } from '../src/utils/analysisReportXlsx.ts';
+import type { AnalysisReport } from '../src/utils/analysisReport.ts';
 import type { NFeAnalysis } from '../src/types.ts';
 import { assert, assertEquals } from './assertions.ts';
 import type { TestCaseResult } from './engine.test.ts';
 
 interface UiTestCase {
   name: string;
-  run: () => void;
+  run: () => void | Promise<void>;
 }
 
 function parseSamples(): NFeAnalysis[] {
@@ -30,16 +32,25 @@ function renderResultsTable() {
   return { container, root };
 }
 
-function renderApp() {
+function renderApp(dependencies?: AppDependencies) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
 
   flushSync(() => {
-    root.render(<App />);
+    root.render(<App dependencies={dependencies} />);
   });
 
   return { container, root };
+}
+
+async function waitForUi(condition: () => boolean, timeoutMs = 3000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (!condition() && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+
+  assert(condition(), 'A interface não concluiu a atualização esperada no tempo limite');
 }
 
 function renderNoteDetail(note: NFeAnalysis) {
@@ -126,6 +137,10 @@ const tests: UiTestCase[] = [
         flushSync(() => {
           samplesButton.click();
         });
+
+        const exportButton = container.querySelector<HTMLButtonElement>('button[title="Baixar o relatório da análise atual"]');
+        assert(exportButton, 'Ação de baixar relatório não foi renderizada após a análise');
+        assert(exportButton.textContent?.includes('Baixar relatório'), 'Ação de exportação não possui rótulo explícito');
 
         const officialSources = container.querySelector<HTMLElement>('#official-sources');
         assert(officialSources, 'Relatório não exibe as fontes oficiais usadas na classificação');
@@ -250,6 +265,193 @@ const tests: UiTestCase[] = [
     },
   },
   {
+    name: 'UI informa falha na geração do relatório e libera nova tentativa',
+    run: async () => {
+      let failGeneration = true;
+      let downloadCalls = 0;
+      let lastReport: AnalysisReport | undefined;
+      const { container, root } = renderApp({
+        generateReport: (report) => {
+          lastReport = report;
+          return failGeneration
+            ? Promise.reject(new Error('Falha simulada ao compactar o XLSX.'))
+            : Promise.resolve(new Blob(['relatorio-valido']));
+        },
+        downloadReport: () => {
+          downloadCalls += 1;
+        },
+      });
+
+      try {
+        const samplesButton = container.querySelector<HTMLButtonElement>('#btn-load-samples');
+        assert(samplesButton, 'Ação de amostras não foi encontrada');
+        flushSync(() => samplesButton.click());
+
+        const exportButton = container.querySelector<HTMLButtonElement>('button[title="Baixar o relatório da análise atual"]');
+        assert(exportButton, 'Ação de baixar relatório não foi renderizada');
+        flushSync(() => exportButton.click());
+
+        await waitForUi(() => container.textContent?.includes('Falha simulada ao compactar o XLSX.') === true);
+        assert(container.querySelector('#report-error'), 'Falha de exportação não foi exibida como erro do relatório');
+        assertEquals(container.querySelector('#error-list-container'), null, 'Falha de exportação não deve ser tratada como erro de arquivo');
+        assertEquals(downloadCalls, 0);
+        assert(!exportButton.disabled, 'Botão deve ser liberado após falha na geração');
+        assert(exportButton.textContent?.includes('Baixar relatório'), 'Botão não voltou ao estado de nova tentativa');
+
+        failGeneration = false;
+        flushSync(() => exportButton.click());
+        await waitForUi(() => downloadCalls === 1 && !container.textContent?.includes('Gerando...'));
+        assertEquals(container.querySelector('#report-error'), null, 'Aviso de falha permaneceu após retry bem-sucedido');
+        const occurrences = lastReport?.sheets.find((sheet) => sheet.name === 'Ocorrências');
+        const summary = lastReport?.sheets.find((sheet) => sheet.name === 'Resumo');
+        assert(occurrences && summary, 'Retry não gerou as abas esperadas');
+        assertEquals(occurrences.rows.length, 1, 'Falha anterior de exportação contaminou as ocorrências do retry');
+        assert(summary.rows.some((row) => row[0] === 'Status da execução' && row[1] === 'Concluída'));
+
+        failGeneration = true;
+        flushSync(() => exportButton.click());
+        await waitForUi(() => container.querySelector('#report-error') !== null);
+        const samplesAgainButton = Array.from(container.querySelectorAll<HTMLButtonElement>('button')).find(
+          (button) => button.textContent?.trim() === 'Amostras',
+        );
+        assert(samplesAgainButton, 'Ação de nova análise não foi encontrada');
+        flushSync(() => samplesAgainButton.click());
+        assertEquals(container.querySelector('#report-error'), null, 'Aviso antigo permaneceu após iniciar nova análise');
+      } finally {
+        flushSync(() => root.unmount());
+        container.remove();
+      }
+    },
+  },
+  {
+    name: 'UI bloqueia alterações enquanto o relatório é gerado',
+    run: () => {
+      const { container, root } = renderApp({
+        generateReport: () => new Promise(() => undefined),
+        downloadReport: () => undefined,
+      });
+
+      try {
+        const samplesButton = container.querySelector<HTMLButtonElement>('#btn-load-samples');
+        assert(samplesButton, 'Ação de amostras não foi encontrada');
+        flushSync(() => samplesButton.click());
+
+        const exportButton = container.querySelector<HTMLButtonElement>('button[title="Baixar o relatório da análise atual"]');
+        const clearButton = container.querySelector<HTMLButtonElement>('#btn-clear-analysis');
+        const appendInput = container.querySelector<HTMLInputElement>('#append-nfe-file-input');
+        const appendLabel = container.querySelector<HTMLLabelElement>('label[for="append-nfe-file-input"]');
+        const samplesAgainButton = Array.from(container.querySelectorAll<HTMLButtonElement>('button')).find(
+          (button) => button.textContent?.trim() === 'Amostras',
+        );
+
+        assert(exportButton && clearButton && appendInput && appendLabel && samplesAgainButton, 'Controles de análise não foram renderizados');
+        flushSync(() => exportButton.click());
+
+        assert(exportButton.disabled, 'Exportação concorrente deveria bloquear o próprio botão');
+        assert(clearButton.disabled, 'Limpeza deveria ser bloqueada durante a exportação');
+        assert(appendInput.disabled, 'Inclusão de arquivos deveria ser bloqueada durante a exportação');
+        assertEquals(appendLabel.getAttribute('aria-disabled'), 'true');
+        assert(samplesAgainButton.disabled, 'Nova carga de amostras deveria ser bloqueada durante a exportação');
+      } finally {
+        flushSync(() => root.unmount());
+        container.remove();
+      }
+    },
+  },
+  {
+    name: 'UI limpa recursos quando o disparo do download falha',
+    run: async () => {
+      const revokedUrls: string[] = [];
+      const originalCreateObjectURL = URL.createObjectURL;
+      const originalRevokeObjectURL = URL.revokeObjectURL;
+      const originalAnchorClick = HTMLAnchorElement.prototype.click;
+      URL.createObjectURL = () => 'blob:relatorio-click-falho';
+      URL.revokeObjectURL = (url) => {
+        revokedUrls.push(url);
+      };
+      HTMLAnchorElement.prototype.click = () => {
+        throw new Error('Falha simulada ao clicar no download.');
+      };
+
+      const { container, root } = renderApp({
+        generateReport: () => Promise.resolve(new Blob(['relatorio-valido'])),
+        downloadReport: downloadBlob,
+      });
+
+      try {
+        const samplesButton = container.querySelector<HTMLButtonElement>('#btn-load-samples');
+        assert(samplesButton, 'Ação de amostras não foi encontrada');
+        flushSync(() => samplesButton.click());
+
+        const exportButton = container.querySelector<HTMLButtonElement>('button[title="Baixar o relatório da análise atual"]');
+        assert(exportButton, 'Ação de baixar relatório não foi renderizada');
+        flushSync(() => exportButton.click());
+
+        await waitForUi(() => container.textContent?.includes('Falha simulada ao clicar no download.') === true);
+        assertEquals(revokedUrls.length, 1, 'ObjectURL não foi revogado após falha no clique');
+        assertEquals(revokedUrls[0], 'blob:relatorio-click-falho');
+        assertEquals(container.querySelectorAll('a[download]').length, 0, 'Âncora temporária permaneceu no DOM');
+        assert(!exportButton.disabled, 'Botão deve ser liberado após falha no clique');
+      } finally {
+        URL.createObjectURL = originalCreateObjectURL;
+        URL.revokeObjectURL = originalRevokeObjectURL;
+        HTMLAnchorElement.prototype.click = originalAnchorClick;
+        flushSync(() => root.unmount());
+        container.remove();
+      }
+    },
+  },
+  {
+    name: 'UI informa falha no download e permite repetir a exportação',
+    run: async () => {
+      let shouldFail = true;
+      let createObjectUrlCalls = 0;
+      const revokedUrls: string[] = [];
+      const originalCreateObjectURL = URL.createObjectURL;
+      const originalRevokeObjectURL = URL.revokeObjectURL;
+      URL.createObjectURL = () => {
+        createObjectUrlCalls += 1;
+        if (shouldFail) throw new Error('Falha simulada ao iniciar o download.');
+        return `blob:relatorio-teste-${createObjectUrlCalls}`;
+      };
+      URL.revokeObjectURL = (url) => {
+        revokedUrls.push(url);
+      };
+
+      const { container, root } = renderApp({
+        generateReport: () => Promise.resolve(new Blob(['relatorio-valido'])),
+        downloadReport: downloadBlob,
+      });
+
+      try {
+        const samplesButton = container.querySelector<HTMLButtonElement>('#btn-load-samples');
+        assert(samplesButton, 'Ação de amostras não foi encontrada');
+        flushSync(() => samplesButton.click());
+
+        const exportButton = container.querySelector<HTMLButtonElement>('button[title="Baixar o relatório da análise atual"]');
+        assert(exportButton, 'Ação de baixar relatório não foi renderizada');
+        flushSync(() => exportButton.click());
+
+        await waitForUi(() => container.textContent?.includes('Falha simulada ao iniciar o download.') === true);
+        assertEquals(createObjectUrlCalls, 1);
+        assert(!exportButton.disabled, 'Botão deve ser liberado após falha no download');
+
+        shouldFail = false;
+        flushSync(() => exportButton.click());
+        await waitForUi(() => createObjectUrlCalls === 2 && !container.textContent?.includes('Gerando...'));
+        assert(!container.textContent?.includes('Gerando...'), 'Botão permaneceu preso no estado de geração');
+        await new Promise((resolve) => setTimeout(resolve, 1100));
+        assertEquals(revokedUrls.length, 1);
+        assertEquals(revokedUrls[0], 'blob:relatorio-teste-2');
+      } finally {
+        URL.createObjectURL = originalCreateObjectURL;
+        URL.revokeObjectURL = originalRevokeObjectURL;
+        flushSync(() => root.unmount());
+        container.remove();
+      }
+    },
+  },
+  {
     name: 'UI usa rótulos específicos para serviços NFS-e no detalhamento',
     run: () => {
       const sample = SAMPLE_NFES.find((item) => item.fileName === 'NFSe_2026_Prestador_Incompleto.xml');
@@ -276,17 +478,19 @@ const tests: UiTestCase[] = [
   },
 ];
 
-export function runUiSmokeTests(): TestCaseResult[] {
-  return tests.map((test) => {
+export async function runUiSmokeTests(): Promise<TestCaseResult[]> {
+  const results: TestCaseResult[] = [];
+  for (const test of tests) {
     try {
-      test.run();
-      return { name: test.name, status: 'passed' };
+      await test.run();
+      results.push({ name: test.name, status: 'passed' });
     } catch (error) {
-      return {
+      results.push({
         name: test.name,
         status: 'failed',
         message: error instanceof Error ? error.message : String(error),
-      };
+      });
     }
-  });
+  }
+  return results;
 }

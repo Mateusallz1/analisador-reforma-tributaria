@@ -13,6 +13,8 @@ import { parseNFeXml } from '../src/utils/nfeParser.ts';
 import { parseXmlDate } from '../src/utils/xmlHelpers.ts';
 import { validateTaxReductions } from '../src/utils/taxReductionValidation.ts';
 import { getTaxpayerDocumentStatus } from '../src/utils/taxpayerId.ts';
+import { buildAnalysisReport } from '../src/utils/analysisReport.ts';
+import { generateAnalysisReportXlsx } from '../src/utils/analysisReportXlsx.ts';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
 import taxBaseData from '../src/data/base_completa.json';
 import { ComplianceStatus, DocType, ItemClassificationStatus, NFeAnalysis, NFeType, ValidationStatus } from '../src/types.ts';
@@ -886,6 +888,49 @@ const tests: TestCase[] = [
       assertEquals(filtered.activeGroups[0].empresaFoco.cnpj, '61585865000108');
       assertEquals(filtered.matchesWithoutCnpj.length, 1);
       assertEquals(filtered.matchesWithoutCnpj[0].fileName, 'NFe_SemEmitente_DadosIncompletos.xml');
+    },
+  },
+  {
+    name: 'relatório resume a execução e separa documentos de achados',
+    run: async () => {
+      const results = parseSamples();
+      const report = buildAnalysisReport(results, [], {
+        startedAt: '2026-08-13T10:00:00.000Z',
+        completedAt: '2026-08-13T10:01:00.000Z',
+        inputFileCount: results.length,
+        cancelled: false,
+      }, '2026-08-13T10:02:00.000Z');
+      const summary = report.sheets.find((sheet) => sheet.name === 'Resumo');
+      const documents = report.sheets.find((sheet) => sheet.name === 'Documentos');
+      const findings = report.sheets.find((sheet) => sheet.name === 'Achados');
+
+      assert(summary && documents && findings, 'Relatório não criou as abas esperadas');
+      assertEquals(documents.rows.length, results.length + 1);
+      assert(findings.rows.length > 1, 'Relatório deveria conter achados das amostras');
+      assert(summary.rows.some((row) => row[0] === 'Documentos analisados' && row[1] === results.length));
+
+      const fallbackReport = buildAnalysisReport([{
+        ...results[0],
+        itens: [],
+      }], [], {
+        startedAt: '2026-08-13T10:00:00.000Z',
+        completedAt: '2026-08-13T10:01:00.000Z',
+        inputFileCount: 1,
+        cancelled: false,
+      }, '2026-08-13T10:02:00.000Z');
+      const fallbackDocuments = fallbackReport.sheets.find((sheet) => sheet.name === 'Documentos');
+      assert(fallbackDocuments, 'Relatório fallback não criou a aba de documentos');
+      assertEquals(fallbackDocuments.rows[1][11], 1, 'Contagem fallback diverge dos KPIs de itens');
+
+      const workbook = await generateAnalysisReportXlsx(report);
+      assert(workbook.size > 0, 'Arquivo XLSX vazio');
+      const { default: JSZip } = await import('jszip');
+      const archive = await JSZip.loadAsync(workbook);
+      assert(archive.file('xl/workbook.xml'), 'Workbook XML ausente');
+      assert(archive.file('xl/worksheets/sheet3.xml'), 'Aba de achados ausente');
+      const findingsXml = await archive.file('xl/worksheets/sheet3.xml')!.async('string');
+      assert(findingsXml.includes('Diagnóstico'), 'Cabeçalho de diagnóstico ausente');
+      assert(!findingsXml.includes('<f>'), 'Relatório não deve criar fórmulas a partir dos dados XML');
     },
   },];
 

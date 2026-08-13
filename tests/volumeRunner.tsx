@@ -4,6 +4,8 @@ import ResultsTable from '../src/components/ResultsTable.tsx';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
 import { processFiles } from '../src/utils/fileProcessing.ts';
 import { getFilteredResultGroups } from '../src/utils/resultFilters.ts';
+import { buildAnalysisReport } from '../src/utils/analysisReport.ts';
+import { generateAnalysisReportXlsx } from '../src/utils/analysisReportXlsx.ts';
 import { assert } from './assertions.ts';
 
 interface VolumeMetrics {
@@ -13,7 +15,9 @@ interface VolumeMetrics {
   firstExpansionMs: number;
   secondPageMs: number;
   filterMs: number;
+  reportMs: number;
   archiveBytes: number;
+  reportBytes: number;
   heapDeltaBytes?: number;
 }
 
@@ -68,6 +72,8 @@ function formatMetrics(metrics: VolumeMetrics): string {
     `expansão ${metrics.firstExpansionMs} ms`,
     `segunda página ${metrics.secondPageMs} ms`,
     `filtro ${metrics.filterMs} ms`,
+    `relatório ${metrics.reportMs} ms`,
+    `XLSX ${(metrics.reportBytes / (1024 * 1024)).toFixed(1)} MB`,
     heap,
   ].join('; ');
 }
@@ -163,6 +169,26 @@ async function runVolumeTest(): Promise<VolumeMetrics> {
     assert(filterMs <= INTERACTION_BUDGET_MS, `Filtro excedeu ${INTERACTION_BUDGET_MS} ms: ${filterMs} ms`);
     assert(uniqueFilter.totalProcessedFiltered === 1, `Busca única retornou ${uniqueFilter.totalProcessedFiltered} itens`);
 
+    const reportStart = performance.now();
+    const report = buildAnalysisReport(
+      processed.results,
+      processed.errors,
+      {
+        startedAt: new Date(0).toISOString(),
+        completedAt: new Date().toISOString(),
+        inputFileCount: DOCUMENT_COUNT,
+        cancelled: false,
+      },
+      new Date().toISOString(),
+    );
+    const reportBlob = await generateAnalysisReportXlsx(report);
+    const reportMs = elapsedSince(reportStart);
+    assert(reportBlob.size > 0, 'Relatório de volume gerou um arquivo vazio');
+    const reportArchive = await JSZip.loadAsync(reportBlob);
+    assert(reportArchive.file('xl/workbook.xml'), 'Relatório de volume não contém workbook.xml');
+    assert(reportArchive.file('xl/worksheets/sheet3.xml'), 'Relatório de volume não contém a aba de achados');
+    assert(reportMs <= PROCESSING_BUDGET_MS, `Geração do relatório excedeu ${PROCESSING_BUDGET_MS} ms: ${reportMs} ms`);
+
     const finalHeap = heapSize();
     return {
       archiveMs,
@@ -171,7 +197,9 @@ async function runVolumeTest(): Promise<VolumeMetrics> {
       firstExpansionMs,
       secondPageMs,
       filterMs,
+      reportMs,
       archiveBytes: archiveBlob.size,
+      reportBytes: reportBlob.size,
       heapDeltaBytes: initialHeap === undefined || finalHeap === undefined ? undefined : finalHeap - initialHeap,
     };
   } finally {
