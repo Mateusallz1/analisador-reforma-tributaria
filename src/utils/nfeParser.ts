@@ -22,7 +22,94 @@ function getElementLocalName(element: Element): string {
 }
 
 function getDirectChildrenByLocalName(parent: Element, localName: string): Element[] {
-  return Array.from(parent.children).filter((element) => getElementLocalName(element) === localName);
+  const expectedName = localName.toLowerCase();
+  return Array.from(parent.children).filter((element) => getElementLocalName(element).toLowerCase() === expectedName);
+}
+
+function getDirectChildByLocalNames(parent: Element, localNames: string[]): Element | null {
+  for (const localName of localNames) {
+    const child = getDirectChildrenByLocalName(parent, localName)[0];
+    if (child) return child;
+  }
+
+  return null;
+}
+
+function getDirectTagValue(parent: Element | null, localNames: string[]): string | null {
+  if (!parent) return null;
+
+  for (const localName of localNames) {
+    const value = getDirectChildrenByLocalName(parent, localName)[0]?.textContent?.trim();
+    if (value) return value;
+  }
+
+  return null;
+}
+
+function findNationalNfsePartyElement(dataElement: Element, localNames: string[]): Element | null {
+  let current = dataElement;
+
+  // Generated national NFS-e files can wrap the DPS inside infNFSe.
+  for (let depth = 0; depth < 3; depth += 1) {
+    const partyElement = getDirectChildByLocalNames(current, localNames);
+    if (partyElement) return partyElement;
+
+    const nestedContainer = getDirectChildByLocalNames(current, ['DPS', 'infDPS']);
+    if (!nestedContainer) return null;
+    current = nestedContainer;
+  }
+
+  return null;
+}
+
+function findAbrasfNfsePartyElement(dataElement: Element, localNames: string[]): Element | null {
+  const directParty = getDirectChildByLocalNames(dataElement, localNames);
+  if (directParty) return directParty;
+
+  const declarationElement = getDirectChildByLocalNames(dataElement, ['DeclaracaoPrestacaoServico']);
+  const declarationDataElement = declarationElement
+    ? getDirectChildByLocalNames(declarationElement, ['InfDeclaracaoPrestacaoServico'])
+    : getDirectChildByLocalNames(dataElement, ['InfDeclaracaoPrestacaoServico']);
+
+  return declarationDataElement
+    ? getDirectChildByLocalNames(declarationDataElement, localNames)
+    : null;
+}
+
+interface NfseParty {
+  document: string;
+  name: string;
+}
+
+function readNfseParty(
+  dataElement: Element,
+  documentLayout: DocumentLayout,
+  role: 'prestador' | 'tomador',
+): NfseParty | null {
+  const isPrestador = role === 'prestador';
+  const partyNames = documentLayout === 'NFSE_ABRASF'
+    ? isPrestador
+      ? ['PrestadorServico', 'Prestador', 'IdentificacaoPrestador']
+      : ['TomadorServico', 'Tomador', 'IdentificacaoTomador']
+    : isPrestador
+      ? ['emit', 'infEmit']
+      : ['toma', 'Tomador', 'infToma'];
+  const partyElement = documentLayout === 'NFSE_NATIONAL'
+    ? findNationalNfsePartyElement(dataElement, partyNames)
+    : findAbrasfNfsePartyElement(dataElement, partyNames);
+
+  if (!partyElement) return null;
+
+  const identityElement = getDirectChildByLocalNames(partyElement, [
+    isPrestador ? 'IdentificacaoPrestador' : 'IdentificacaoTomador',
+  ]);
+  const documentSource = identityElement || partyElement;
+  const document = getDirectTagValue(documentSource, ['CNPJ', 'Cnpj', 'CPF', 'Cpf']) ||
+    getDirectTagValue(partyElement, ['CNPJ', 'Cnpj', 'CPF', 'Cpf']) || '';
+  const name = getDirectTagValue(partyElement, ['RazaoSocial', 'razaoSocial', 'xNome', 'xRazao']) ||
+    getDirectTagValue(identityElement, ['RazaoSocial', 'razaoSocial', 'xNome', 'xRazao']) || '';
+
+  return { document, name };
 }
 
 function getSingleDirectChild(parent: Element, localName: string, context: string): Element {
@@ -187,34 +274,13 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     tipoNota = 'SAÍDA';
     operationStatus = 'VALID';
 
-    const prestadorElement = getElementsByLocalName(dataElement, 'PrestadorServico')[0] ||
-      getElementsByLocalName(dataElement, 'Prestador')[0] ||
-      getElementsByLocalName(dataElement, 'IdentificacaoPrestador')[0] ||
-      getElementsByLocalName(dataElement, 'emit')[0] ||
-      getElementsByLocalName(dataElement, 'infEmit')[0];
-    if (prestadorElement) {
-      cnpjEmitente = getTagValue(prestadorElement, 'CNPJ') || getTagValue(prestadorElement, 'Cnpj') || getTagValue(prestadorElement, 'CPF') || getTagValue(prestadorElement, 'Cpf') || '';
-      nomeEmitente = getTagValue(prestadorElement, 'RazaoSocial') || getTagValue(prestadorElement, 'razaoSocial') ||
-        getTagValue(prestadorElement, 'xNome') || getTagValue(prestadorElement, 'xRazao') || 'Prestador de Serviço';
-    } else {
-      cnpjEmitente = getTagValue(dataElement, 'CNPJ') || getTagValue(dataElement, 'Cnpj') || '';
-      nomeEmitente = getTagValue(dataElement, 'RazaoSocial') || getTagValue(dataElement, 'razaoSocial') ||
-        'Prestador Não Identificado';
-    }
+    const prestador = readNfseParty(dataElement, documentLayout, 'prestador');
+    cnpjEmitente = prestador?.document || '';
+    nomeEmitente = prestador?.name || 'Prestador Não Identificado';
 
-    const tomadorElement = getElementsByLocalName(dataElement, 'TomadorServico')[0] ||
-      getElementsByLocalName(dataElement, 'Tomador')[0] ||
-      getElementsByLocalName(dataElement, 'IdentificacaoTomador')[0] ||
-      getElementsByLocalName(dataElement, 'toma')[0] ||
-      getElementsByLocalName(dataElement, 'infToma')[0];
-    if (tomadorElement) {
-      cnpjDestinatario = getTagValue(tomadorElement, 'CNPJ') || getTagValue(tomadorElement, 'Cnpj') || getTagValue(tomadorElement, 'CPF') || getTagValue(tomadorElement, 'Cpf') || '';
-      nomeDestinatario = getTagValue(tomadorElement, 'RazaoSocial') || getTagValue(tomadorElement, 'razaoSocial') ||
-        getTagValue(tomadorElement, 'xNome') || getTagValue(tomadorElement, 'xRazao') || 'Tomador de Serviço';
-    } else {
-      cnpjDestinatario = getTagValue(dataElement, 'CNPJ') || '';
-      nomeDestinatario = 'Tomador Não Identificado';
-    }
+    const tomador = readNfseParty(dataElement, documentLayout, 'tomador');
+    cnpjDestinatario = tomador?.document || '';
+    nomeDestinatario = tomador?.name || 'Tomador Não Identificado';
   } else {
     // Standard NF-e and NFC-e
     if (!ideElement) {

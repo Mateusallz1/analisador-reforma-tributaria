@@ -378,6 +378,42 @@ const tests: TestCase[] = [
       assertEquals(nationalNfse.nomeEmitente, 'Prestador Nacional');
       assertEquals(nationalNfse.nomeDestinatario, 'Tomador Nacional');
 
+      const nationalNfseWithoutRecipient = parseNFeXml([
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<nDPS>9005</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi>',
+        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador sem tomador</xRazao></emit>',
+        '</infDPS></DPS>',
+      ].join(''), 'NFSe_DPS_sem_tomador.xml');
+
+      assertEquals(nationalNfseWithoutRecipient.cnpjEmitente, '04252011000110');
+      assertEquals(nationalNfseWithoutRecipient.cnpjDestinatario, '');
+      assertEquals(nationalNfseWithoutRecipient.nomeDestinatario, 'Tomador Não Identificado');
+
+      const abrasfNfse = parseNFeXml(
+        SAMPLE_NFES.find((sample) => sample.fileName === 'NFSe_2026_Prestador_Incompleto.xml')?.xmlContent || '',
+        'NFSe_ABRASF.xml',
+      );
+
+      assertEquals(abrasfNfse.cnpjEmitente, '55666777000188');
+      assertEquals(abrasfNfse.cnpjDestinatario, '44555666000188');
+      assertEquals(abrasfNfse.nomeDestinatario, 'Delta Agropecuaria e Cooperativa S.A.');
+
+      const nestedAbrasfNfse = parseNFeXml([
+        '<ConsultarNfseResposta xmlns="http://www.abrasf.org.br/nfse.xsd"><ListaNfse>',
+        '<CompNfse><Nfse><InfNfse><Numero>9006</Numero><DataEmissao>2026-08-14</DataEmissao>',
+        '<PrestadorServico><IdentificacaoPrestador><Cnpj>11222333000144</Cnpj></IdentificacaoPrestador>',
+        '<RazaoSocial>Prestador aninhado</RazaoSocial></PrestadorServico>',
+        '<DeclaracaoPrestacaoServico><InfDeclaracaoPrestacaoServico>',
+        '<Tomador><IdentificacaoTomador><Cpf>52998224725</Cpf></IdentificacaoTomador>',
+        '<RazaoSocial>Tomador aninhado</RazaoSocial></Tomador>',
+        '</InfDeclaracaoPrestacaoServico></DeclaracaoPrestacaoServico>',
+        '</InfNfse></Nfse></CompNfse></ListaNfse></ConsultarNfseResposta>',
+      ].join(''), 'NFSe_ABRASF_partes_aninhadas.xml');
+
+      assertEquals(nestedAbrasfNfse.cnpjEmitente, '11222333000144');
+      assertEquals(nestedAbrasfNfse.cnpjDestinatario, '52998224725');
+      assertEquals(nestedAbrasfNfse.nomeDestinatario, 'Tomador aninhado');
+
       const nationalNfseWithService = parseNFeXml([
         '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
         '<nDPS>9003</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi>',
