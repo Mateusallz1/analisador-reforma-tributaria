@@ -14,6 +14,8 @@ interface TestReport {
 }
 
 const HOST = '127.0.0.1';
+const MAX_PROCESS_OUTPUT_LENGTH = 8000;
+const VITE_SHUTDOWN_TIMEOUT_MS = 2000;
 const pagePath = Deno.args[0] || '/tests/browser.html';
 const reportTimeoutMs = Number(Deno.args[1] || 20000);
 const suiteLabel = Deno.args[2] || 'Engine fiscal';
@@ -33,18 +35,136 @@ function getFreePort(): number {
   return port;
 }
 
-async function waitForHttp(url: string, timeoutMs = 30000): Promise<void> {
+interface ViteDiagnostics {
+  status: Deno.CommandStatus;
+  stdout: string;
+  stderr: string;
+}
+
+interface ProcessOutputCapture {
+  readonly text: string;
+  readonly complete: Promise<string>;
+}
+
+interface ViteProcess {
+  process: Deno.ChildProcess;
+  stdout: ProcessOutputCapture;
+  stderr: ProcessOutputCapture;
+  diagnostics: Promise<ViteDiagnostics>;
+}
+
+async function readProcessOutput(
+  stream: ReadableStream<Uint8Array> | null,
+  onUpdate: (output: string) => void,
+): Promise<string> {
+  if (!stream) {
+    onUpdate('');
+    return '';
+  }
+
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let output = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      output += decoder.decode(value, { stream: true });
+      if (output.length > MAX_PROCESS_OUTPUT_LENGTH) {
+        output = output.slice(-MAX_PROCESS_OUTPUT_LENGTH);
+      }
+      onUpdate(output);
+    }
+
+    output += decoder.decode();
+    onUpdate(output);
+    return output;
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+function createProcessOutputCapture(stream: ReadableStream<Uint8Array> | null): ProcessOutputCapture {
+  let currentOutput = '';
+  const complete = readProcessOutput(stream, (output) => {
+    currentOutput = output;
+  });
+
+  return {
+    get text() {
+      return currentOutput;
+    },
+    complete,
+  };
+}
+
+function formatViteDiagnostics(diagnostics: ViteDiagnostics | null, vite: ViteProcess): string {
+  const stdout = diagnostics?.stdout ?? vite.stdout.text;
+  const stderr = diagnostics?.stderr ?? vite.stderr.text;
+  const output = [
+    stdout.trim() ? `stdout:\n${stdout.trim()}` : '',
+    stderr.trim() ? `stderr:\n${stderr.trim()}` : '',
+  ].filter(Boolean).join('\n');
+  const outputMessage = output || 'O Vite não produziu saída.';
+  const statusMessage = diagnostics
+    ? `Vite encerrou com código ${diagnostics.status.code}.`
+    : 'Vite não encerrou após o sinal de término.';
+
+  return `${statusMessage}\n${outputMessage}`;
+}
+
+async function probeHttp(url: string, timeoutMs: number): Promise<'ready' | 'retry'> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    return response.ok ? 'ready' : 'retry';
+  } catch {
+    return 'retry';
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function stopVite(vite: ViteProcess): Promise<ViteDiagnostics | null> {
+  stopProcess(vite.process);
+  const diagnostics = await Promise.race([
+    vite.diagnostics,
+    delay(VITE_SHUTDOWN_TIMEOUT_MS).then(() => null),
+  ]);
+
+  if (diagnostics) return diagnostics;
+
+  try {
+    vite.process.kill('SIGKILL');
+  } catch {
+    // Process already exited or cannot receive a second termination signal.
+  }
+
+  return null;
+}
+
+async function waitForHttp(url: string, vite: ViteProcess, timeoutMs = 30000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    try {
-      const response = await fetch(url);
-      if (response.ok) return;
-    } catch {
-      // Server not ready yet.
+    const result = await Promise.race([
+      probeHttp(url, Math.max(1, Math.min(250, deadline - Date.now()))).then((kind) => ({ kind } as const)),
+      vite.diagnostics.then((diagnostics) => ({ kind: 'exit' as const, diagnostics })),
+    ]);
+
+    if (result.kind === 'ready') return;
+    if (result.kind === 'exit') {
+      throw new Error(`Servidor de testes não iniciou.\n${formatViteDiagnostics(result.diagnostics, vite)}`);
     }
-    await delay(250);
+
+    await delay(Math.max(1, Math.min(250, deadline - Date.now())));
   }
-  throw new Error(`Servidor de testes não respondeu em ${url}`);
+
+  const diagnostics = await stopVite(vite);
+  throw new Error(`Servidor de testes não respondeu em ${url} após ${timeoutMs} ms.\n${formatViteDiagnostics(diagnostics, vite)}`);
 }
 
 async function findExecutable(candidates: string[], envNames: string[]): Promise<string> {
@@ -93,12 +213,29 @@ function getChromeExecutable(): Promise<string> {
   ], ['CHROME_PATH', 'CHROME']);
 }
 
-function startVite(port: number): Deno.ChildProcess {
-  return new Deno.Command('node', {
+function startVite(port: number): ViteProcess {
+  const process = new Deno.Command('node', {
     args: ['node_modules/vite/bin/vite.js', '--host', HOST, '--port', String(port), '--strictPort'],
     stdout: 'piped',
     stderr: 'piped',
   }).spawn();
+  const stdout = createProcessOutputCapture(process.stdout);
+  const stderr = createProcessOutputCapture(process.stderr);
+
+  return {
+    process,
+    stdout,
+    stderr,
+    diagnostics: Promise.all([
+      process.status,
+      stdout.complete,
+      stderr.complete,
+    ]).then(([status, stdoutOutput, stderrOutput]) => ({
+      status,
+      stdout: stdoutOutput,
+      stderr: stderrOutput,
+    })),
+  };
 }
 
 function startChrome(chromeExecutable: string, debugPort: number, userDataDir: string): Deno.ChildProcess {
@@ -241,7 +378,7 @@ let client: CdpClient | undefined;
 
 try {
   const testUrl = `http://${HOST}:${vitePort}${pagePath}`;
-  await waitForHttp(testUrl);
+  await waitForHttp(testUrl, vite);
 
   const chromeExecutable = await getChromeExecutable();
   chrome = startChrome(chromeExecutable, chromeDebugPort, userDataDir);
@@ -267,6 +404,6 @@ try {
 } finally {
   client?.close();
   if (chrome) stopProcess(chrome);
-  stopProcess(vite);
+  stopProcess(vite.process);
   await Deno.remove(userDataDir, { recursive: true }).catch(() => undefined);
 }
