@@ -61,6 +61,7 @@ export interface NFeAnalysis {
   dataEmissao: string;
   emissionDateStatus: DataIntegrityStatus;
   tipoNota: NFeType;
+  operationStatus: DataIntegrityStatus;
   docType: DocType;
   documentLayout: DocumentLayout;
   cnpjEmitente: string;
@@ -105,4 +106,5 @@ export interface AnalysisRunInfo {
   completedAt: string;
   inputFileCount: number;
   cancelled: boolean;
+  inputUncompressedSizeBytes?: number;
 }

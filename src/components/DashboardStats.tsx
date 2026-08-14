@@ -32,6 +32,12 @@ export default function DashboardStats({ results, grouped, onReset, isBusy = fal
           <span><strong className="text-base-content">{grouped.length}</strong> empresas</span>
           <span className="text-base-content/20" aria-hidden="true">|</span>
           <span>{stats.saidaItems} saída / {stats.entradaItems} entrada</span>
+          {stats.unknownOperationItems > 0 && (
+            <>
+              <span className="text-base-content/20" aria-hidden="true">|</span>
+              <span className="font-medium text-warning">{stats.unknownOperationItems} operação não verificada</span>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-1">
           <button

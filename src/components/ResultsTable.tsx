@@ -84,15 +84,22 @@ function EmissionSummary({ note }: { note: NFeAnalysis }) {
 }
 function OperationSummary({ note }: { note: NFeAnalysis }) {
   const isSaida = note.tipoNota === 'SAÍDA';
+  const operationIsValid = note.operationStatus === 'VALID';
+  const operationLabel = operationIsValid ? (isSaida ? 'Saída' : 'Entrada') : 'Não verificada';
 
   return (
-    <span className="inline-flex w-fit items-center gap-1 text-xs font-medium text-base-content/70">
-      {isSaida ? (
+    <span
+      className={`inline-flex w-fit items-center gap-1 text-xs font-medium ${operationIsValid ? 'text-base-content/70' : 'text-warning'}`}
+      title={operationIsValid ? undefined : note.operationStatus === 'MISSING' ? 'tpNF não informado' : 'tpNF inválido'}
+    >
+      {!operationIsValid ? (
+        <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+      ) : isSaida ? (
         <ArrowUpRight className="h-3 w-3 opacity-60" aria-hidden="true" />
       ) : (
         <ArrowDownLeft className="h-3 w-3 opacity-60" aria-hidden="true" />
       )}
-      {isSaida ? 'Saída' : 'Entrada'}
+      {operationLabel}
     </span>
   );
 }
@@ -145,7 +152,9 @@ function MobileDocumentRow({ note, selected, onSelect }: { note: NFeAnalysis; se
       <span className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
         <span>
           <span className="block text-[10px] font-semibold uppercase text-base-content/50">Operação</span>
-          <span className="mt-0.5 block font-medium">{note.tipoNota === 'SAÍDA' ? 'Saída' : 'Entrada'}</span>
+            <span className={`mt-0.5 block font-medium ${note.operationStatus === 'VALID' ? '' : 'text-warning'}`}>
+              {note.operationStatus === 'VALID' ? note.tipoNota === 'SAÍDA' ? 'Saída' : 'Entrada' : 'Não verificada'}
+            </span>
         </span>
         <span>
           <span className="block text-[10px] font-semibold uppercase text-base-content/50">Emissão</span>
