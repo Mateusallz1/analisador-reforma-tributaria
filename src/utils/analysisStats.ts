@@ -9,6 +9,7 @@ export interface ItemStats {
   outOfScopeItems: number;
   entradaItems: number;
   saidaItems: number;
+  unknownOperationItems: number;
   complianceRate: number;
 }
 
@@ -29,6 +30,7 @@ export function calculateItemStats(notes: NFeAnalysis[]): ItemStats {
     outOfScopeItems: 0,
     entradaItems: 0,
     saidaItems: 0,
+    unknownOperationItems: 0,
   };
 
   notes.forEach((note) => {
@@ -39,7 +41,9 @@ export function calculateItemStats(notes: NFeAnalysis[]): ItemStats {
     noteItems.forEach((item) => {
       stats.totalItems += 1;
 
-      if (note.tipoNota === 'SAÍDA') {
+      if (note.operationStatus !== 'VALID') {
+        stats.unknownOperationItems += 1;
+      } else if (note.tipoNota === 'SAÍDA') {
         stats.saidaItems += 1;
       } else {
         stats.entradaItems += 1;

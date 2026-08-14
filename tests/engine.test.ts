@@ -3,6 +3,8 @@ import { getFilteredResultGroups } from '../src/utils/resultFilters.ts';
 import {
   getXmlFingerprint,
   getZipLimitError,
+  MAX_ANALYSIS_UNCOMPRESSED_SIZE_BYTES,
+  MAX_ANALYSIS_XML_FILES,
   MAX_XML_FILE_SIZE_BYTES,
   MAX_ZIP_FILE_SIZE_BYTES,
   MAX_ZIP_UNCOMPRESSED_SIZE_BYTES,
@@ -547,6 +549,81 @@ const tests: TestCase[] = [
       assertEquals(parsed.results.length, 1);
       assertEquals(parsed.errors.length, 0);
       assertEquals(parsed.results[0].fileName, 'nota.xml');
+    },
+  },
+  {
+    name: 'parser não presume saída quando tpNF está ausente ou inválido',
+    run: () => {
+      const source = SAMPLE_NFES[0].xmlContent;
+      const missing = parseNFeXml(
+        source.replace('<tpNF>1</tpNF>', ''),
+        'NFe_tpNF_ausente.xml',
+      );
+      const invalid = parseNFeXml(
+        source.replace('<tpNF>1</tpNF>', '<tpNF>9</tpNF>'),
+        'NFe_tpNF_invalido.xml',
+      );
+
+      assertEquals(missing.operationStatus, 'MISSING');
+      assertEquals(missing.empresaFoco.cnpj, '');
+      assertEquals(invalid.operationStatus, 'INVALID');
+      assertEquals(invalid.empresaFoco.cnpj, '');
+    },
+  },
+  {
+    name: 'processamento respeita os limites acumulados da análise',
+    run: async () => {
+      const atDocumentLimit = await processFiles(
+        [new File([SAMPLE_NFES[0].xmlContent], 'limite.xml', { type: 'text/xml' })],
+        { existingResultCount: MAX_ANALYSIS_XML_FILES },
+      );
+
+      assertEquals(atDocumentLimit.results.length, 0);
+      assertEquals(atDocumentLimit.errors.length, 1);
+      assert(atDocumentLimit.errors[0].error.includes('limite total de ' + MAX_ANALYSIS_XML_FILES));
+
+      const atSizeLimit = await processFiles(
+        [new File([SAMPLE_NFES[0].xmlContent], 'tamanho.xml', { type: 'text/xml' })],
+        { existingUncompressedSizeBytes: MAX_ANALYSIS_UNCOMPRESSED_SIZE_BYTES },
+      );
+
+      assertEquals(atSizeLimit.results.length, 0);
+      assertEquals(atSizeLimit.errors.length, 1);
+      assert(atSizeLimit.errors[0].error.includes('limite total de 100 MB'));
+
+      const { default: JSZip } = await import('jszip');
+      const makeZip = async (fileName: string): Promise<File> => {
+        const zip = new JSZip();
+        zip.file(fileName, SAMPLE_NFES[0].xmlContent.replace('<nNF>845187</nNF>', '<nNF>990001</nNF>'));
+        const content = await zip.generateAsync({ type: 'uint8array' });
+        return new File([content], fileName + '.zip', { type: 'application/zip' });
+      };
+      const acrossZips = await processFiles(
+        [await makeZip('primeiro.xml'), await makeZip('segundo.xml')],
+        { existingResultCount: MAX_ANALYSIS_XML_FILES - 1 },
+      );
+
+      assertEquals(acrossZips.results.length, 1);
+      assertEquals(acrossZips.errors.length, 1);
+      assert(acrossZips.errors[0].error.includes('limite total de ' + MAX_ANALYSIS_XML_FILES));
+
+      const oversizedBatch = Array.from(
+        { length: 11 },
+        (_, index) => new File(
+          [SAMPLE_NFES[0].xmlContent.replace('<nNF>845187</nNF>', `<nNF>${845187 + index}</nNF>`)],
+          `lote-${index}.xml`,
+          { type: 'text/xml' },
+        ),
+      );
+      oversizedBatch.forEach((file) => {
+        Object.defineProperty(file, 'size', { value: MAX_ANALYSIS_UNCOMPRESSED_SIZE_BYTES / 10 });
+      });
+
+      const bySize = await processFiles(oversizedBatch);
+
+      assertEquals(bySize.results.length, 10);
+      assertEquals(bySize.errors.length, 1);
+      assert(bySize.errors[0].error.includes('limite total de 100 MB'));
     },
   },
   {

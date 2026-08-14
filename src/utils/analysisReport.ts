@@ -50,6 +50,12 @@ function documentTypeLabel(note: NFeAnalysis): string {
   return `${note.docType} (${note.documentLayout})`;
 }
 
+function operationLabel(note: NFeAnalysis): string {
+  if (note.operationStatus === 'MISSING') return 'Operação não informada';
+  if (note.operationStatus === 'INVALID') return 'Operação inválida';
+  return note.tipoNota === 'SAÍDA' ? 'Saída' : 'Entrada';
+}
+
 function itemLabel(item: ItemValidation): string {
   return item.numeroItem > 0 ? `#${item.numeroItem}` : 'Documento';
 }
@@ -154,7 +160,7 @@ function documentRows(results: NFeAnalysis[]): ReportCell[][] {
       note.empresaFoco.cnpj || 'Não identificado',
       documentTypeLabel(note),
       note.numeroNota || 'Não informado',
-      note.tipoNota === 'SAÍDA' ? 'Saída' : 'Entrada',
+      operationLabel(note),
       note.dataEmissao || 'Não informada',
       note.nomeEmitente || 'Não informado',
       note.cnpjEmitente || 'Não informado',
@@ -194,7 +200,7 @@ function findingRows(results: NFeAnalysis[]): ReportCell[][] {
         note.empresaFoco.nome,
         documentTypeLabel(note),
         note.numeroNota || 'Não informado',
-        note.tipoNota === 'SAÍDA' ? 'Saída' : 'Entrada',
+        operationLabel(note),
         note.dataEmissao || 'Não informada',
         itemLabel(item),
         item.descricaoProduto || 'Não informado',

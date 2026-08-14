@@ -137,12 +137,16 @@ export default function App({ dependencies }: AppProps = {}) {
     if (isExporting) return;
 
     const startedAt = new Date().toISOString();
+    const existingUncompressedSizeBytes = append
+      ? analysisRun?.inputUncompressedSizeBytes || 0
+      : 0;
     setExportError(null);
     setAnalysisRun((current) => ({
       startedAt: append && current ? current.startedAt : startedAt,
       completedAt: startedAt,
       inputFileCount: append && current ? current.inputFileCount + files.length : files.length,
       cancelled: false,
+      inputUncompressedSizeBytes: existingUncompressedSizeBytes,
     }));
     setIsLoading(true);
     const controller = new AbortController();
@@ -164,6 +168,8 @@ export default function App({ dependencies }: AppProps = {}) {
         : undefined;
       const parsed = await processFiles(files, {
         existingFingerprints,
+        existingResultCount: append ? results.length : 0,
+        existingUncompressedSizeBytes,
         signal: controller.signal,
         onProgress: setProcessingProgress,
       });
@@ -173,6 +179,7 @@ export default function App({ dependencies }: AppProps = {}) {
         ...current,
         completedAt: new Date().toISOString(),
         cancelled: parsed.cancelled,
+        inputUncompressedSizeBytes: parsed.uncompressedSizeBytes,
       } : current);
     } catch (err: unknown) {
       const processingError = {
@@ -205,6 +212,10 @@ export default function App({ dependencies }: AppProps = {}) {
       completedAt: startedAt,
       inputFileCount: SAMPLE_NFES.length,
       cancelled: false,
+      inputUncompressedSizeBytes: SAMPLE_NFES.reduce(
+        (total, sample) => total + new Blob([sample.xmlContent]).size,
+        0,
+      ),
     });
     processingAbortController.current = null;
     setCanCancelProcessing(false);

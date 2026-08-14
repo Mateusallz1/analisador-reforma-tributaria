@@ -13,6 +13,8 @@ export interface FileProcessingProgress {
 
 export interface ProcessFilesOptions {
   existingFingerprints?: ReadonlySet<string>;
+  existingResultCount?: number;
+  existingUncompressedSizeBytes?: number;
   signal?: AbortSignal;
   onProgress?: (progress: FileProcessingProgress) => void;
 }
@@ -21,12 +23,15 @@ export interface ProcessFilesResult {
   results: NFeAnalysis[];
   errors: FileProcessingError[];
   cancelled: boolean;
+  uncompressedSizeBytes: number;
 }
 
 export const MAX_XML_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 export const MAX_ZIP_FILE_SIZE_BYTES = 50 * 1024 * 1024;
 export const MAX_ZIP_XML_FILES = 5000;
 export const MAX_ZIP_UNCOMPRESSED_SIZE_BYTES = 100 * 1024 * 1024;
+export const MAX_ANALYSIS_XML_FILES = MAX_ZIP_XML_FILES;
+export const MAX_ANALYSIS_UNCOMPRESSED_SIZE_BYTES = MAX_ZIP_UNCOMPRESSED_SIZE_BYTES;
 
 function formatMegabytes(bytes: number): string {
   return (bytes / (1024 * 1024)).toFixed(0) + ' MB';
@@ -74,6 +79,20 @@ function duplicateError(fileName: string): FileProcessingError {
   };
 }
 
+function analysisXmlLimitError(fileName: string): FileProcessingError {
+  return {
+    fileName,
+    error: 'A análise atingiu o limite total de ' + MAX_ANALYSIS_XML_FILES + ' XMLs. Remova documentos ou inicie uma nova análise.',
+  };
+}
+
+function analysisSizeLimitError(fileName: string): FileProcessingError {
+  return {
+    fileName,
+    error: 'O lote excede o limite total de ' + formatMegabytes(MAX_ANALYSIS_UNCOMPRESSED_SIZE_BYTES) + ' descompactados para esta análise.',
+  };
+}
+
 /**
  * Process a list of uploaded files, supporting XML and ZIP files.
  * Raw XML is parsed and released after processing; only a compact fingerprint is retained.
@@ -87,6 +106,8 @@ export async function processFiles(
   const knownFingerprints = new Set(options.existingFingerprints || []);
   let processedFiles = 0;
   let totalFiles = files.length;
+  let analyzedXmlCount = options.existingResultCount || 0;
+  let analyzedUncompressedSize = options.existingUncompressedSizeBytes || 0;
   const isCancelled = () => options.signal?.aborted === true;
   const reportProgress = (currentFile?: string): void => {
     options.onProgress?.({
@@ -147,6 +168,20 @@ export async function processFiles(
     }
 
     if (lowerName.endsWith('.xml')) {
+      if (analyzedXmlCount >= MAX_ANALYSIS_XML_FILES) {
+        errors.push(analysisXmlLimitError(file.name));
+        markProcessed(file.name);
+        continue;
+      }
+
+      if (analyzedUncompressedSize + file.size > MAX_ANALYSIS_UNCOMPRESSED_SIZE_BYTES) {
+        errors.push(analysisSizeLimitError(file.name));
+        markProcessed(file.name);
+        continue;
+      }
+
+      analyzedXmlCount += 1;
+      analyzedUncompressedSize += file.size;
       try {
         const xmlContent = await file.text();
         if (!isCancelled()) {
@@ -199,7 +234,26 @@ export async function processFiles(
           continue;
         }
 
+        const zipUncompressedSize = xmlFiles.reduce(
+          (total, name) => total + (getZipEntryUncompressedSize(zip.files[name]) || 0),
+          0,
+        );
+
+        if (analyzedXmlCount + xmlFiles.length > MAX_ANALYSIS_XML_FILES) {
+          errors.push(analysisXmlLimitError(file.name));
+          markProcessed(file.name);
+          continue;
+        }
+
+        if (analyzedUncompressedSize + zipUncompressedSize > MAX_ANALYSIS_UNCOMPRESSED_SIZE_BYTES) {
+          errors.push(analysisSizeLimitError(file.name));
+          markProcessed(file.name);
+          continue;
+        }
+
         totalFiles += xmlFiles.length - 1;
+        analyzedXmlCount += xmlFiles.length;
+        analyzedUncompressedSize += zipUncompressedSize;
         reportProgress(file.name);
 
         for (const xmlPath of xmlFiles) {
@@ -239,5 +293,10 @@ export async function processFiles(
     }
   }
 
-  return { results, errors, cancelled: isCancelled() };
+  return {
+    results,
+    errors,
+    cancelled: isCancelled(),
+    uncompressedSizeBytes: analyzedUncompressedSize,
+  };
 }

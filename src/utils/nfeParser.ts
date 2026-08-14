@@ -168,6 +168,7 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
   let emissaoDate: Date | null = null;
   let emissionDateStatus: DataIntegrityStatus = 'MISSING';
   let tipoNota: NFeType = 'SAÍDA';
+  let operationStatus: DataIntegrityStatus = 'MISSING';
   let cnpjEmitente = '';
   let nomeEmitente = 'Emitente não identificado';
   let cnpjDestinatario = '';
@@ -184,6 +185,7 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     emissaoDate = parseXmlDate(rawDate);
     emissionDateStatus = !rawDate ? 'MISSING' : emissaoDate ? 'VALID' : 'INVALID';
     tipoNota = 'SAÍDA';
+    operationStatus = 'VALID';
 
     const prestadorElement = getElementsByLocalName(dataElement, 'PrestadorServico')[0] ||
       getElementsByLocalName(dataElement, 'Prestador')[0] ||
@@ -227,7 +229,16 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
 
     // tpNF: 0 = entrada, 1 = saída
     const tpNFText = getTagValue(ideElement, 'tpNF');
-    tipoNota = tpNFText === '0' ? 'ENTRADA' : 'SAÍDA';
+    if (tpNFText === '0') {
+      tipoNota = 'ENTRADA';
+      operationStatus = 'VALID';
+    } else if (tpNFText === '1') {
+      tipoNota = 'SAÍDA';
+      operationStatus = 'VALID';
+    } else {
+      tipoNota = 'SAÍDA';
+      operationStatus = tpNFText ? 'INVALID' : 'MISSING';
+    }
 
     // 2. Identify <emit> block
     const emitElement = getElementsByLocalName(dataElement, 'emit')[0];
@@ -248,7 +259,12 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
   // Se for SAÍDA (tpNF=1): a empresa em foco é o EMITENTE (emit)
   // Se for ENTRADA (tpNF=0): a empresa em foco é o DESTINATÁRIO (dest)
   let empresaFoco: CompanyInfo;
-  if (tipoNota === 'SAÍDA') {
+  if (operationStatus !== 'VALID') {
+    empresaFoco = {
+      cnpj: '',
+      nome: 'Empresa em foco não determinada',
+    };
+  } else if (tipoNota === 'SAÍDA') {
     empresaFoco = {
       cnpj: cnpjEmitente,
       nome: nomeEmitente,
@@ -289,6 +305,7 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     dataEmissao,
     emissionDateStatus,
     tipoNota,
+    operationStatus,
     docType,
     documentLayout,
     cnpjEmitente,
