@@ -10,8 +10,9 @@
     "clean": "node -e \"const fs = require('node:fs'); fs.rmSync('dist', { recursive: true, force: true }); fs.rmSync('server.js', { force: true });\"",
     "lint": "tsc --noEmit && deno lint --rules-exclude=no-sloppy-imports src tests scripts",
     "test": "deno task test",
+    "test:mobile": "deno task test:mobile",
     "test:volume": "deno task test:volume",
-    "check": "npm run lint && npm run test && npm run build"
+    "check": "npm run lint && npm run test && npm run test:mobile && npm run build"
   },
   "dependencies": {
     "jszip": "3.10.1",

@@ -20,16 +20,32 @@ function parseSamples(): NFeAnalysis[] {
   return SAMPLE_NFES.map((sample) => parseNFeXml(sample.xmlContent, sample.fileName));
 }
 
-function renderResultsTable() {
+function renderResultsTable(results = parseSamples()) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
 
   flushSync(() => {
-    root.render(<ResultsTable allResults={parseSamples()} />);
+    root.render(<ResultsTable allResults={results} />);
   });
 
   return { container, root };
+}
+
+function createLongContentResults(): NFeAnalysis[] {
+  const sample = parseSamples()[0];
+  const longCompanyName = 'Empresa de Operações Industriais e Distribuição de Equipamentos para a Reforma Tributária '.repeat(3).trim();
+  const longProductDescription = 'Produto fiscal com descrição operacional extensa para validar a adaptação do detalhamento em telas estreitas '.repeat(3).trim();
+
+  return [{
+    ...sample,
+    id: `${sample.id}-long-content`,
+    fileName: `documento-fiscal-${'com-nome-extenso-'.repeat(8)}.xml`,
+    nomeEmitente: longCompanyName,
+    nomeDestinatario: longCompanyName,
+    empresaFoco: { ...sample.empresaFoco, nome: longCompanyName },
+    itens: sample.itens?.map((item) => ({ ...item, descricaoProduto: longProductDescription })),
+  }];
 }
 
 function renderApp(dependencies?: AppDependencies) {
@@ -258,6 +274,39 @@ const tests: UiTestCase[] = [
 
         assertEquals(groupToggle.getAttribute('aria-expanded'), 'false', 'Empresa não foi recolhida');
         assertEquals(container.querySelector(groupToggle.getAttribute('aria-controls') || ''), null);
+      } finally {
+        flushSync(() => root.unmount());
+        container.remove();
+      }
+    },
+  },
+  {
+    name: 'UI móvel acomoda conteúdo extenso sem overflow horizontal',
+    run: () => {
+      if (globalThis.innerWidth > 480) return;
+
+      const { container, root } = renderResultsTable(createLongContentResults());
+
+      try {
+        assertEquals(globalThis.innerWidth, 390, 'Viewport móvel deve ser executada com 390 px de largura');
+        const groupToggle = container.querySelector<HTMLButtonElement>('button[aria-controls^="group-content-"]');
+        assert(groupToggle, 'Grupo não foi renderizado na viewport móvel');
+
+        flushSync(() => {
+          groupToggle.click();
+        });
+
+        const mobileRow = container.querySelector<HTMLButtonElement>('button[data-note-viewport="mobile"]');
+        assert(mobileRow, 'Linha móvel da nota não foi renderizada');
+        assert(mobileRow.textContent?.includes('Empresa de Operações Industriais'), 'Conteúdo extenso não foi renderizado na linha móvel');
+
+        flushSync(() => {
+          mobileRow.click();
+        });
+
+        assert(container.querySelector('[data-detail-layout="inline"]'), 'Detalhamento móvel não foi renderizado');
+        const renderedWidth = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
+        assert(renderedWidth <= globalThis.innerWidth, `Conteúdo móvel criou overflow horizontal: ${renderedWidth}px`);
       } finally {
         flushSync(() => root.unmount());
         container.remove();

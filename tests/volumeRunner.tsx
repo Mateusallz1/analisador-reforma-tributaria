@@ -99,7 +99,7 @@ async function runVolumeTest(): Promise<VolumeMetrics> {
     const sequence = String(index + 1).padStart(5, '0');
     const volumeXml = uniqueXml(sample.xmlContent, index);
     zip.file(
-      `volume/${sequence}-${sample.fileName}`,
+      `volume/${sequence}-${'documento-fiscal-com-nome-operacional-extenso-'.repeat(3)}${sample.fileName}`,
       index === 0 ? withMultipleItems(volumeXml) : volumeXml,
     );
   }
@@ -139,6 +139,10 @@ async function runVolumeTest(): Promise<VolumeMetrics> {
   assert(!processed.cancelled, 'Processamento de volume foi cancelado inesperadamente');
   assert(processed.errors.length === 0, `Volume produziu ${processed.errors.length} erro(s)`);
   assert(processed.results.length === DOCUMENT_COUNT, `Esperados ${DOCUMENT_COUNT} resultados, recebidos ${processed.results.length}`);
+  assert(
+    processed.results.some((result) => result.fileName.length > 120),
+    'Volume não preservou nomes de arquivo longos na análise',
+  );
   assert(finalProgress.processed === DOCUMENT_COUNT, `Progresso final marcou ${finalProgress.processed} documentos`);
   assert(finalProgress.total === DOCUMENT_COUNT, `Total de progresso marcou ${finalProgress.total} documentos`);
   assert(processingMs <= PROCESSING_BUDGET_MS, `Processamento excedeu ${PROCESSING_BUDGET_MS} ms: ${processingMs} ms`);

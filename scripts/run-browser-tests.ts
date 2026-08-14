@@ -19,8 +19,23 @@ const VITE_SHUTDOWN_TIMEOUT_MS = 2000;
 const pagePath = Deno.args[0] || '/tests/browser.html';
 const reportTimeoutMs = Number(Deno.args[1] || 20000);
 const suiteLabel = Deno.args[2] || 'Engine fiscal';
+const viewportWidth = Deno.args[3] ? Number(Deno.args[3]) : undefined;
+const viewportHeight = Deno.args[4] ? Number(Deno.args[4]) : undefined;
+const hasViewportOverride = viewportWidth !== undefined || viewportHeight !== undefined;
 
-if (!pagePath.startsWith('/') || !Number.isFinite(reportTimeoutMs) || reportTimeoutMs <= 0) {
+if (
+  !pagePath.startsWith('/') ||
+  !Number.isFinite(reportTimeoutMs) ||
+  reportTimeoutMs <= 0 ||
+  (hasViewportOverride && (
+    viewportWidth === undefined ||
+    viewportHeight === undefined ||
+    !Number.isInteger(viewportWidth) ||
+    !Number.isInteger(viewportHeight) ||
+    viewportWidth <= 0 ||
+    viewportHeight <= 0
+  ))
+) {
   throw new Error('Argumentos inválidos para o runner de testes browser.');
 }
 
@@ -388,6 +403,14 @@ try {
   await client.send('Page.enable');
   await client.send('Runtime.enable');
   await client.send('Log.enable');
+  if (hasViewportOverride) {
+    await client.send('Emulation.setDeviceMetricsOverride', {
+      width: viewportWidth,
+      height: viewportHeight,
+      deviceScaleFactor: 1,
+      mobile: true,
+    });
+  }
   await client.send('Page.navigate', { url: testUrl });
 
   const report = await readReport(client, reportTimeoutMs);
