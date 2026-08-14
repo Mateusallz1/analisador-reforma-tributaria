@@ -10,6 +10,7 @@ import { assert } from './assertions.ts';
 
 interface VolumeMetrics {
   archiveMs: number;
+  cancellationMs: number;
   processingMs: number;
   initialRenderMs: number;
   firstExpansionMs: number;
@@ -52,6 +53,14 @@ function uniqueXml(xml: string, index: number): string {
   return `${withNfseNumber}\n<!-- volume-document-${index} -->`;
 }
 
+function withMultipleItems(xml: string): string {
+  const itemMatch = xml.match(/<det\b[^>]*>[\s\S]*?<\/det>/);
+  if (!itemMatch) return xml;
+
+  const secondItem = itemMatch[0].replace(/nItem="[^"]*"/, 'nItem="2"');
+  return xml.replace(itemMatch[0], `${itemMatch[0]}${secondItem}`);
+}
+
 function heapSize(): number | undefined {
   return (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize;
 }
@@ -67,6 +76,7 @@ function formatMetrics(metrics: VolumeMetrics): string {
 
   return [
     `ZIP ${(metrics.archiveBytes / (1024 * 1024)).toFixed(1)} MB em ${metrics.archiveMs} ms`,
+    `cancelamento ${metrics.cancellationMs} ms`,
     `processamento ${metrics.processingMs} ms`,
     `render ${metrics.initialRenderMs} ms`,
     `expansão ${metrics.firstExpansionMs} ms`,
@@ -87,12 +97,35 @@ async function runVolumeTest(): Promise<VolumeMetrics> {
   for (let index = 0; index < DOCUMENT_COUNT; index += 1) {
     const sample = SAMPLE_NFES[index % SAMPLE_NFES.length];
     const sequence = String(index + 1).padStart(5, '0');
-    zip.file(`volume/${sequence}-${sample.fileName}`, uniqueXml(sample.xmlContent, index));
+    const volumeXml = uniqueXml(sample.xmlContent, index);
+    zip.file(
+      `volume/${sequence}-${sample.fileName}`,
+      index === 0 ? withMultipleItems(volumeXml) : volumeXml,
+    );
   }
 
   const archiveBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE', streamFiles: true });
   const archiveMs = elapsedSince(archiveStart);
   const volumeFile = new File([archiveBlob], 'homologacao-5000.xml.zip', { type: 'application/zip' });
+
+  const cancellationController = new AbortController();
+  let cancellationProgress = { processed: 0, total: 0 };
+  const cancellationStart = performance.now();
+  const cancelled = await processFiles([volumeFile], {
+    signal: cancellationController.signal,
+    onProgress: ({ processed: processedCount, total }) => {
+      cancellationProgress = { processed: processedCount, total };
+      if (processedCount >= 25) cancellationController.abort();
+    },
+  });
+  const cancellationMs = elapsedSince(cancellationStart);
+
+  assert(cancelled.cancelled, 'Cancelamento de volume não foi sinalizado');
+  assert(cancelled.results.length >= 25, `Cancelamento interrompeu antes do esperado: ${cancelled.results.length} resultados`);
+  assert(cancelled.results.length < DOCUMENT_COUNT, 'Cancelamento não interrompeu o lote de volume');
+  assert(cancellationProgress.processed < DOCUMENT_COUNT, 'Progresso de cancelamento chegou ao fim do lote');
+  assert(cancellationProgress.total === DOCUMENT_COUNT, 'Total de progresso do cancelamento não corresponde ao volume');
+
   let finalProgress = { processed: 0, total: 0 };
 
   const processingStart = performance.now();
@@ -109,6 +142,10 @@ async function runVolumeTest(): Promise<VolumeMetrics> {
   assert(finalProgress.processed === DOCUMENT_COUNT, `Progresso final marcou ${finalProgress.processed} documentos`);
   assert(finalProgress.total === DOCUMENT_COUNT, `Total de progresso marcou ${finalProgress.total} documentos`);
   assert(processingMs <= PROCESSING_BUDGET_MS, `Processamento excedeu ${PROCESSING_BUDGET_MS} ms: ${processingMs} ms`);
+
+  const coveredDocumentTypes = new Set(processed.results.map((result) => result.docType));
+  assert(coveredDocumentTypes.size >= 3, 'Volume não cobriu NF-e, NFC-e e NFS-e');
+  assert(processed.results.some((result) => (result.itens?.length || 0) > 1), 'Volume não cobriu documento com múltiplos itens');
 
   const filtered = getFilteredResultGroups(processed.results, {
     searchTerm: '',
@@ -192,6 +229,7 @@ async function runVolumeTest(): Promise<VolumeMetrics> {
     const finalHeap = heapSize();
     return {
       archiveMs,
+      cancellationMs,
       processingMs,
       initialRenderMs,
       firstExpansionMs,
