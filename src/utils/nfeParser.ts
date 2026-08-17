@@ -23,8 +23,54 @@ interface RecognizedFiscalDocument {
   docType: DocType;
   documentLayout: DocumentLayout;
   documentKind: DocumentKind;
+  documentVersion?: string;
   dataElement: Element;
   ideElement?: Element;
+}
+
+export interface FiscalDocumentErrorContext {
+  documentLayout?: DocumentLayout;
+  documentKind?: DocumentKind;
+  documentVersion?: string;
+}
+
+export class FiscalDocumentError extends Error implements FiscalDocumentErrorContext {
+  readonly documentLayout?: DocumentLayout;
+  readonly documentKind?: DocumentKind;
+  readonly documentVersion?: string;
+
+  constructor(message: string, context: FiscalDocumentErrorContext = {}) {
+    super(message);
+    this.name = 'FiscalDocumentError';
+    this.documentLayout = context.documentLayout;
+    this.documentKind = context.documentKind;
+    this.documentVersion = context.documentVersion;
+  }
+}
+
+export function getFiscalDocumentErrorContext(error: unknown): FiscalDocumentErrorContext {
+  if (!(error instanceof FiscalDocumentError)) return {};
+
+  return {
+    documentLayout: error.documentLayout,
+    documentKind: error.documentKind,
+    documentVersion: error.documentVersion,
+  };
+}
+
+function withFiscalDocumentContext<T>(
+  context: FiscalDocumentErrorContext,
+  operation: () => T,
+): T {
+  try {
+    return operation();
+  } catch (error: unknown) {
+    if (error instanceof FiscalDocumentError) throw error;
+    const message = error instanceof Error && error.message
+      ? error.message
+      : 'Erro ao interpretar a estrutura fiscal.';
+    throw new FiscalDocumentError(message, context);
+  }
 }
 
 function getElementLocalName(element: Element): string {
@@ -54,6 +100,11 @@ function getDirectTagValue(parent: Element | null, localNames: string[]): string
   }
 
   return null;
+}
+
+function getAttributeValue(element: Element | null, attributeName: string): string | undefined {
+  const value = element?.getAttribute(attributeName)?.trim();
+  return value || undefined;
 }
 
 function findNationalNfsePartyElement(dataElement: Element, localNames: string[]): Element | null {
@@ -105,7 +156,7 @@ function readNfseParty(
         ? ['TomadorServico', 'Tomador', 'IdentificacaoTomador']
         : ['Intermediario', 'IntermediarioServico', 'IdentificacaoIntermediario']
     : isPrestador
-      ? ['emit', 'infEmit']
+      ? ['prest', 'emit', 'infEmit']
       : isTomador
         ? ['toma', 'Tomador', 'infToma']
         : ['interm', 'Intermediario', 'infIntermediario'];
@@ -150,80 +201,94 @@ function recognizeNFeDocument(root: Element): RecognizedFiscalDocument | null {
   const rootName = getElementLocalName(root);
   if (rootName !== 'NFe' && rootName !== 'nfeProc') return null;
 
-  assertNamespace(root, NFE_NAMESPACE, 'NF-e/NFC-e');
-  const nfeElement = rootName === 'NFe'
-    ? root
-    : getSingleDirectChild(root, 'NFe', 'NF-e/NFC-e processada');
-  assertNamespace(nfeElement, NFE_NAMESPACE, 'NF-e/NFC-e');
+  return withFiscalDocumentContext({ documentLayout: 'NFE' }, () => {
+    assertNamespace(root, NFE_NAMESPACE, 'NF-e/NFC-e');
+    const nfeElement = rootName === 'NFe'
+      ? root
+      : getSingleDirectChild(root, 'NFe', 'NF-e/NFC-e processada');
+    assertNamespace(nfeElement, NFE_NAMESPACE, 'NF-e/NFC-e');
 
-  const infNFeElement = getSingleDirectChild(nfeElement, 'infNFe', 'NF-e/NFC-e');
-  assertNamespace(infNFeElement, NFE_NAMESPACE, 'NF-e/NFC-e');
-  const ideElement = getSingleDirectChild(infNFeElement, 'ide', 'NF-e/NFC-e');
-  assertNamespace(ideElement, NFE_NAMESPACE, 'NF-e/NFC-e');
-  const modelElements = getDirectChildrenByLocalName(ideElement, 'mod');
-  const modelElement = modelElements.length === 1 ? modelElements[0] : null;
-  if (modelElement) assertNamespace(modelElement, NFE_NAMESPACE, 'NF-e/NFC-e');
-  const model = modelElement?.textContent?.trim();
+    const infNFeElement = getSingleDirectChild(nfeElement, 'infNFe', 'NF-e/NFC-e');
+    assertNamespace(infNFeElement, NFE_NAMESPACE, 'NF-e/NFC-e');
+    const ideElement = getSingleDirectChild(infNFeElement, 'ide', 'NF-e/NFC-e');
+    assertNamespace(ideElement, NFE_NAMESPACE, 'NF-e/NFC-e');
+    const modelElements = getDirectChildrenByLocalName(ideElement, 'mod');
+    const modelElement = modelElements.length === 1 ? modelElements[0] : null;
+    if (modelElement) assertNamespace(modelElement, NFE_NAMESPACE, 'NF-e/NFC-e');
+    const model = modelElement?.textContent?.trim();
 
-  if (model !== '55' && model !== '65') {
-    throw new Error('Modelo fiscal não suportado. A tag <mod> deve informar 55 (NF-e) ou 65 (NFC-e).');
-  }
+    if (model !== '55' && model !== '65') {
+      throw new Error('Modelo fiscal não suportado. A tag <mod> deve informar 55 (NF-e) ou 65 (NFC-e).');
+    }
 
-  return {
-    docType: model === '65' ? 'NFCe' : 'NFe',
-    documentLayout: 'NFE',
-    documentKind: model === '65' ? 'NFCE' : 'NFE',
-    dataElement: infNFeElement,
-    ideElement,
-  };
+    return {
+      docType: model === '65' ? 'NFCe' : 'NFe',
+      documentLayout: 'NFE',
+      documentKind: model === '65' ? 'NFCE' : 'NFE',
+      documentVersion: getAttributeValue(infNFeElement, 'versao'),
+      dataElement: infNFeElement,
+      ideElement,
+    };
+  });
 }
 
 function recognizeNationalNfseDocument(root: Element): RecognizedFiscalDocument | null {
   const rootName = getElementLocalName(root);
   if (rootName !== 'DPS' && rootName !== 'NFSe') return null;
 
-  assertNamespace(root, NFSE_NATIONAL_NAMESPACE, 'NFS-e padrão nacional');
-  const informationTag = rootName === 'DPS' ? 'infDPS' : 'infNFSe';
-  const dataElement = getSingleDirectChild(root, informationTag, 'NFS-e padrão nacional');
-  assertNamespace(dataElement, NFSE_NATIONAL_NAMESPACE, 'NFS-e padrão nacional');
-
-  return {
-    docType: 'NFSe',
+  const documentKind = rootName === 'DPS' ? 'DPS' : 'NFSE';
+  return withFiscalDocumentContext({
     documentLayout: 'NFSE_NATIONAL',
-    documentKind: rootName === 'DPS' ? 'DPS' : 'NFSE',
-    dataElement,
-  };
+    documentKind,
+    documentVersion: getAttributeValue(root, 'versao'),
+  }, () => {
+    assertNamespace(root, NFSE_NATIONAL_NAMESPACE, 'NFS-e padrão nacional');
+    const informationTag = rootName === 'DPS' ? 'infDPS' : 'infNFSe';
+    const dataElement = getSingleDirectChild(root, informationTag, 'NFS-e padrão nacional');
+    assertNamespace(dataElement, NFSE_NATIONAL_NAMESPACE, 'NFS-e padrão nacional');
+
+    return {
+      docType: 'NFSe',
+      documentLayout: 'NFSE_NATIONAL',
+      documentKind,
+      documentVersion: getAttributeValue(root, 'versao') || getAttributeValue(dataElement, 'versao'),
+      dataElement,
+    };
+  });
 }
 
 function recognizeAbrasfNfseDocument(xmlDoc: Document, root: Element): RecognizedFiscalDocument | null {
   if (root.namespaceURI !== NFSE_ABRASF_NAMESPACE) return null;
 
-  const nfseElements = getElementsByLocalName(xmlDoc, 'Nfse').filter((element) => {
-    const parent = element.parentElement;
-    return getElementLocalName(element) === 'Nfse' &&
-      element.namespaceURI === NFSE_ABRASF_NAMESPACE &&
-      (element === root ||
-        (!!parent &&
-          getElementLocalName(parent) === 'CompNfse' &&
-          parent.namespaceURI === NFSE_ABRASF_NAMESPACE));
+  return withFiscalDocumentContext({ documentLayout: 'NFSE_ABRASF', documentKind: 'NFSE' }, () => {
+    const nfseElements = getElementsByLocalName(xmlDoc, 'Nfse').filter((element) => {
+      const parent = element.parentElement;
+      return getElementLocalName(element) === 'Nfse' &&
+        element.namespaceURI === NFSE_ABRASF_NAMESPACE &&
+        (element === root ||
+          (!!parent &&
+            getElementLocalName(parent) === 'CompNfse' &&
+            parent.namespaceURI === NFSE_ABRASF_NAMESPACE));
+    });
+
+    if (nfseElements.length === 0) {
+      throw new Error('Estrutura inválida de NFS-e ABRASF: nenhuma NFS-e emitida foi encontrada no XML.');
+    }
+    if (nfseElements.length > 1) {
+      throw new Error('O XML contém mais de uma NFS-e ABRASF. Separe cada nota em um arquivo para análise.');
+    }
+
+    const dataElement = getSingleDirectChild(nfseElements[0], 'InfNfse', 'NFS-e ABRASF');
+    assertNamespace(dataElement, NFSE_ABRASF_NAMESPACE, 'NFS-e ABRASF');
+
+    return {
+      docType: 'NFSe',
+      documentLayout: 'NFSE_ABRASF',
+      documentKind: 'NFSE',
+      documentVersion: getAttributeValue(dataElement, 'versao') || getAttributeValue(nfseElements[0], 'versao') || getAttributeValue(root, 'versao'),
+      dataElement,
+    };
   });
-
-  if (nfseElements.length === 0) {
-    throw new Error('Estrutura inválida de NFS-e ABRASF: nenhuma NFS-e emitida foi encontrada no XML.');
-  }
-  if (nfseElements.length > 1) {
-    throw new Error('O XML contém mais de uma NFS-e ABRASF. Separe cada nota em um arquivo para análise.');
-  }
-
-  const dataElement = getSingleDirectChild(nfseElements[0], 'InfNfse', 'NFS-e ABRASF');
-  assertNamespace(dataElement, NFSE_ABRASF_NAMESPACE, 'NFS-e ABRASF');
-
-  return {
-    docType: 'NFSe',
-    documentLayout: 'NFSE_ABRASF',
-    documentKind: 'NFSE',
-    dataElement,
-  };
 }
 
 function recognizeFiscalDocument(xmlDoc: Document): RecognizedFiscalDocument {
@@ -269,6 +334,7 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     docType,
     documentLayout,
     documentKind,
+    documentVersion,
     dataElement,
     ideElement,
   } = recognizeFiscalDocument(xmlDoc);
@@ -443,6 +509,7 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     docType,
     documentLayout,
     documentKind,
+    documentVersion,
     dpsIssuerRole,
     cnpjEmitente,
     nomeEmitente,

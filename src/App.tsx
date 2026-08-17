@@ -22,6 +22,7 @@ import { getXmlFingerprint, processFiles } from './utils/fileProcessing';
 import type { FileProcessingProgress } from './utils/fileProcessing';
 import { groupAnalysesByEmpresaFoco } from './utils/analysisStats';
 import { getErrorMessage } from './utils/errors';
+import { getFiscalDocumentErrorContext } from './utils/nfeParser';
 import { TAX_BASE_INFO } from './utils/taxValidation';
 import { buildAnalysisReport } from './utils/analysisReport';
 import { downloadBlob, generateAnalysisReportXlsx } from './utils/analysisReportXlsx';
@@ -235,6 +236,7 @@ export default function App({ dependencies }: AppProps = {}) {
         } catch (err: unknown) {
           sampleErrors.push({
             fileName: sample.fileName,
+            ...getFiscalDocumentErrorContext(err),
             error: getErrorMessage(err, 'Erro de parsing na amostra.'),
           });
         }
@@ -441,9 +443,21 @@ export default function App({ dependencies }: AppProps = {}) {
                       : 'border-rose-100 text-rose-700')
                   }
                 >
-                  <span className="min-w-0 truncate font-mono">
-                    <strong>{err.fileName}</strong>: {err.error}
-                  </span>
+                  <div className="flex min-w-0 flex-1 items-center gap-2">
+                    {err.documentLayout && (
+                      <span className="badge badge-ghost badge-xs shrink-0">
+                        {err.documentLayout === 'NFE'
+                          ? 'NF-e/NFC-e'
+                          : err.documentLayout === 'NFSE_NATIONAL'
+                            ? 'NFS-e nacional'
+                            : 'NFS-e ABRASF'}
+                        {err.documentVersion ? ` v${err.documentVersion}` : ''}
+                      </span>
+                    )}
+                    <span className="min-w-0 truncate font-mono">
+                      <strong>{err.fileName}</strong>: {err.error}
+                    </span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => clearSingleError(idx)}

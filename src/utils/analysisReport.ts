@@ -48,7 +48,19 @@ function formatDateTime(value: string): string {
 
 function documentTypeLabel(note: NFeAnalysis): string {
   const documentLabel = note.documentKind === 'DPS' ? 'DPS' : note.docType;
-  return `${documentLabel} (${note.documentLayout})`;
+  const versionLabel = note.documentVersion ? ` v${note.documentVersion}` : '';
+  return `${documentLabel} (${note.documentLayout}${versionLabel})`;
+}
+
+function errorLayoutLabel(error: FileProcessingError): string {
+  if (!error.documentLayout) return 'Não identificado';
+
+  const layoutLabel = error.documentLayout === 'NFE'
+    ? 'NF-e/NFC-e'
+    : error.documentLayout === 'NFSE_NATIONAL'
+      ? 'NFS-e nacional'
+      : 'NFS-e ABRASF';
+  return error.documentVersion ? `${layoutLabel} v${error.documentVersion}` : layoutLabel;
 }
 
 function operationLabel(note: NFeAnalysis): string {
@@ -233,9 +245,10 @@ function findingRows(results: NFeAnalysis[]): ReportCell[][] {
 
 function occurrenceRows(errors: FileProcessingError[]): ReportCell[][] {
   return [
-    ['Tipo', 'Arquivo/documento', 'Ocorrência'],
+    ['Tipo', 'Layout detectado', 'Arquivo/documento', 'Ocorrência'],
     ...errors.map((error) => [
       error.kind === 'DUPLICATE' ? 'Duplicidade' : 'Erro de processamento',
+      errorLayoutLabel(error),
       error.fileName,
       error.error,
     ]),
@@ -264,7 +277,7 @@ export function buildAnalysisReport(
       { name: 'Resumo', rows: summaryRows(results, errors, run, stats), columnWidths: [34, 110] },
       { name: 'Documentos', rows: documentRows(results), columnWidths: [28, 18, 24, 16, 12, 14, 32, 18, 32, 18, 28, 14, 18, 42], filterRow: 1 },
       { name: 'Achados', rows: findingRows(results), columnWidths: [28, 24, 16, 12, 14, 10, 42, 12, 16, 24, 70, 32, 32, 42], filterRow: 1 },
-      { name: 'Ocorrências', rows: occurrenceRows(errors), columnWidths: [22, 46, 90], filterRow: 1 },
+      { name: 'Ocorrências', rows: occurrenceRows(errors), columnWidths: [22, 24, 46, 90], filterRow: 1 },
     ],
   };
 }

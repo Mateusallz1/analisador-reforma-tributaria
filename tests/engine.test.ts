@@ -18,6 +18,12 @@ import { getTaxpayerDocumentStatus } from '../src/utils/taxpayerId.ts';
 import { buildAnalysisReport } from '../src/utils/analysisReport.ts';
 import { generateAnalysisReportXlsx } from '../src/utils/analysisReportXlsx.ts';
 import { SAMPLE_NFES } from '../src/data/samples.ts';
+import {
+  NATIONAL_DPS_1_00,
+  NATIONAL_DPS_1_01,
+  NATIONAL_NFSE_1_00,
+  NATIONAL_NFSE_1_01,
+} from './fixtures/nfseNationalFixtures.ts';
 import taxBaseData from '../src/data/base_completa.json';
 import { ComplianceStatus, DocType, ItemClassificationStatus, NFeAnalysis, NFeType, ValidationStatus } from '../src/types.ts';
 import { assert, assertEquals } from './assertions.ts';
@@ -172,6 +178,7 @@ const tests: TestCase[] = [
       const results = parseSamples();
       assertEquals(results.length, sampleExpectations.length);
       assertEquals(results[0].taxBase.version, '1.1.0');
+      assertEquals(results[0].documentVersion, '4.00');
       assert(results[0].taxBase.source.includes('cClassTrib 2026-06-22.xlsx'), 'Origem da base fiscal não foi preservada');
       assertEquals('xmlContent' in results[0], false);
 
@@ -365,9 +372,9 @@ const tests: TestCase[] = [
       assert(missingDate.itens?.some((item) => item.validationReason?.includes('Data de emissão')), 'A pendência de data deve ser explicada');
 
       const nationalNfse = parseNFeXml([
-        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<DPS versao="1.00" xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
         '<nDPS>9001</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi><tpEmit>1</tpEmit>',
-        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
+        '<prest><CNPJ>04252011000110</CNPJ><xNome>Prestador Nacional</xNome></prest>',
         '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
         '</infDPS></DPS>',
       ].join(''), 'NFSe_DPS.xml');
@@ -375,6 +382,7 @@ const tests: TestCase[] = [
       assertEquals(nationalNfse.docType, 'NFSe');
       assertEquals(nationalNfse.documentLayout, 'NFSE_NATIONAL');
       assertEquals(nationalNfse.documentKind, 'DPS');
+      assertEquals(nationalNfse.documentVersion, '1.00');
       assertEquals(nationalNfse.dpsIssuerRole, 'PRESTADOR');
       assertEquals(nationalNfse.operationStatus, 'NOT_VERIFIABLE');
       assertEquals(nationalNfse.numeroNota, '9001');
@@ -383,6 +391,15 @@ const tests: TestCase[] = [
       assertEquals(nationalNfse.empresaFoco.cnpj, '04252011000110');
       assertEquals(nationalNfse.status, 'PENDENTE');
       assertEquals(nationalNfse.validationStatus, 'pendente');
+
+      for (const [fixture, version] of [[NATIONAL_DPS_1_00, '1.00'], [NATIONAL_DPS_1_01, '1.01']] as const) {
+        const parsedFixture = parseNFeXml(fixture, `DPS_${version}.xml`);
+        assertEquals(parsedFixture.documentLayout, 'NFSE_NATIONAL');
+        assertEquals(parsedFixture.documentKind, 'DPS');
+        assertEquals(parsedFixture.documentVersion, version);
+        assertEquals(parsedFixture.cnpjEmitente, '04252011000110');
+        assertEquals(parsedFixture.itens?.[0]?.descricaoProduto, 'Consultoria tributaria');
+      }
 
       const nationalNfseWithoutRecipient = parseNFeXml([
         '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
@@ -519,23 +536,24 @@ const tests: TestCase[] = [
       assertEquals(nationalNfseWithServiceAndTax.itens?.[0]?.cClassTrib, '000001');
       assertEquals(nationalNfseWithServiceAndTax.itens?.[0]?.itemStatus, 'pendente');
 
-      const generatedNationalNfse = parseNFeXml([
-        '<NFSe xmlns="http://www.sped.fazenda.gov.br/nfse"><infNFSe>',
-        '<nNFSe>9002</nNFSe><dhEmi>2026-05-30T10:00:00-03:00</dhEmi>',
-        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
-        '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
-        '</infNFSe></NFSe>',
-      ].join(''), 'NFSe_Nacional.xml');
-
-      assertEquals(generatedNationalNfse.docType, 'NFSe');
-      assertEquals(generatedNationalNfse.documentLayout, 'NFSE_NATIONAL');
-      assertEquals(generatedNationalNfse.documentKind, 'NFSE');
-      assertEquals(generatedNationalNfse.numeroNota, '9002');
+      for (const [fixture, version, number] of [
+        [NATIONAL_NFSE_1_00, '1.00', '1'],
+        [NATIONAL_NFSE_1_01, '1.01', '2'],
+      ] as const) {
+        const issuedNationalNfse = parseNFeXml(fixture, `NFSe_Nacional_${version}.xml`);
+        assertEquals(issuedNationalNfse.docType, 'NFSe');
+        assertEquals(issuedNationalNfse.documentLayout, 'NFSE_NATIONAL');
+        assertEquals(issuedNationalNfse.documentKind, 'NFSE');
+        assertEquals(issuedNationalNfse.documentVersion, version);
+        assertEquals(issuedNationalNfse.numeroNota, number);
+        assertEquals(issuedNationalNfse.cnpjEmitente, '04252011000110');
+        assertEquals(issuedNationalNfse.itens?.[0]?.descricaoProduto, 'Consultoria tributaria');
+      }
     },
   },
   {
     name: 'parser rejeita coincidências de tags sem uma estrutura fiscal suportada',
-    run: () => {
+    run: async () => {
       assertParseError(
         '<Documento><ide><mod>55</mod></ide><Prestador><Rps>1</Rps></Prestador></Documento>',
         'Formato XML não reconhecido',
@@ -573,6 +591,20 @@ const tests: TestCase[] = [
         ].join(''),
         'mais de uma NFS-e ABRASF',
       );
+
+      const nationalStructureError = await processFiles([
+        new File([[
+          '<DPS versao="1.00" xmlns="http://www.sped.fazenda.gov.br/nfse">',
+          '<infDPS xmlns=""><nDPS>1</nDPS></infDPS>',
+          '</DPS>',
+        ].join('')], 'DPS_namespace_invalido.xml', { type: 'text/xml' }),
+      ]);
+
+      assertEquals(nationalStructureError.results.length, 0);
+      assertEquals(nationalStructureError.errors.length, 1);
+      assertEquals(nationalStructureError.errors[0].documentLayout, 'NFSE_NATIONAL');
+      assertEquals(nationalStructureError.errors[0].documentKind, 'DPS');
+      assertEquals(nationalStructureError.errors[0].documentVersion, '1.00');
     },
   },
   {
@@ -1116,8 +1148,29 @@ const tests: TestCase[] = [
 
       assert(summary && documents && findings, 'Relatório não criou as abas esperadas');
       assertEquals(documents.rows.length, results.length + 1);
+      assert(
+        documents.rows.some((row) => String(row[2]).includes('NFE v4.00')),
+        'Relatório não exibe a versão declarada do layout',
+      );
       assert(findings.rows.length > 1, 'Relatório deveria conter achados das amostras');
       assert(summary.rows.some((row) => row[0] === 'Documentos analisados' && row[1] === results.length));
+
+      const occurrenceReport = buildAnalysisReport([], [{
+        fileName: 'DPS_invalido.xml',
+        error: 'Estrutura inválida de NFS-e padrão nacional.',
+        documentLayout: 'NFSE_NATIONAL',
+        documentKind: 'DPS',
+        documentVersion: '1.00',
+      }], {
+        startedAt: '2026-08-13T10:00:00.000Z',
+        completedAt: '2026-08-13T10:01:00.000Z',
+        inputFileCount: 1,
+        cancelled: false,
+      }, '2026-08-13T10:02:00.000Z');
+      const occurrences = occurrenceReport.sheets.find((sheet) => sheet.name === 'Ocorrências');
+      assert(occurrences, 'Relatório não criou a aba de ocorrências');
+      assertEquals(occurrences.rows[0]?.[1], 'Layout detectado');
+      assertEquals(occurrences.rows[1]?.[1], 'NFS-e nacional v1.00');
 
       const dps = parseNFeXml([
         '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',

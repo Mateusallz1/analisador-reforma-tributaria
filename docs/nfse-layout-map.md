@@ -38,7 +38,7 @@ O parser reconhece a estrutura de uma NFS-e emitida, mas não lê nem valida o a
 | `NFE_55` | `NFe` ou `nfeProc`, namespace NF-e, `ide/mod=55` | Nota emitida | Coberto | Manter |
 | `NFCE_65` | `NFe` ou `nfeProc`, namespace NF-e, `ide/mod=65` | Nota emitida | Coberto | Manter |
 | `NFSE_NATIONAL_DPS` | raiz `DPS`, namespace nacional, filho direto `infDPS` | Declaração anterior à NFS-e | Coberto semanticamente | Manter pendente e exibir o papel definido por `tpEmit` |
-| `NFSE_NATIONAL_ISSUED` | raiz `NFSe`, namespace nacional, filho direto `infNFSe`; pode conter `DPS/infDPS` | Nota emitida | Coberto estruturalmente | Adicionar versão e fixture oficial completa |
+| `NFSE_NATIONAL_ISSUED` | raiz `NFSe`, namespace nacional, filho direto `infNFSe`; pode conter `DPS/infDPS` | Nota emitida | Coberto estruturalmente; versões 1.00 e 1.01 exercitadas | Manter cobertura de campos IBS/CBS por amostra real |
 | `NFSE_NATIONAL_EVENT` | raiz `pedRegEvento` ou `evento` | Evento fiscal | Rejeitado por projeto | Continuar fora do fluxo de notas |
 | `NFSE_ABRASF_DIRECT` | raiz `Nfse`, namespace ABRASF, filho direto `InfNfse` | Nota emitida | Coberto estruturalmente | Validar com fixtures das famílias 1.x e 2.x |
 | `NFSE_ABRASF_COMP` | `CompNfse/Nfse/InfNfse` em documento com namespace ABRASF | Nota emitida encapsulada | Coberto | Manter limite de uma nota por arquivo |
@@ -53,19 +53,19 @@ O parser reconhece a estrutura de uma NFS-e emitida, mas não lê nem valida o a
 | Família | Número e data | Prestador e tomador | Serviço | IBS/CBS | Observação |
 | --- | --- | --- | --- | --- | --- |
 | Nacional emitida | `nNFSe`, `dhEmi`, `dhEmis`, `DataEmissao`, `dEmi` | `emit`/`infEmit` e `toma`/`infToma`, inclusive dentro de DPS | `serv`, `xDescServ`, `cTribNac`, `cNBS` | Classificação na DPS e cálculos na NFS-e | Há testes de emissão, serviço, valores e redução |
-| DPS nacional | `nDPS` e `dhEmi` | Mesmos caminhos do padrão nacional, com foco definido por `tpEmit` | `serv/xDescServ` | Grupo da declaração pode ser lido | Mantém `docType=NFSe` para os filtros atuais, mas expõe `documentKind=DPS`, papel e situação pendente |
+| DPS nacional | `nDPS` e `dhEmi` | `prest`, `toma` e `interm`, com foco definido por `tpEmit` | `serv/xDescServ` | Grupo da declaração pode ser lido | Mantém `docType=NFSe` para os filtros atuais, mas expõe `documentKind=DPS`, papel e situação pendente |
 | ABRASF emitida | `Numero` e `DataEmissao` | `PrestadorServico`, `Prestador`, `TomadorServico`, `Tomador` e identificações aninhadas | `Servico/Discriminacao` e aliases já tratados | Busca estrutural genérica por `IBSCBS` | Cobertura não é versionada e precisa de fixtures válidas 1.x/2.x |
 
 ## Lacunas encontradas
 
 1. `DPS` e `NFSe` continuam na mesma família de `DocumentLayout`, mas o resultado agora expõe `documentKind` para preservar a diferença entre declaração e nota emitida.
 2. A DPS agora interpreta `tpEmit` e não é mais apresentada como operação de saída validada da prestadora.
-3. A versão do layout nacional ou ABRASF não é registrada no resultado da análise.
+3. A versão declarada agora é registrada para NF-e e para o padrão nacional; no ABRASF ela continua opcional quando não está presente no XML.
 4. A cobertura ABRASF é baseada em assinaturas estruturais e fixtures sintéticas, não em uma matriz validada por versão.
 5. A amostra demonstrativa ABRASF foi ajustada para uma resposta `ConsultarNfseResposta/ListaNfse/CompNfse`; ela continua sendo sintética e não é evidência de aderência completa a uma versão ABRASF.
 6. Envelopes SOAP são rejeitados porque o reconhecedor exige que a raiz já pertença ao namespace fiscal.
 7. Um XML ABRASF com múltiplas notas é rejeitado; o processamento atual produz um resultado por arquivo.
-8. Layouts proprietários são rejeitados corretamente, mas a mensagem ainda não identifica qual assinatura foi detectada.
+8. Quando a raiz fiscal é reconhecida, erros estruturais preservam a família e a versão declarada no painel e no relatório; formatos proprietários continuam genéricos por projeto.
 
 ## Prioridade de implementação
 
@@ -81,9 +81,12 @@ Implementado nesta etapa:
 
 ### P1 - Registro de perfil
 
-- Fazer o reconhecedor retornar família, tipo de documento, versão declarada e elemento de dados.
-- Expor a família detectada nos erros e no relatório técnico.
-- Adicionar fixtures válidas do XSD nacional 1.00 e 1.01.
+Implementado nesta etapa:
+
+- O resultado registra a versão declarada de NF-e e do padrão nacional; versões ABRASF continuam opcionais quando não estão presentes no XML.
+- O relatório técnico exibe a versão junto da família do documento quando disponível.
+- Erros estruturais preservam a família, o tipo e a versão declarada quando a raiz fiscal foi reconhecida.
+- As fixtures sanitizadas `DPS` e `NFSe` 1.00 e 1.01 seguem as sequências obrigatórias dos XSD oficiais e foram validadas contra os esquemas correspondentes do pacote de referência; a assinatura é apenas estrutural e não tem validade criptográfica.
 
 ### P2 - ABRASF por estrutura
 

@@ -1,6 +1,6 @@
 import { FileProcessingError, NFeAnalysis } from '../types';
 import { getErrorMessage } from './errors';
-import { parseNFeXml } from './nfeParser';
+import { getFiscalDocumentErrorContext, parseNFeXml } from './nfeParser';
 import { getXmlFingerprint } from './xmlFingerprint';
 
 export { getXmlFingerprint, normalizeXmlForFingerprint } from './xmlFingerprint';
@@ -140,6 +140,7 @@ export async function processFiles(
     } catch (err: unknown) {
       errors.push({
         fileName: displayFileName,
+        ...getFiscalDocumentErrorContext(err),
         error: getErrorMessage(err, 'Erro desconhecido ao ler XML.'),
       });
     }

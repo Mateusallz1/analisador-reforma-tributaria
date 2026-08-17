@@ -69,6 +69,7 @@ export interface NFeAnalysis {
   docType: DocType;
   documentLayout: DocumentLayout;
   documentKind: DocumentKind;
+  documentVersion?: string;
   dpsIssuerRole?: DpsIssuerRole;
   cnpjEmitente: string;
   nomeEmitente: string;
@@ -105,6 +106,9 @@ export interface FileProcessingError {
   fileName: string;
   error: string;
   kind?: FileProcessingErrorKind;
+  documentLayout?: DocumentLayout;
+  documentKind?: DocumentKind;
+  documentVersion?: string;
 }
 
 export interface AnalysisRunInfo {
