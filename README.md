@@ -135,7 +135,7 @@ A planilha oficial CST/cClassTrib pode ser convertida para o contrato JSON usado
 
 O conversor preserva os campos consumidos pela aplicação e informa CSTs e classificações adicionados, removidos ou alterados antes de gravar a nova base. Depois da conversão, execute `npm run check` e `npm run test:volume`.
 
-## Validacao local dos schemas ABRASF
+## Validação local dos schemas ABRASF
 
 Os schemas ABRASF mantidos em `src/data` podem ser verificados localmente, fora do fluxo principal de CI. O comando usa `jjs`/Nashorn, preserva os arquivos originais e normaliza somente cópias temporárias: o namespace inconsistente do schema v1 e as restrições incompatíveis do schema v2.04:
 
