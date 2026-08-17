@@ -1,6 +1,10 @@
 # Analisador da Reforma Tributaria
 
+[![CI](https://github.com/Mateusallz1/analisador-reforma-tributaria/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Mateusallz1/analisador-reforma-tributaria/actions/workflows/ci.yml)
+
 Analisador local de IBS/CBS para documentos fiscais eletrônicos, com suporte a arquivos XML individuais e pacotes ZIP.
+
+O analisador reconhece NF-e, NFC-e, NFS-e padrão nacional e NFS-e ABRASF. Para ABRASF, a cobertura estrutural atual inclui respostas das famílias 1.00 e 2.04; o aplicativo não substitui a validação oficial do documento nem a autorização municipal.
 
 ## Executar localmente com Deno
 
@@ -79,9 +83,19 @@ O workflow de CI executa essa homologacao separadamente depois do gate principal
 
 O processamento roda localmente no navegador. Nenhuma variável de ambiente é necessária para analisar XMLs ou ZIPs.
 
-## Deploy em Vercel
+## Publicacao
 
-O projeto esta preparado para hospedagem estatica na Vercel:
+A aplicação é publicada automaticamente no GitHub Pages após um push aprovado na `main`:
+
+```text
+https://mateusallz1.github.io/analisador-reforma-tributaria/
+```
+
+O CI executa lint, testes funcionais, testes móveis, build e homologação com 5.000 XMLs antes da publicação.
+
+### Deploy em Vercel
+
+O projeto também está preparado para hospedagem estática na Vercel:
 
 - Framework: `Vite`
 - Install command: `npm ci`
@@ -121,7 +135,7 @@ A planilha oficial CST/cClassTrib pode ser convertida para o contrato JSON usado
 
 O conversor preserva os campos consumidos pela aplicação e informa CSTs e classificações adicionados, removidos ou alterados antes de gravar a nova base. Depois da conversão, execute `npm run check` e `npm run test:volume`.
 
-## Validacao local dos schemas ABRASF
+## Validação local dos schemas ABRASF
 
 Os schemas ABRASF mantidos em `src/data` podem ser verificados localmente, fora do fluxo principal de CI. O comando usa `jjs`/Nashorn, preserva os arquivos originais e normaliza somente cópias temporárias: o namespace inconsistente do schema v1 e as restrições incompatíveis do schema v2.04:
 
