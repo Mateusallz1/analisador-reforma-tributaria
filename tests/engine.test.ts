@@ -24,6 +24,17 @@ import {
   NATIONAL_NFSE_1_00,
   NATIONAL_NFSE_1_01,
 } from './fixtures/nfseNationalFixtures.ts';
+import {
+  ABRASF_NFSE_1_00_DIRECT,
+  ABRASF_NFSE_1_00_RESPONSE,
+  ABRASF_NFSE_2_04_FAIXA_RESPONSE,
+  ABRASF_NFSE_2_04_GERAR_RESPONSE,
+  ABRASF_NFSE_2_04_BY_RPS_RESPONSE,
+  ABRASF_NFSE_2_04_LOTE_RESPONSE,
+  ABRASF_NFSE_2_04_RESPONSE,
+  ABRASF_NFSE_2_04_SINCRONO_RESPONSE,
+  ABRASF_NFSE_2_04_TOMADO_RESPONSE,
+} from './fixtures/nfseAbrasfFixtures.ts';
 import taxBaseData from '../src/data/base_completa.json';
 import { ComplianceStatus, DocType, ItemClassificationStatus, NFeAnalysis, NFeType, ValidationStatus } from '../src/types.ts';
 import { assert, assertEquals } from './assertions.ts';
@@ -485,6 +496,39 @@ const tests: TestCase[] = [
       assertEquals(nestedAbrasfNfse.cnpjDestinatario, '52998224725');
       assertEquals(nestedAbrasfNfse.nomeDestinatario, 'Tomador aninhado');
 
+      for (const [fixture, version, number, issuer, recipient, description] of [
+        [ABRASF_NFSE_1_00_DIRECT, '1.00', '1001', '04252011000110', '11222333000144', 'Consultoria tributaria ABRASF 1'],
+        [ABRASF_NFSE_1_00_RESPONSE, '1.00', '1002', '04252011000110', '11222333000144', 'Consultoria tributaria ABRASF 1 resposta'],
+        [ABRASF_NFSE_2_04_RESPONSE, '2.04', '2041', '55666777000188', '52998224725', 'Consultoria tributaria ABRASF 2'],
+        [ABRASF_NFSE_2_04_BY_RPS_RESPONSE, '2.04', '2041', '55666777000188', '52998224725', 'Consultoria tributaria ABRASF 2'],
+        [ABRASF_NFSE_2_04_LOTE_RESPONSE, '2.04', '2041', '55666777000188', '52998224725', 'Consultoria tributaria ABRASF 2'],
+        [ABRASF_NFSE_2_04_FAIXA_RESPONSE, '2.04', '2041', '55666777000188', '52998224725', 'Consultoria tributaria ABRASF 2'],
+        [ABRASF_NFSE_2_04_GERAR_RESPONSE, '2.04', '2041', '55666777000188', '52998224725', 'Consultoria tributaria ABRASF 2'],
+        [ABRASF_NFSE_2_04_SINCRONO_RESPONSE, '2.04', '2041', '55666777000188', '52998224725', 'Consultoria tributaria ABRASF 2'],
+        [ABRASF_NFSE_2_04_TOMADO_RESPONSE, '2.04', '2041', '55666777000188', '52998224725', 'Consultoria tributaria ABRASF 2'],
+      ] as const) {
+        const parsedAbrasfNfse = parseNFeXml(fixture, `NFSe_ABRASF_${version}.xml`);
+        assertEquals(parsedAbrasfNfse.docType, 'NFSe');
+        assertEquals(parsedAbrasfNfse.documentLayout, 'NFSE_ABRASF');
+        assertEquals(parsedAbrasfNfse.documentKind, 'NFSE');
+        assertEquals(parsedAbrasfNfse.documentVersion, version);
+        assertEquals(parsedAbrasfNfse.numeroNota, number);
+        assertEquals(parsedAbrasfNfse.cnpjEmitente, issuer);
+        assertEquals(parsedAbrasfNfse.cnpjDestinatario, recipient);
+        assertEquals(parsedAbrasfNfse.itens?.[0]?.descricaoProduto, description);
+      }
+
+      const abrasfWithoutParties = parseNFeXml([
+        '<Nfse xmlns="http://www.abrasf.org.br/nfse.xsd"><InfNfse versao="2.04">',
+        '<Numero>2042</Numero><DataEmissao>2026-08-15</DataEmissao>',
+        '<Rps><IdentificacaoRps><Cnpj>99999999000199</Cnpj></IdentificacaoRps></Rps>',
+        '</InfNfse></Nfse>',
+      ].join(''), 'NFSe_ABRASF_sem_partes.xml');
+
+      assertEquals(abrasfWithoutParties.cnpjEmitente, '');
+      assertEquals(abrasfWithoutParties.cnpjDestinatario, '');
+      assertEquals(abrasfWithoutParties.empresaFoco.cnpj, '');
+
       const nationalNfseWithService = parseNFeXml([
         '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
         '<nDPS>9003</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi><tpEmit>1</tpEmit>',
@@ -590,6 +634,15 @@ const tests: TestCase[] = [
           '</ListaNfse></ConsultarNfseResposta>',
         ].join(''),
         'mais de uma NFS-e ABRASF',
+      );
+      assertParseError(
+        [
+          '<ConsultarNfseResposta xmlns="http://www.abrasf.org.br/nfse.xsd">',
+          '<ListaNfse xmlns=""><CompNfse><Nfse xmlns="http://www.abrasf.org.br/nfse.xsd">',
+          '<InfNfse versao="2.04"><Numero>1</Numero></InfNfse>',
+          '</Nfse></CompNfse></ListaNfse></ConsultarNfseResposta>',
+        ].join(''),
+        'Namespace inválido de NFS-e ABRASF',
       );
 
       const nationalStructureError = await processFiles([

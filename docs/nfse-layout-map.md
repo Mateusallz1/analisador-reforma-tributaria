@@ -29,7 +29,7 @@ Na referência desta pesquisa, o portal RTC informa que o leiaute disponível em
 
 A biblioteca oficial mantém as versões 1.00, 2.00, 2.01, 2.02, 2.03 e 2.04. O namespace esperado pelo parser atual é `http://www.abrasf.org.br/nfse.xsd`.
 
-O parser reconhece a estrutura de uma NFS-e emitida, mas não lê nem valida o atributo de versão. Consequentemente, não podemos afirmar cobertura integral de todas as versões apenas porque compartilham namespace ou nomes de tags.
+O parser registra o atributo de versão quando presente e aceita apenas assinaturas estruturais explícitas. As regressões atuais exercitam as famílias 1.x e 2.x com fixtures 1.00 e 2.04; isso não equivale a validar todos os municípios ou todas as versões apenas porque compartilham namespace ou nomes de tags.
 
 ## Matriz de reconhecimento
 
@@ -40,9 +40,9 @@ O parser reconhece a estrutura de uma NFS-e emitida, mas não lê nem valida o a
 | `NFSE_NATIONAL_DPS` | raiz `DPS`, namespace nacional, filho direto `infDPS` | Declaração anterior à NFS-e | Coberto semanticamente | Manter pendente e exibir o papel definido por `tpEmit` |
 | `NFSE_NATIONAL_ISSUED` | raiz `NFSe`, namespace nacional, filho direto `infNFSe`; pode conter `DPS/infDPS` | Nota emitida | Coberto estruturalmente; versões 1.00 e 1.01 exercitadas | Manter cobertura de campos IBS/CBS por amostra real |
 | `NFSE_NATIONAL_EVENT` | raiz `pedRegEvento` ou `evento` | Evento fiscal | Rejeitado por projeto | Continuar fora do fluxo de notas |
-| `NFSE_ABRASF_DIRECT` | raiz `Nfse`, namespace ABRASF, filho direto `InfNfse` | Nota emitida | Coberto estruturalmente | Validar com fixtures das famílias 1.x e 2.x |
-| `NFSE_ABRASF_COMP` | `CompNfse/Nfse/InfNfse` em documento com namespace ABRASF | Nota emitida encapsulada | Coberto | Manter limite de uma nota por arquivo |
-| `NFSE_ABRASF_RESPONSE_SINGLE` | resposta ABRASF com exatamente um `CompNfse/Nfse/InfNfse` | Resposta contendo uma nota | Parcial | Testado com `ConsultarNfseResposta`; catalogar outros envelopes somente com fixtures |
+| `NFSE_ABRASF_DIRECT` | raiz `Nfse`, namespace ABRASF, filho direto `InfNfse` | Nota emitida | Coberto com fixture 1.00 | Manter leitura versionada sem código por município |
+| `NFSE_ABRASF_COMP` | `CompNfse/Nfse/InfNfse` em documento com namespace ABRASF | Nota emitida encapsulada | Coberto com fixture 2.04 | Manter limite de uma nota por arquivo |
+| `NFSE_ABRASF_RESPONSE_SINGLE` | respostas ABRASF catalogadas com exatamente um `CompNfse/Nfse/InfNfse` | Resposta contendo uma nota | Coberto com `ConsultarNfseResposta` 1.00 e `ConsultarNfseRpsResposta`, `ConsultarLoteRpsResposta`, `ConsultarNfseServicoPrestadoResposta`, `ConsultarNfseServicoTomadoResposta`, `ConsultarNfseFaixaResposta`, `GerarNfseResposta` e `EnviarLoteRpsSincronoResposta` 2.04 | Adicionar novos envelopes somente com perfil explícito e fixture |
 | `NFSE_ABRASF_RESPONSE_BATCH` | resposta ABRASF com mais de uma `Nfse` | Lote de notas emitidas | Rejeitado por projeto | Exigir separação ou criar processamento de lote em mudança própria |
 | `ABRASF_RPS_REQUEST` | `Rps/InfRps`, `GerarNfseEnvio` ou `EnviarLoteRpsEnvio` sem `Nfse/InfNfse` | Solicitação, não nota emitida | Rejeitado por projeto | Não classificar como NFS-e |
 | `SOAP_WRAPPED_FISCAL_XML` | raiz `Envelope` SOAP e payload fiscal em `Body` | Transporte | Não suportado | Desencapsular somente por perfil explícito e com fixture real |
@@ -54,15 +54,15 @@ O parser reconhece a estrutura de uma NFS-e emitida, mas não lê nem valida o a
 | --- | --- | --- | --- | --- | --- |
 | Nacional emitida | `nNFSe`, `dhEmi`, `dhEmis`, `DataEmissao`, `dEmi` | `emit`/`infEmit` e `toma`/`infToma`, inclusive dentro de DPS | `serv`, `xDescServ`, `cTribNac`, `cNBS` | Classificação na DPS e cálculos na NFS-e | Há testes de emissão, serviço, valores e redução |
 | DPS nacional | `nDPS` e `dhEmi` | `prest`, `toma` e `interm`, com foco definido por `tpEmit` | `serv/xDescServ` | Grupo da declaração pode ser lido | Mantém `docType=NFSe` para os filtros atuais, mas expõe `documentKind=DPS`, papel e situação pendente |
-| ABRASF emitida | `Numero` e `DataEmissao` | `PrestadorServico`, `Prestador`, `TomadorServico`, `Tomador` e identificações aninhadas | `Servico/Discriminacao` e aliases já tratados | Busca estrutural genérica por `IBSCBS` | Cobertura não é versionada e precisa de fixtures válidas 1.x/2.x |
+| ABRASF emitida | `Numero` e `DataEmissao` | `PrestadorServico`, `Prestador`, `TomadorServico`, `Tomador`, `CpfCnpj` e identificações aninhadas | `Servico/Discriminacao` e aliases já tratados | Busca estrutural genérica por `IBSCBS` | Fixtures 1.00 direta e 2.04 encapsulada cobrem os caminhos atuais |
 
 ## Lacunas encontradas
 
 1. `DPS` e `NFSe` continuam na mesma família de `DocumentLayout`, mas o resultado agora expõe `documentKind` para preservar a diferença entre declaração e nota emitida.
 2. A DPS agora interpreta `tpEmit` e não é mais apresentada como operação de saída validada da prestadora.
 3. A versão declarada agora é registrada para NF-e e para o padrão nacional; no ABRASF ela continua opcional quando não está presente no XML.
-4. A cobertura ABRASF é baseada em assinaturas estruturais e fixtures sintéticas, não em uma matriz validada por versão.
-5. A amostra demonstrativa ABRASF foi ajustada para uma resposta `ConsultarNfseResposta/ListaNfse/CompNfse`; ela continua sendo sintética e não é evidência de aderência completa a uma versão ABRASF.
+4. A cobertura ABRASF é baseada em assinaturas estruturais e fixtures sintéticas; a aplicação não valida o XML contra o XSD oficial.
+5. As fixtures sanitizadas exercitam uma nota direta e uma resposta `ConsultarNfseResposta/ListaNfse/CompNfse` 1.00, além de respostas 2.04 por serviço prestado, serviço tomado, RPS, lote, faixa, geração e envio síncrono; elas não são evidência de aderência completa a todos os municípios.
 6. Envelopes SOAP são rejeitados porque o reconhecedor exige que a raiz já pertença ao namespace fiscal.
 7. Um XML ABRASF com múltiplas notas é rejeitado; o processamento atual produz um resultado por arquivo.
 8. Quando a raiz fiscal é reconhecida, erros estruturais preservam a família e a versão declarada no painel e no relatório; formatos proprietários continuam genéricos por projeto.
@@ -77,7 +77,7 @@ Implementado nesta etapa:
 - A UI e o relatório apresentam DPS como declaração, não como nota fiscal emitida.
 - `tpEmit` define prestador, tomador ou intermediário como papel responsável e empresa em foco.
 - A análise fiscal de DPS permanece pendente no nível documental, sem mascarar o `itemStatus` técnico.
-- A amostra ABRASF usa uma resposta estruturalmente coerente com `ListaNfse/CompNfse`.
+- As amostras ABRASF usam respostas estruturalmente coerentes com `ListaNfse/CompNfse` e perfis explicitamente catalogados.
 
 ### P1 - Registro de perfil
 
@@ -90,9 +90,17 @@ Implementado nesta etapa:
 
 ### P2 - ABRASF por estrutura
 
-- Adicionar uma fixture sanitizada da família 1.x e outra da família 2.x.
-- Cobrir nota direta, `CompNfse`, resposta com uma nota e identificação aninhada.
-- Não criar código por município; um adaptador deve corresponder a uma assinatura reutilizável.
+Implementado nesta etapa:
+
+- Fixtures sanitizadas das famílias 1.x e 2.x, representadas por ABRASF 1.00 e 2.04.
+- Reconhecimento explícito de `Nfse`, `CompNfse` e respostas ABRASF catalogadas.
+- Cobertura de resposta com uma nota, identificação direta e identificação aninhada com `CpfCnpj`.
+- Validação do namespace em `ListaNfse`, `CompNfse`, `Nfse` e `InfNfse`.
+- Regressões para `ConsultarNfseFaixaResposta`, `GerarNfseResposta` e `EnviarLoteRpsSincronoResposta`.
+- Rejeição de raízes ABRASF não catalogadas e de respostas com mais de uma nota.
+- Nenhum código específico por município foi adicionado.
+
+O script `scripts/validate-abrasf-schemas.ps1` valida a resposta 1.00 contra uma cópia temporária com o namespace corrigido e as respostas 2.04 contra uma cópia temporária com as restrições incompatíveis removidas. Isso é um diagnóstico de compatibilidade do material de referência, não uma validação executada pelo analisador.
 
 ### P3 - Demanda observada
 
