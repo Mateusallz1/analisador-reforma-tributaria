@@ -1,4 +1,4 @@
-# Analisador da Reforma Tributaria
+# Analisador da Reforma Tributária
 
 [![CI](https://github.com/Mateusallz1/analisador-reforma-tributaria/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Mateusallz1/analisador-reforma-tributaria/actions/workflows/ci.yml)
 
@@ -8,7 +8,7 @@ O analisador reconhece NF-e, NFC-e, NFS-e padrão nacional e NFS-e ABRASF. Para 
 
 ## Executar localmente com Deno
 
-**Pre-requisito:** Deno 2.x.
+**Pré-requisito:** Deno 2.x.
 
 1. Instale/cacheie as dependências npm declaradas no projeto:
 
@@ -33,9 +33,9 @@ O analisador reconhece NF-e, NFC-e, NFS-e padrão nacional e NFS-e ABRASF. Para 
 ```bash
 deno task dev      # servidor Vite local
 deno task lint     # TypeScript sem emitir arquivos
-deno task build    # build de producao em dist/
+deno task build    # build de produção em dist/
 deno task test     # testes da engine fiscal em browser headless
-deno task test:volume # homologacao com 5.000 XMLs em browser headless
+deno task test:volume # homologação com 5.000 XMLs em browser headless
 deno task check    # lint + test + build
 deno task preview  # preview do build
 deno task clean    # remove dist/ e server.js
@@ -57,7 +57,7 @@ npm run check
 
 ## Testes
 
-A suite de engine fiscal roda em um navegador headless via Vite para exercitar o mesmo `DOMParser` usado pela aplicação em produção. Ela cobre parsing das amostras, status por item, KPIs e agrupamento por empresa em foco.
+A suíte da engine fiscal roda em um navegador headless via Vite para exercitar o mesmo `DOMParser` usado pela aplicação em produção. Ela cobre parsing das amostras, status por item, KPIs e agrupamento por empresa em foco.
 
 ```bash
 deno task test
@@ -65,11 +65,11 @@ deno task test
 npm run test
 ```
 
-Pre-requisito adicional: Chrome ou Edge instalado. Se o navegador estiver em um caminho não padrão, defina `CHROME_PATH` apontando para o executável.
+Pré-requisito adicional: Chrome ou Edge instalado. Se o navegador estiver em um caminho não padrão, defina `CHROME_PATH` apontando para o executável.
 
-### Homologacao de volume
+### Homologação de volume
 
-O teste de volume gera um ZIP deterministico com 5.000 XMLs e valida processamento, agrupamento por empresa, paginacao, filtros e tempos de interacao:
+O teste de volume gera um ZIP determinístico com 5.000 XMLs e valida processamento, agrupamento por empresa, paginação, filtros e tempos de interação:
 
 ```bash
 deno task test:volume
@@ -77,13 +77,13 @@ deno task test:volume
 npm run test:volume
 ```
 
-O workflow de CI executa essa homologacao separadamente depois do gate principal para que uma regressao de escala seja identificada sem misturar seu diagnostico com os testes funcionais.
+O workflow de CI executa essa homologação separadamente depois do gate principal para que uma regressão de escala seja identificada sem misturar seu diagnóstico com os testes funcionais.
 
-## Configuracao
+## Configuração
 
 O processamento roda localmente no navegador. Nenhuma variável de ambiente é necessária para analisar XMLs ou ZIPs.
 
-## Publicacao
+## Publicação
 
 A aplicação é publicada automaticamente no GitHub Pages após um push aprovado na `main`:
 
@@ -101,7 +101,7 @@ O projeto também está preparado para hospedagem estática na Vercel:
 - Install command: `npm ci`
 - Build command: `npm run build`
 - Output directory: `dist`
-- Variaveis de ambiente: nenhuma
+- Variáveis de ambiente: nenhuma
 
 Para criar um preview a partir da raiz do projeto:
 
@@ -109,7 +109,7 @@ Para criar um preview a partir da raiz do projeto:
 npx vercel
 ```
 
-Depois de validar o preview, o deploy de producao pode ser executado com:
+Depois de validar o preview, o deploy de produção pode ser executado com:
 
 ```bash
 npx vercel --prod
@@ -117,7 +117,7 @@ npx vercel --prod
 
 O deploy deve ser feito somente depois que `npm run check` passar localmente e a CI estiver verde.
 
-## Atualizacao da base fiscal
+## Atualização da base fiscal
 
 A planilha oficial CST/cClassTrib pode ser convertida para o contrato JSON usado pelo analisador com o script versionado:
 
