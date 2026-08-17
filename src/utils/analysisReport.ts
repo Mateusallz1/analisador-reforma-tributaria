@@ -47,12 +47,24 @@ function formatDateTime(value: string): string {
 }
 
 function documentTypeLabel(note: NFeAnalysis): string {
-  return `${note.docType} (${note.documentLayout})`;
+  const documentLabel = note.documentKind === 'DPS' ? 'DPS' : note.docType;
+  return `${documentLabel} (${note.documentLayout})`;
 }
 
 function operationLabel(note: NFeAnalysis): string {
+  if (note.documentKind === 'DPS') {
+    const role = note.dpsIssuerRole === 'PRESTADOR'
+      ? 'prestador'
+      : note.dpsIssuerRole === 'TOMADOR'
+        ? 'tomador'
+        : note.dpsIssuerRole === 'INTERMEDIARIO'
+          ? 'intermediário'
+          : 'papel não identificado';
+    return `DPS - papel: ${role}`;
+  }
   if (note.operationStatus === 'MISSING') return 'Operação não informada';
   if (note.operationStatus === 'INVALID') return 'Operação inválida';
+  if (note.operationStatus === 'NOT_VERIFIABLE') return 'Operação não verificável';
   return note.tipoNota === 'SAÍDA' ? 'Saída' : 'Entrada';
 }
 
@@ -77,13 +89,14 @@ function getActionableItems(note: NFeAnalysis): ItemValidation[] {
     return actionable;
   }
 
+  const hasDetailedItems = items.length > 0;
   return [{
     numeroItem: 0,
-    descricaoProduto: 'Documento sem item/serviço detalhado',
+    descricaoProduto: hasDetailedItems ? 'Pendência documental' : 'Documento sem item/serviço detalhado',
     contemIBSCBS: note.contemIBSCBS,
     validationStatus: note.validationStatus || 'incompleto',
     validationReason: note.validationReason || 'Documento exige revisão.',
-    itemStatus: 'incompleto',
+    itemStatus: note.status === 'PENDENTE' ? 'pendente' : 'incompleto',
   }];
 }
 

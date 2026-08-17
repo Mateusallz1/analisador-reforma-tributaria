@@ -443,9 +443,8 @@ export const SAMPLE_NFES: SampleNfe[] = [
   {
     fileName: 'NFSe_2026_Prestador_Incompleto.xml',
     xmlContent: `<?xml version="1.0" encoding="UTF-8"?>
-<EnviarLoteRpsEnvio xmlns="http://www.abrasf.org.br/nfse.xsd">
-  <LoteRps>
-    <Numero>412</Numero>
+<ConsultarNfseResposta xmlns="http://www.abrasf.org.br/nfse.xsd">
+  <ListaNfse>
     <CompNfse>
       <Nfse>
         <InfNfse>
@@ -473,8 +472,8 @@ export const SAMPLE_NFES: SampleNfe[] = [
         </InfNfse>
       </Nfse>
     </CompNfse>
-  </LoteRps>
-</EnviarLoteRpsEnvio>`
+  </ListaNfse>
+</ConsultarNfseResposta>`
   },
   {
     fileName: 'NFe_SemEmitente_DadosIncompletos.xml',

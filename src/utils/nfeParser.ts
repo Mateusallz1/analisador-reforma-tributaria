@@ -1,4 +1,13 @@
-import { DataIntegrityStatus, DocumentLayout, NFeAnalysis, NFeType, DocType, CompanyInfo } from '../types';
+import {
+  CompanyInfo,
+  DataIntegrityStatus,
+  DocumentKind,
+  DocumentLayout,
+  DpsIssuerRole,
+  NFeAnalysis,
+  NFeType,
+  DocType,
+} from '../types';
 import { formatEmissionDate, getElementsByLocalName, getTagValue, parseXmlDate } from './xmlHelpers';
 import { TAX_BASE_INFO, analyzeTaxCompliance } from './taxValidation';
 import { getTaxpayerDocumentStatus } from './taxpayerId';
@@ -13,6 +22,7 @@ const UNSUPPORTED_FORMAT_MESSAGE =
 interface RecognizedFiscalDocument {
   docType: DocType;
   documentLayout: DocumentLayout;
+  documentKind: DocumentKind;
   dataElement: Element;
   ideElement?: Element;
 }
@@ -84,16 +94,21 @@ interface NfseParty {
 function readNfseParty(
   dataElement: Element,
   documentLayout: DocumentLayout,
-  role: 'prestador' | 'tomador',
+  role: 'prestador' | 'tomador' | 'intermediario',
 ): NfseParty | null {
   const isPrestador = role === 'prestador';
+  const isTomador = role === 'tomador';
   const partyNames = documentLayout === 'NFSE_ABRASF'
     ? isPrestador
       ? ['PrestadorServico', 'Prestador', 'IdentificacaoPrestador']
-      : ['TomadorServico', 'Tomador', 'IdentificacaoTomador']
+      : isTomador
+        ? ['TomadorServico', 'Tomador', 'IdentificacaoTomador']
+        : ['Intermediario', 'IntermediarioServico', 'IdentificacaoIntermediario']
     : isPrestador
       ? ['emit', 'infEmit']
-      : ['toma', 'Tomador', 'infToma'];
+      : isTomador
+        ? ['toma', 'Tomador', 'infToma']
+        : ['interm', 'Intermediario', 'infIntermediario'];
   const partyElement = documentLayout === 'NFSE_NATIONAL'
     ? findNationalNfsePartyElement(dataElement, partyNames)
     : findAbrasfNfsePartyElement(dataElement, partyNames);
@@ -101,7 +116,11 @@ function readNfseParty(
   if (!partyElement) return null;
 
   const identityElement = getDirectChildByLocalNames(partyElement, [
-    isPrestador ? 'IdentificacaoPrestador' : 'IdentificacaoTomador',
+    isPrestador
+      ? 'IdentificacaoPrestador'
+      : isTomador
+        ? 'IdentificacaoTomador'
+        : 'IdentificacaoIntermediario',
   ]);
   const documentSource = identityElement || partyElement;
   const document = getDirectTagValue(documentSource, ['CNPJ', 'Cnpj', 'CPF', 'Cpf']) ||
@@ -153,6 +172,7 @@ function recognizeNFeDocument(root: Element): RecognizedFiscalDocument | null {
   return {
     docType: model === '65' ? 'NFCe' : 'NFe',
     documentLayout: 'NFE',
+    documentKind: model === '65' ? 'NFCE' : 'NFE',
     dataElement: infNFeElement,
     ideElement,
   };
@@ -170,6 +190,7 @@ function recognizeNationalNfseDocument(root: Element): RecognizedFiscalDocument 
   return {
     docType: 'NFSe',
     documentLayout: 'NFSE_NATIONAL',
+    documentKind: rootName === 'DPS' ? 'DPS' : 'NFSE',
     dataElement,
   };
 }
@@ -200,6 +221,7 @@ function recognizeAbrasfNfseDocument(xmlDoc: Document, root: Element): Recognize
   return {
     docType: 'NFSe',
     documentLayout: 'NFSE_ABRASF',
+    documentKind: 'NFSE',
     dataElement,
   };
 }
@@ -246,6 +268,7 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
   const {
     docType,
     documentLayout,
+    documentKind,
     dataElement,
     ideElement,
   } = recognizeFiscalDocument(xmlDoc);
@@ -260,6 +283,8 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
   let nomeEmitente = 'Emitente não identificado';
   let cnpjDestinatario = '';
   let nomeDestinatario = 'Destinatário não identificado';
+  let dpsIssuerRole: DpsIssuerRole | undefined;
+  let dpsFocusParty: NfseParty | null = null;
 
   if (docType === 'NFSe') {
     numeroNota = getTagValue(dataElement, 'nNFSe') || getTagValue(dataElement, 'Numero') ||
@@ -272,7 +297,6 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     emissaoDate = parseXmlDate(rawDate);
     emissionDateStatus = !rawDate ? 'MISSING' : emissaoDate ? 'VALID' : 'INVALID';
     tipoNota = 'SAÍDA';
-    operationStatus = 'VALID';
 
     const prestador = readNfseParty(dataElement, documentLayout, 'prestador');
     cnpjEmitente = prestador?.document || '';
@@ -281,6 +305,29 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     const tomador = readNfseParty(dataElement, documentLayout, 'tomador');
     cnpjDestinatario = tomador?.document || '';
     nomeDestinatario = tomador?.name || 'Tomador Não Identificado';
+
+    if (documentKind === 'DPS') {
+      const tpEmit = getDirectTagValue(dataElement, ['tpEmit']);
+      dpsIssuerRole = tpEmit === '1'
+        ? 'PRESTADOR'
+        : tpEmit === '2'
+          ? 'TOMADOR'
+          : tpEmit === '3'
+            ? 'INTERMEDIARIO'
+            : 'NAO_IDENTIFICADO';
+      operationStatus = !tpEmit ? 'MISSING' : dpsIssuerRole === 'NAO_IDENTIFICADO' ? 'INVALID' : 'NOT_VERIFIABLE';
+
+      const intermediary = readNfseParty(dataElement, documentLayout, 'intermediario');
+      dpsFocusParty = dpsIssuerRole === 'PRESTADOR'
+        ? prestador
+        : dpsIssuerRole === 'TOMADOR'
+          ? tomador
+          : dpsIssuerRole === 'INTERMEDIARIO'
+            ? intermediary
+            : null;
+    } else {
+      operationStatus = 'VALID';
+    }
   } else {
     // Standard NF-e and NFC-e
     if (!ideElement) {
@@ -321,11 +368,21 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     }
   }
 
-  // 4. Resolve "empresa em foco" based on rule:
+  // 4. Resolve "empresa em foco" based on document operation and DPS issuer role.
   // Se for SAÍDA (tpNF=1): a empresa em foco é o EMITENTE (emit)
   // Se for ENTRADA (tpNF=0): a empresa em foco é o DESTINATÁRIO (dest)
   let empresaFoco: CompanyInfo;
-  if (operationStatus !== 'VALID') {
+  if (documentKind === 'DPS') {
+    empresaFoco = dpsFocusParty?.document
+      ? {
+          cnpj: dpsFocusParty.document,
+          nome: dpsFocusParty.name || 'Empresa em foco sem nome',
+        }
+      : {
+          cnpj: '',
+          nome: 'Empresa em foco não determinada',
+        };
+  } else if (operationStatus !== 'VALID') {
     empresaFoco = {
       cnpj: '',
       nome: 'Empresa em foco não determinada',
@@ -358,11 +415,22 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     cClassTrib,
     cstDesc,
     cClassTribDesc,
-    validationStatus,
-    validationReason,
-    status,
+    validationStatus: taxValidationStatus,
+    validationReason: taxValidationReason,
+    status: taxValidationDocumentStatus,
     itens,
   } = taxValidation;
+
+  const validationStatus = documentKind === 'DPS' ? 'pendente' : taxValidationStatus;
+  const validationReason = documentKind === 'DPS'
+    ? [
+        dpsIssuerRole === 'NAO_IDENTIFICADO'
+          ? 'DPS sem tpEmit válido. O papel responsável pelo documento não pôde ser determinado.'
+          : 'Documento identificado como DPS, uma declaração de prestação de serviço. A análise não representa uma NFS-e emitida.',
+        taxValidationReason,
+      ].filter(Boolean).join(' ')
+    : taxValidationReason;
+  const status = documentKind === 'DPS' ? 'PENDENTE' : taxValidationDocumentStatus;
 
   return {
     id: `${docType}-${getXmlFingerprint(xmlText)}`,
@@ -374,6 +442,8 @@ export function parseNFeXml(xmlText: string, fileName: string): NFeAnalysis {
     operationStatus,
     docType,
     documentLayout,
+    documentKind,
+    dpsIssuerRole,
     cnpjEmitente,
     nomeEmitente,
     emitterDocumentStatus,

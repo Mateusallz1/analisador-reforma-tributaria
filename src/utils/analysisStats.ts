@@ -18,7 +18,9 @@ export function getNoteItemCount(note: NFeAnalysis): number {
 }
 
 function getFallbackItemStatus(note: NFeAnalysis): ItemClassificationStatus {
-  return note.status === 'CONFORME' ? 'conforme' : 'N/A';
+  if (note.status === 'CONFORME') return 'conforme';
+  if (note.status === 'PENDENTE') return 'pendente';
+  return 'N/A';
 }
 
 export function calculateItemStats(notes: NFeAnalysis[]): ItemStats {
@@ -53,7 +55,7 @@ export function calculateItemStats(notes: NFeAnalysis[]): ItemStats {
         stats.compliantItems += 1;
       } else if (item.itemStatus === 'N/A' || !item.itemStatus) {
         stats.outOfScopeItems += 1;
-      } else if (item.itemStatus === 'pendente' || note.status === 'PENDENTE') {
+      } else if (item.itemStatus === 'pendente') {
         stats.pendingItems += 1;
       } else {
         stats.nonCompliantItems += 1;
