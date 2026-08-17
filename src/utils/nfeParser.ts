@@ -125,16 +125,80 @@ function findNationalNfsePartyElement(dataElement: Element, localNames: string[]
 
 function findAbrasfNfsePartyElement(dataElement: Element, localNames: string[]): Element | null {
   const directParty = getDirectChildByLocalNames(dataElement, localNames);
-  if (directParty) return directParty;
 
   const declarationElement = getDirectChildByLocalNames(dataElement, ['DeclaracaoPrestacaoServico']);
   const declarationDataElement = declarationElement
     ? getDirectChildByLocalNames(declarationElement, ['InfDeclaracaoPrestacaoServico'])
     : getDirectChildByLocalNames(dataElement, ['InfDeclaracaoPrestacaoServico']);
-
-  return declarationDataElement
+  const declarationParty = declarationDataElement
     ? getDirectChildByLocalNames(declarationDataElement, localNames)
     : null;
+
+  if (directParty && hasAbrasfNfsePartyDocument(directParty)) return directParty;
+  return declarationParty || directParty;
+}
+
+function hasAbrasfNfsePartyDocument(partyElement: Element): boolean {
+  const identityElements = [
+    partyElement,
+    ...getDirectChildrenByLocalName(partyElement, 'CpfCnpj'),
+    ...getDirectChildrenByLocalName(partyElement, 'IdentificacaoPrestador'),
+    ...getDirectChildrenByLocalName(partyElement, 'IdentificacaoTomador'),
+    ...getDirectChildrenByLocalName(partyElement, 'IdentificacaoIntermediario'),
+  ];
+
+  return identityElements.some((element) => Boolean(
+    getDirectTagValue(element, ['CNPJ', 'Cnpj', 'CPF', 'Cpf']),
+  ));
+}
+
+type AbrasfResponseProfile = 'DIRECT_COMP_NFSE' | 'LISTA_NFSE';
+
+const ABRASF_RESPONSE_PROFILES: Record<string, AbrasfResponseProfile> = {
+  ConsultarNfseResposta: 'LISTA_NFSE',
+  ConsultarNfseRpsResposta: 'DIRECT_COMP_NFSE',
+  ConsultarLoteRpsResposta: 'LISTA_NFSE',
+  ConsultarNfseServicoPrestadoResposta: 'LISTA_NFSE',
+  ConsultarNfseServicoTomadoResposta: 'LISTA_NFSE',
+  ConsultarNfseFaixaResposta: 'LISTA_NFSE',
+  EnviarLoteRpsSincronoResposta: 'LISTA_NFSE',
+  GerarNfseResposta: 'LISTA_NFSE',
+};
+
+function getAbrasfDirectChildrenByLocalName(
+  parent: Element,
+  localName: string,
+  context: string,
+): Element[] {
+  const children = getDirectChildrenByLocalName(parent, localName);
+  children.forEach((child) => assertNamespace(child, NFSE_ABRASF_NAMESPACE, context));
+  return children;
+}
+
+function getAbrasfNfseElements(root: Element): Element[] {
+  const rootName = getElementLocalName(root);
+
+  if (rootName === 'Nfse') return [root];
+
+  if (rootName === 'CompNfse') {
+    return getAbrasfDirectChildrenByLocalName(root, 'Nfse', 'NFS-e ABRASF');
+  }
+
+  const responseProfile = ABRASF_RESPONSE_PROFILES[rootName];
+  if (responseProfile === 'DIRECT_COMP_NFSE') {
+    return getAbrasfDirectChildrenByLocalName(root, 'CompNfse', 'NFS-e ABRASF')
+      .flatMap((compNfse) => getAbrasfDirectChildrenByLocalName(compNfse, 'Nfse', 'NFS-e ABRASF'));
+  }
+
+  if (responseProfile === 'LISTA_NFSE') {
+    const listaNfseElements = getAbrasfDirectChildrenByLocalName(root, 'ListaNfse', 'NFS-e ABRASF');
+    if (listaNfseElements.length !== 1) return [];
+
+    return getAbrasfDirectChildrenByLocalName(listaNfseElements[0], 'CompNfse', 'NFS-e ABRASF')
+      .flatMap((compNfse) => getAbrasfDirectChildrenByLocalName(compNfse, 'Nfse', 'NFS-e ABRASF'));
+  }
+
+  return [];
 }
 
 interface NfseParty {
@@ -166,6 +230,10 @@ function readNfseParty(
 
   if (!partyElement) return null;
 
+  const directPartyElement = documentLayout === 'NFSE_ABRASF'
+    ? getDirectChildByLocalNames(dataElement, partyNames)
+    : null;
+
   const identityElement = getDirectChildByLocalNames(partyElement, [
     isPrestador
       ? 'IdentificacaoPrestador'
@@ -174,10 +242,25 @@ function readNfseParty(
         : 'IdentificacaoIntermediario',
   ]);
   const documentSource = identityElement || partyElement;
+  const nestedDocumentSource = getDirectChildByLocalNames(documentSource, ['CpfCnpj']);
+  const partyNestedDocumentSource = getDirectChildByLocalNames(partyElement, ['CpfCnpj']);
   const document = getDirectTagValue(documentSource, ['CNPJ', 'Cnpj', 'CPF', 'Cpf']) ||
-    getDirectTagValue(partyElement, ['CNPJ', 'Cnpj', 'CPF', 'Cpf']) || '';
-  const name = getDirectTagValue(partyElement, ['RazaoSocial', 'razaoSocial', 'xNome', 'xRazao']) ||
-    getDirectTagValue(identityElement, ['RazaoSocial', 'razaoSocial', 'xNome', 'xRazao']) || '';
+    getDirectTagValue(nestedDocumentSource, ['CNPJ', 'Cnpj', 'CPF', 'Cpf']) ||
+    getDirectTagValue(partyElement, ['CNPJ', 'Cnpj', 'CPF', 'Cpf']) ||
+    getDirectTagValue(partyNestedDocumentSource, ['CNPJ', 'Cnpj', 'CPF', 'Cpf']) || '';
+  const nameSources = directPartyElement && directPartyElement !== partyElement
+    ? [partyElement, directPartyElement]
+    : [partyElement];
+  const name = nameSources.reduce(
+    (currentName, source) => {
+      if (currentName) return currentName;
+      return getDirectTagValue(source, ['RazaoSocial', 'razaoSocial', 'xNome', 'xRazao']) ||
+        (source === partyElement && identityElement
+          ? getDirectTagValue(identityElement, ['RazaoSocial', 'razaoSocial', 'xNome', 'xRazao'])
+          : '') || '';
+    },
+    '',
+  );
 
   return { document, name };
 }
@@ -257,19 +340,19 @@ function recognizeNationalNfseDocument(root: Element): RecognizedFiscalDocument 
   });
 }
 
-function recognizeAbrasfNfseDocument(xmlDoc: Document, root: Element): RecognizedFiscalDocument | null {
+function recognizeAbrasfNfseDocument(root: Element): RecognizedFiscalDocument | null {
   if (root.namespaceURI !== NFSE_ABRASF_NAMESPACE) return null;
 
-  return withFiscalDocumentContext({ documentLayout: 'NFSE_ABRASF', documentKind: 'NFSE' }, () => {
-    const nfseElements = getElementsByLocalName(xmlDoc, 'Nfse').filter((element) => {
-      const parent = element.parentElement;
-      return getElementLocalName(element) === 'Nfse' &&
-        element.namespaceURI === NFSE_ABRASF_NAMESPACE &&
-        (element === root ||
-          (!!parent &&
-            getElementLocalName(parent) === 'CompNfse' &&
-            parent.namespaceURI === NFSE_ABRASF_NAMESPACE));
-    });
+  const versionHint = getAttributeValue(root, 'versao') ||
+    getAttributeValue(getElementsByLocalName(root, 'Nfse')[0] || null, 'versao') ||
+    getAttributeValue(getElementsByLocalName(root, 'InfNfse')[0] || null, 'versao');
+
+  return withFiscalDocumentContext({
+    documentLayout: 'NFSE_ABRASF',
+    documentKind: 'NFSE',
+    documentVersion: versionHint,
+  }, () => {
+    const nfseElements = getAbrasfNfseElements(root);
 
     if (nfseElements.length === 0) {
       throw new Error('Estrutura inválida de NFS-e ABRASF: nenhuma NFS-e emitida foi encontrada no XML.');
@@ -278,6 +361,7 @@ function recognizeAbrasfNfseDocument(xmlDoc: Document, root: Element): Recognize
       throw new Error('O XML contém mais de uma NFS-e ABRASF. Separe cada nota em um arquivo para análise.');
     }
 
+    assertNamespace(nfseElements[0], NFSE_ABRASF_NAMESPACE, 'NFS-e ABRASF');
     const dataElement = getSingleDirectChild(nfseElements[0], 'InfNfse', 'NFS-e ABRASF');
     assertNamespace(dataElement, NFSE_ABRASF_NAMESPACE, 'NFS-e ABRASF');
 
@@ -297,7 +381,7 @@ function recognizeFiscalDocument(xmlDoc: Document): RecognizedFiscalDocument {
 
   const recognizedDocument = recognizeNFeDocument(root) ||
     recognizeNationalNfseDocument(root) ||
-    recognizeAbrasfNfseDocument(xmlDoc, root);
+    recognizeAbrasfNfseDocument(root);
 
   if (!recognizedDocument) throw new Error(UNSUPPORTED_FORMAT_MESSAGE);
   return recognizedDocument;
