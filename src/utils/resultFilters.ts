@@ -45,7 +45,11 @@ export function getFilteredResultGroups(allResults: NFeAnalysis[], filters: Resu
   const searchTerm = filters.searchTerm.trim();
   const matches = allResults.filter((note) => {
     const matchStatus = filters.statusFilter === 'ALL' || note.status === filters.statusFilter;
-    const matchType = filters.typeFilter === 'ALL' || note.tipoNota === filters.typeFilter;
+    const matchType = filters.typeFilter === 'ALL' || (
+      note.operationStatus === 'VALID' &&
+      note.documentKind !== 'DPS' &&
+      note.tipoNota === filters.typeFilter
+    );
     const matchDocType = filters.docTypeFilter === 'ALL' || note.docType === filters.docTypeFilter;
 
     return matchesSearchTerm(note, searchTerm) && matchStatus && matchType && matchDocType;

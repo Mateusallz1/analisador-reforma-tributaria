@@ -83,16 +83,35 @@ function EmissionSummary({ note }: { note: NFeAnalysis }) {
   );
 }
 function OperationSummary({ note }: { note: NFeAnalysis }) {
+  const isDps = note.documentKind === 'DPS';
   const isSaida = note.tipoNota === 'SAÍDA';
   const operationIsValid = note.operationStatus === 'VALID';
-  const operationLabel = operationIsValid ? (isSaida ? 'Saída' : 'Entrada') : 'Não verificada';
+  const dpsRoleLabel = note.dpsIssuerRole === 'PRESTADOR'
+    ? 'Prestador'
+    : note.dpsIssuerRole === 'TOMADOR'
+      ? 'Tomador'
+      : note.dpsIssuerRole === 'INTERMEDIARIO'
+        ? 'Intermediário'
+        : 'Papel não identificado';
+  const operationLabel = isDps
+    ? `DPS · ${dpsRoleLabel}`
+    : operationIsValid
+      ? (isSaida ? 'Saída' : 'Entrada')
+      : 'Não verificada';
+  const operationTitle = isDps
+    ? 'DPS é uma declaração de prestação de serviço; não representa uma NFS-e emitida.'
+    : operationIsValid
+      ? undefined
+      : note.operationStatus === 'MISSING'
+        ? 'tpNF não informado'
+        : 'tpNF inválido';
 
   return (
     <span
-      className={`inline-flex w-fit items-center gap-1 text-xs font-medium ${operationIsValid ? 'text-base-content/70' : 'text-warning'}`}
-      title={operationIsValid ? undefined : note.operationStatus === 'MISSING' ? 'tpNF não informado' : 'tpNF inválido'}
+      className={`inline-flex w-fit items-center gap-1 text-xs font-medium ${isDps || !operationIsValid ? 'text-warning' : 'text-base-content/70'}`}
+      title={operationTitle}
     >
-      {!operationIsValid ? (
+      {isDps || !operationIsValid ? (
         <AlertTriangle className="h-3 w-3" aria-hidden="true" />
       ) : isSaida ? (
         <ArrowUpRight className="h-3 w-3 opacity-60" aria-hidden="true" />
@@ -119,7 +138,7 @@ function DocumentRow({ note, selected, onSelect }: { note: NFeAnalysis; selected
       <span className="min-w-0">
         <span className="flex items-center gap-2">
           <strong className="font-mono text-sm text-base-content">Nº {note.numeroNota || 'N/A'}</strong>
-          <span className="badge badge-outline badge-xs text-[10px] font-semibold">{note.docType}</span>
+          <span className="badge badge-outline badge-xs text-[10px] font-semibold">{note.documentKind === 'DPS' ? 'DPS' : note.docType}</span>
         </span>
       </span>
       <OperationSummary note={note} />
@@ -145,7 +164,7 @@ function MobileDocumentRow({ note, selected, onSelect }: { note: NFeAnalysis; se
       <span className="flex items-start justify-between gap-3">
         <span className="min-w-0">
           <strong className="font-mono text-sm text-base-content">Nº {note.numeroNota || 'N/A'}</strong>
-          <span className="badge badge-outline badge-xs ml-2 text-[10px]">{note.docType}</span>
+          <span className="badge badge-outline badge-xs ml-2 text-[10px]">{note.documentKind === 'DPS' ? 'DPS' : note.docType}</span>
         </span>
         <ChevronRight className={`mt-1 h-4 w-4 shrink-0 text-base-content/30 transition-transform ${selected ? 'rotate-90' : ''}`} aria-hidden="true" />
       </span>
@@ -153,7 +172,17 @@ function MobileDocumentRow({ note, selected, onSelect }: { note: NFeAnalysis; se
         <span>
           <span className="block text-[10px] font-semibold uppercase text-base-content/50">Operação</span>
             <span className={`mt-0.5 block font-medium ${note.operationStatus === 'VALID' ? '' : 'text-warning'}`}>
-              {note.operationStatus === 'VALID' ? note.tipoNota === 'SAÍDA' ? 'Saída' : 'Entrada' : 'Não verificada'}
+              {note.documentKind === 'DPS'
+                ? `DPS · ${note.dpsIssuerRole === 'PRESTADOR'
+                  ? 'Prestador'
+                  : note.dpsIssuerRole === 'TOMADOR'
+                    ? 'Tomador'
+                    : note.dpsIssuerRole === 'INTERMEDIARIO'
+                      ? 'Intermediário'
+                      : 'Papel não identificado'}`
+                : note.operationStatus === 'VALID'
+                  ? note.tipoNota === 'SAÍDA' ? 'Saída' : 'Entrada'
+                  : 'Não verificada'}
             </span>
         </span>
         <span>

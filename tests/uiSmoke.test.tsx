@@ -281,6 +281,35 @@ const tests: UiTestCase[] = [
     },
   },
   {
+    name: 'UI identifica DPS como declaração e preserva o papel do emissor',
+    run: () => {
+      const dps = parseNFeXml([
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<nDPS>9012</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi><tpEmit>1</tpEmit>',
+        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
+        '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
+        '</infDPS></DPS>',
+      ].join(''), 'NFSe_DPS_ui.xml');
+      const { container, root } = renderResultsTable([dps]);
+
+      try {
+        const groupToggle = container.querySelector<HTMLButtonElement>('button[aria-controls^="group-content-"]');
+        assert(groupToggle, 'Grupo da DPS não foi renderizado');
+        flushSync(() => groupToggle.click());
+
+        const documentButton = container.querySelector<HTMLButtonElement>('button[data-note-layer="summary"]');
+        assert(documentButton, 'DPS não foi renderizada na lista de documentos');
+        assert(documentButton.textContent?.includes('DPS'), 'A primeira camada não identifica o documento como DPS');
+        assert(documentButton.textContent?.includes('DPS · Prestador'), 'A primeira camada não informa o papel do emissor da DPS');
+        assert(!documentButton.textContent?.includes('Saída'), 'DPS não deve ser apresentada como operação de saída');
+        assert(documentButton.textContent?.includes('Pendente'), 'DPS deve permanecer pendente no nível documental');
+      } finally {
+        flushSync(() => root.unmount());
+        container.remove();
+      }
+    },
+  },
+  {
     name: 'UI móvel acomoda conteúdo extenso sem overflow horizontal',
     run: () => {
       if (globalThis.innerWidth > 480) return;

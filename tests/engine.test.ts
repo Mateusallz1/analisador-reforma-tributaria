@@ -366,7 +366,7 @@ const tests: TestCase[] = [
 
       const nationalNfse = parseNFeXml([
         '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
-        '<nDPS>9001</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi>',
+        '<nDPS>9001</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi><tpEmit>1</tpEmit>',
         '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
         '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
         '</infDPS></DPS>',
@@ -374,13 +374,19 @@ const tests: TestCase[] = [
 
       assertEquals(nationalNfse.docType, 'NFSe');
       assertEquals(nationalNfse.documentLayout, 'NFSE_NATIONAL');
+      assertEquals(nationalNfse.documentKind, 'DPS');
+      assertEquals(nationalNfse.dpsIssuerRole, 'PRESTADOR');
+      assertEquals(nationalNfse.operationStatus, 'NOT_VERIFIABLE');
       assertEquals(nationalNfse.numeroNota, '9001');
       assertEquals(nationalNfse.nomeEmitente, 'Prestador Nacional');
       assertEquals(nationalNfse.nomeDestinatario, 'Tomador Nacional');
+      assertEquals(nationalNfse.empresaFoco.cnpj, '04252011000110');
+      assertEquals(nationalNfse.status, 'PENDENTE');
+      assertEquals(nationalNfse.validationStatus, 'pendente');
 
       const nationalNfseWithoutRecipient = parseNFeXml([
         '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
-        '<nDPS>9005</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi>',
+        '<nDPS>9005</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi><tpEmit>1</tpEmit>',
         '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador sem tomador</xRazao></emit>',
         '</infDPS></DPS>',
       ].join(''), 'NFSe_DPS_sem_tomador.xml');
@@ -388,6 +394,54 @@ const tests: TestCase[] = [
       assertEquals(nationalNfseWithoutRecipient.cnpjEmitente, '04252011000110');
       assertEquals(nationalNfseWithoutRecipient.cnpjDestinatario, '');
       assertEquals(nationalNfseWithoutRecipient.nomeDestinatario, 'Tomador Não Identificado');
+      assertEquals(nationalNfseWithoutRecipient.empresaFoco.cnpj, '04252011000110');
+
+      const dpsFromTaker = parseNFeXml([
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<nDPS>9007</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi><tpEmit>2</tpEmit>',
+        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
+        '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
+        '</infDPS></DPS>',
+      ].join(''), 'NFSe_DPS_emitida_pelo_tomador.xml');
+
+      assertEquals(dpsFromTaker.dpsIssuerRole, 'TOMADOR');
+      assertEquals(dpsFromTaker.operationStatus, 'NOT_VERIFIABLE');
+      assertEquals(dpsFromTaker.empresaFoco.cnpj, '52998224725');
+
+      const dpsFromIntermediary = parseNFeXml([
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<nDPS>9008</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi><tpEmit>3</tpEmit>',
+        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
+        '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
+        '<interm><CNPJ>07649362000157</CNPJ><xRazao>Intermediário Nacional</xRazao></interm>',
+        '</infDPS></DPS>',
+      ].join(''), 'NFSe_DPS_emitida_pelo_intermediario.xml');
+
+      assertEquals(dpsFromIntermediary.dpsIssuerRole, 'INTERMEDIARIO');
+      assertEquals(dpsFromIntermediary.empresaFoco.cnpj, '07649362000157');
+
+      const dpsWithInvalidRole = parseNFeXml([
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<nDPS>9009</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi><tpEmit>9</tpEmit>',
+        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
+        '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
+        '</infDPS></DPS>',
+      ].join(''), 'NFSe_DPS_tpEmit_invalido.xml');
+
+      assertEquals(dpsWithInvalidRole.dpsIssuerRole, 'NAO_IDENTIFICADO');
+      assertEquals(dpsWithInvalidRole.operationStatus, 'INVALID');
+      assertEquals(dpsWithInvalidRole.empresaFoco.cnpj, '');
+
+      const dpsWithoutRole = parseNFeXml([
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<nDPS>9010</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi>',
+        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
+        '</infDPS></DPS>',
+      ].join(''), 'NFSe_DPS_tpEmit_ausente.xml');
+
+      assertEquals(dpsWithoutRole.dpsIssuerRole, 'NAO_IDENTIFICADO');
+      assertEquals(dpsWithoutRole.operationStatus, 'MISSING');
+      assertEquals(dpsWithoutRole.empresaFoco.cnpj, '');
 
       const abrasfNfse = parseNFeXml(
         SAMPLE_NFES.find((sample) => sample.fileName === 'NFSe_2026_Prestador_Incompleto.xml')?.xmlContent || '',
@@ -416,7 +470,7 @@ const tests: TestCase[] = [
 
       const nationalNfseWithService = parseNFeXml([
         '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
-        '<nDPS>9003</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi>',
+        '<nDPS>9003</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi><tpEmit>1</tpEmit>',
         '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
         '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
         '<serv><cServ><xDescServ>Consultoria em processos tributários</xDescServ></cServ></serv>',
@@ -450,7 +504,7 @@ const tests: TestCase[] = [
 
       const nationalNfseWithServiceAndTax = parseNFeXml([
         '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
-        '<nDPS>9004</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi>',
+        '<nDPS>9004</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi><tpEmit>1</tpEmit>',
         '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
         '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
         '<serv><cServ><xDescServ>Consultoria em processos tributários</xDescServ></cServ></serv>',
@@ -475,6 +529,7 @@ const tests: TestCase[] = [
 
       assertEquals(generatedNationalNfse.docType, 'NFSe');
       assertEquals(generatedNationalNfse.documentLayout, 'NFSE_NATIONAL');
+      assertEquals(generatedNationalNfse.documentKind, 'NFSE');
       assertEquals(generatedNationalNfse.numeroNota, '9002');
     },
   },
@@ -970,6 +1025,28 @@ const tests: TestCase[] = [
     },
   },
   {
+    name: 'KPI de item preserva falha objetiva em DPS pendente',
+    run: () => {
+      const dps = parseNFeXml([
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<nDPS>9011</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi><tpEmit>1</tpEmit>',
+        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
+        '<serv><cServ><xDescServ>Consultoria tributária</xDescServ></cServ></serv>',
+        '<IBSCBS><CST>000</CST><cClassTrib>000001</cClassTrib></IBSCBS>',
+        '</infDPS></DPS>',
+      ].join(''), 'NFSe_DPS_item_com_falha.xml');
+      const dpsWithFailedItem: NFeAnalysis = {
+        ...dps,
+        itens: dps.itens?.map((item) => ({ ...item, itemStatus: 'nao_conforme_valor' })),
+      };
+      const stats = calculateItemStats([dpsWithFailedItem]);
+
+      assertEquals(dps.status, 'PENDENTE');
+      assertEquals(stats.pendingItems, 0);
+      assertEquals(stats.nonCompliantItems, 1);
+    },
+  },
+  {
     name: 'agrupamento ignora notas sem CNPJ em foco e preserva resumo do Grupo Alfa',
     run: () => {
       const groups = groupAnalysesByEmpresaFoco(parseSamples());
@@ -1001,6 +1078,26 @@ const tests: TestCase[] = [
       assertEquals(filtered.activeGroups[0].empresaFoco.cnpj, '61585865000108');
       assertEquals(filtered.matchesWithoutCnpj.length, 1);
       assertEquals(filtered.matchesWithoutCnpj[0].fileName, 'NFe_SemEmitente_DadosIncompletos.xml');
+
+      const dps = parseNFeXml([
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<nDPS>9013</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi><tpEmit>2</tpEmit>',
+        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
+        '<toma><CPF>52998224725</CPF><xRazao>Tomador Nacional</xRazao></toma>',
+        '</infDPS></DPS>',
+      ].join(''), 'NFSe_DPS_filtro_operacao.xml');
+      const outgoingOnly = getFilteredResultGroups([...parseSamples(), dps], {
+        searchTerm: '',
+        statusFilter: 'ALL',
+        typeFilter: 'SAÍDA',
+        docTypeFilter: 'ALL',
+      });
+
+      assertEquals(
+        outgoingOnly.activeGroups.flatMap((group) => group.notas).some((note) => note.documentKind === 'DPS'),
+        false,
+        'DPS não deve aparecer no filtro de saída',
+      );
     },
   },
   {
@@ -1021,6 +1118,30 @@ const tests: TestCase[] = [
       assertEquals(documents.rows.length, results.length + 1);
       assert(findings.rows.length > 1, 'Relatório deveria conter achados das amostras');
       assert(summary.rows.some((row) => row[0] === 'Documentos analisados' && row[1] === results.length));
+
+      const dps = parseNFeXml([
+        '<DPS xmlns="http://www.sped.fazenda.gov.br/nfse"><infDPS>',
+        '<nDPS>9014</nDPS><dhEmi>2026-05-29T10:00:00-03:00</dhEmi><tpEmit>1</tpEmit>',
+        '<emit><CNPJ>04252011000110</CNPJ><xRazao>Prestador Nacional</xRazao></emit>',
+        '<serv><cServ><xDescServ>Consultoria tributária</xDescServ></cServ></serv>',
+        '</infDPS></DPS>',
+      ].join(''), 'NFSe_DPS_pendencia_documental.xml');
+      const dpsReport = buildAnalysisReport([dps], [], {
+        startedAt: '2026-08-13T10:00:00.000Z',
+        completedAt: '2026-08-13T10:01:00.000Z',
+        inputFileCount: 1,
+        cancelled: false,
+      }, '2026-08-13T10:02:00.000Z');
+      const dpsFindings = dpsReport.sheets.find((sheet) => sheet.name === 'Achados');
+
+      assert(dpsFindings, 'Relatório da DPS não criou a aba de achados');
+      assertEquals(dpsFindings.rows[1]?.[5], 'Documento');
+      assertEquals(dpsFindings.rows[1]?.[6], 'Pendência documental');
+      assertEquals(dpsFindings.rows[1]?.[9], 'Pendente');
+      assert(
+        !dpsFindings.rows[1]?.includes('Documento sem item/serviço detalhado'),
+        'DPS com serviço detalhado não deve gerar achado de ausência de item',
+      );
 
       const fallbackReport = buildAnalysisReport([{
         ...results[0],

@@ -12,6 +12,10 @@ export type DataIntegrityStatus = 'VALID' | 'MISSING' | 'INVALID' | 'NOT_VERIFIA
 
 export type DocumentLayout = 'NFE' | 'NFSE_ABRASF' | 'NFSE_NATIONAL';
 
+export type DocumentKind = 'NFE' | 'NFCE' | 'NFSE' | 'DPS';
+
+export type DpsIssuerRole = 'PRESTADOR' | 'TOMADOR' | 'INTERMEDIARIO' | 'NAO_IDENTIFICADO';
+
 export type ComplianceStatus = 'CONFORME' | 'NÃO_CONFORME' | 'AUTORIZADA_COM_PENDENCIAS' | 'PENDENTE' | 'N/A';
 
 export type ItemClassificationStatus =
@@ -64,6 +68,8 @@ export interface NFeAnalysis {
   operationStatus: DataIntegrityStatus;
   docType: DocType;
   documentLayout: DocumentLayout;
+  documentKind: DocumentKind;
+  dpsIssuerRole?: DpsIssuerRole;
   cnpjEmitente: string;
   nomeEmitente: string;
   emitterDocumentStatus: DataIntegrityStatus;
