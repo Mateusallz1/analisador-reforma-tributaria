@@ -75,6 +75,19 @@ $redactedNames = @{
   obsFisco = 'Conteudo removido para homologacao.'
   xContato = 'Contato de homologacao'
   infAdProd = 'Informacao adicional de produto removida para homologacao.'
+  CodigoVerificacao = 'CODIGO-HOMO'
+  Discriminacao = 'Servico de homologacao'
+  Contato = 'Contato de homologacao'
+  InscricaoMunicipal = 'IM-HOMO'
+  NomeFantasia = 'Empresa de homologacao'
+  Endereco = 'Endereco de homologacao'
+  Bairro = 'Bairro de homologacao'
+  Numero = 'Numero de homologacao'
+  Serie = 'Serie de homologacao'
+  cEAN = 'EAN-HOMO'
+  cEANTrib = 'EANTRIB-HOMO'
+  urlChave = 'https://example.invalid/chave-homologacao'
+  xMotivo = 'Motivo de homologacao'
   chNFe = '00000000000000000000000000000000000000000000'
   refNFe = 'REFNFE-HOMO'
   chaveAcesso = 'CHAVE-HOMO'
@@ -116,19 +129,19 @@ function New-ValidCpf([int]$seed) {
 }
 
 function Get-NodeValues([System.Xml.XmlDocument]$document) {
-  $values = [System.Collections.Generic.List[string]]::new()
+  $values = [System.Collections.Generic.List[object]]::new()
 
   foreach ($element in @($document.SelectNodes('//*'))) {
     if ($redactedNames.ContainsKey($element.LocalName) -and $element.InnerText.Length -ge 8) {
-      $values.Add($element.InnerText)
+      $values.Add([pscustomobject]@{ Name = $element.LocalName; Value = $element.InnerText })
     }
 
     if ($element.HasAttribute('Id') -and $element.GetAttribute('Id').Length -ge 8) {
-      $values.Add($element.GetAttribute('Id'))
+      $values.Add([pscustomobject]@{ Name = "$($element.LocalName).@Id"; Value = $element.GetAttribute('Id') })
     }
 
     if ($element.HasAttribute('URI') -and $element.GetAttribute('URI').Length -ge 8) {
-      $values.Add($element.GetAttribute('URI'))
+      $values.Add([pscustomobject]@{ Name = "$($element.LocalName).@URI"; Value = $element.GetAttribute('URI') })
     }
   }
 
@@ -157,7 +170,7 @@ function Sanitize-Document(
       Set-ElementText $element ('{0:D8}' -f (10000000 + $sequence))
     }
 
-    if ($element.LocalName -in @('dhEmi', 'dEmi', 'dhProc', 'dhSaiEnt')) {
+    if ($element.LocalName -in @('dhEmi', 'dEmi', 'dhProc', 'dhSaiEnt', 'DataEmissao', 'DataEmissaoRps', 'Competencia')) {
       Set-ElementText $element '2026-06-01T12:00:00-03:00'
     }
 
@@ -213,6 +226,19 @@ for ($index = 0; $index -lt $files.Count; $index++) {
   $replacements['obsFisco'] = "Conteudo $token"
   $replacements['xContato'] = "Contato $token"
   $replacements['infAdProd'] = "Informacao adicional $token"
+  $replacements['CodigoVerificacao'] = "CODIGO-$token"
+  $replacements['Discriminacao'] = "Servico $token"
+  $replacements['Contato'] = "Contato $token"
+  $replacements['InscricaoMunicipal'] = "IM-$token"
+  $replacements['NomeFantasia'] = "Empresa $token"
+  $replacements['Endereco'] = "Endereco $token"
+  $replacements['Bairro'] = "Bairro $token"
+  $replacements['Numero'] = "NUMERO-$token"
+  $replacements['Serie'] = "SERIE-$token"
+  $replacements['cEAN'] = "EAN-$token"
+  $replacements['cEANTrib'] = "EANTRIB-$token"
+  $replacements['urlChave'] = "https://example.invalid/$token"
+  $replacements['xMotivo'] = "Motivo $token"
   $replacements['chNFe'] = "CHAVE-$token"
   $replacements['refNFe'] = "REFNFE-$token"
   $replacements['chaveAcesso'] = "CHAVE-$token"
@@ -220,17 +246,17 @@ for ($index = 0; $index -lt $files.Count; $index++) {
   $replacements['digVal'] = "DIGEST-$token"
   $replacements['SignatureValue'] = "SIGNATURE-$token"
   $replacements['DigestValue'] = "DIGEST-$token"
-  while (@($sensitiveValues) -contains $replacements['CNPJ']) {
+  while (@($sensitiveValues | Where-Object { $_.Value -eq $replacements['CNPJ'] }).Count -gt 0) {
     $sequence++
     $replacements['CNPJ'] = New-ValidCnpj (100 + $sequence)
   }
-  while (@($sensitiveValues) -contains $replacements['CPF']) {
+  while (@($sensitiveValues | Where-Object { $_.Value -eq $replacements['CPF'] }).Count -gt 0) {
     $sequence++
     $replacements['CPF'] = New-ValidCpf (100 + $sequence)
   }
   foreach ($key in @($replacements.Keys)) {
     $value = [string]$replacements[$key]
-    while (@($sensitiveValues | Where-Object { [string]$_ -eq $value }).Count -gt 0) {
+    while (@($sensitiveValues | Where-Object { [string]$_.Value -eq $value }).Count -gt 0) {
       $value += '-X'
     }
     $replacements[$key] = $value
@@ -238,21 +264,38 @@ for ($index = 0; $index -lt $files.Count; $index++) {
 
   Sanitize-Document $document $sequence $replacements
 
+  $serializedDocument = $document.OuterXml
+  $replacementValue = "REDACTED-$token"
+  foreach ($sensitiveValue in $sensitiveValues) {
+    foreach ($candidateValue in @(
+        [string]$sensitiveValue.Value,
+        [System.Security.SecurityElement]::Escape([string]$sensitiveValue.Value)
+      )) {
+      if (-not [string]::IsNullOrEmpty($candidateValue)) {
+        $serializedDocument = $serializedDocument.Replace($candidateValue, $replacementValue)
+      }
+    }
+  }
+
+  $sanitizedDocument = [System.Xml.XmlDocument]::new()
+  $sanitizedDocument.XmlResolver = $null
+  $sanitizedDocument.LoadXml($serializedDocument)
+
   $outputFile = Join-Path $outputRoot ('sample-{0:D3}.xml' -f $sequence)
   $writerSettings = [System.Xml.XmlWriterSettings]::new()
   $writerSettings.Encoding = [System.Text.UTF8Encoding]::new($false)
   $writerSettings.Indent = $true
   $writer = [System.Xml.XmlWriter]::Create($outputFile, $writerSettings)
   try {
-    $document.Save($writer)
+    $sanitizedDocument.Save($writer)
   } finally {
     $writer.Dispose()
   }
 
   $sanitizedText = Get-Content -LiteralPath $outputFile -Raw
   foreach ($sensitiveValue in $sensitiveValues) {
-    if ($sanitizedText.Contains($sensitiveValue)) {
-      throw "Valor sensível da origem permaneceu na fixture $outputFile."
+    if ($sanitizedText.Contains($sensitiveValue.Value)) {
+      throw "Valor sensível da origem permaneceu na tag $($sensitiveValue.Name) da fixture $outputFile."
     }
   }
 }
