@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ConsultarNfseResposta>
+  <ListaNfse>
+    <CompNfse>
+      <Nfse>
+        <InfNfse id="NFS211220922REDACTED-__HOMO_SAMPLE_001__000000000000126021162077200">
+          <Numero>NUMERO-__HOMO_SAMPLE_001__</Numero>
+          <CodigoVerificacao>CODIGO-__HOMO_SAMPLE_001__</CodigoVerificacao>
+          <DataEmissao>2026-06-01T12:00:00-03:00</DataEmissao>
+          <IdentificacaoRps>
+            <Numero>NUMERO-__HOMO_SAMPLE_001__</Numero>
+            <Serie>1</Serie>
+            <Tipo>0</Tipo>
+          </IdentificacaoRps>
+          <DataEmissaoRps>2026-06-01T12:00:00-03:00</DataEmissaoRps>
+          <NaturezaOperacao>2</NaturezaOperacao>
+          <OptanteSimplesNacional>2</OptanteSimplesNacional>
+          <Competencia>2026-06-01T12:00:00-03:00</Competencia>
+          <Servico>
+            <Valores>
+              <ValorServicos>1014756.93</ValorServicos>
+              <ValorDeducoes>405902.77</ValorDeducoes>
+              <ValorPis>0.0</ValorPis>
+              <ValorCofins>0.0</ValorCofins>
+              <ValorInss>0.0</ValorInss>
+              <ValorIr>0.0</ValorIr>
+              <ValorCsll>0.0</ValorCsll>
+              <IssRetido>2</IssRetido>
+              <ValorIss>30442.71</ValorIss>
+              <OutrasRetencoes>0.0</OutrasRetencoes>
+              <BaseCalculo>608854.16</BaseCalculo>
+              <Aliquota>5.0</Aliquota>
+              <ValorLiquidoNfse>1014756.93</ValorLiquidoNfse>
+              <ValorIssRetido>0.0</ValorIssRetido>
+              <DescontoCondicionado>0.0</DescontoCondicionado>
+              <DescontoIncondicionado>0.0</DescontoIncondicionado>
+              <AliqPis>0.0</AliqPis>
+              <AliqCofins>0.0</AliqCofins>
+            </Valores>
+            <ItemListaServico>702</ItemListaServico>
+            <Discriminacao>Servico __HOMO_SAMPLE_001__</Discriminacao>
+            <CodigoMunicipio>2207009</CodigoMunicipio>
+          </Servico>
+          <PrestadorServico>
+            <IdentificacaoPrestador>
+              <Cnpj>12345101000183</Cnpj>
+              <InscricaoMunicipal>IM-__HOMO_SAMPLE_001__</InscricaoMunicipal>
+            </IdentificacaoPrestador>
+            <RazaoSocial>Empresa __HOMO_SAMPLE_001__</RazaoSocial>
+            <NomeFantasia>Empresa __HOMO_SAMPLE_001__</NomeFantasia>
+            <Endereco>Endereco __HOMO_SAMPLE_001__</Endereco>
+            <Contato>Contato __HOMO_SAMPLE_001__</Contato>
+          </PrestadorServico>
+          <TomadorServico>
+            <IdentificacaoTomador>
+              <CpfCnpj>
+                <Cnpj>12345101000183</Cnpj>
+              </CpfCnpj>
+              <InscricaoMunicipal>IM-__HOMO_SAMPLE_001__</InscricaoMunicipal>
+            </IdentificacaoTomador>
+            <RazaoSocial>Empresa __HOMO_SAMPLE_001__</RazaoSocial>
+            <Endereco>Endereco __HOMO_SAMPLE_001__</Endereco>
+            <Contato>Contato __HOMO_SAMPLE_001__</Contato>
+          </TomadorServico>
+          <OrgaoGerador>
+            <CodigoMunicipio>2112209</CodigoMunicipio>
+            <Uf>MA</Uf>
+          </OrgaoGerador>
+          <DadosDPS>
+            <TpEmit>0</TpEmit>
+            <TpAmb>0</TpAmb>
+            <TribIssqn>0</TribIssqn>
+            <TpRetIssqn>0</TpRetIssqn>
+            <OpSimpNac>0</OpSimpNac>
+            <RegEspTrib>0</RegEspTrib>
+            <RegApTribSN>0</RegApTribSN>
+          </DadosDPS>
+          <ComercioExterior>
+            <VincPrest>0</VincPrest>
+            <MovTempBens>0</MovTempBens>
+            <MDIC>0</MDIC>
+          </ComercioExterior>
+          <RetencoesFederais />
+          <TipoReembolsoRepasse>0</TipoReembolsoRepasse>
+          <IBSCBS>
+            <IBSUFAliquota>0</IBSUFAliquota>
+            <IBSMunAliquota>0</IBSMunAliquota>
+            <CBSAliquota>0</CBSAliquota>
+            <IBSUFValor>0</IBSUFValor>
+            <IBSMunValor>0</IBSMunValor>
+            <CBSValor>0</CBSValor>
+          </IBSCBS>
+        </InfNfse>
+      </Nfse>
+    </CompNfse>
+  </ListaNfse>
+</ConsultarNfseResposta>
