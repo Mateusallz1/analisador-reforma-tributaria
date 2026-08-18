@@ -11,8 +11,9 @@
     "lint": "tsc --noEmit && deno lint --rules-exclude=no-sloppy-imports src tests scripts",
     "test": "deno task test",
     "test:mobile": "deno task test:mobile",
+    "test:real": "deno task test:real",
     "test:volume": "deno task test:volume",
-    "check": "npm run lint && npm run test && npm run test:mobile && npm run build"
+    "check": "npm run lint && npm run test && npm run test:mobile && npm run test:real && npm run build"
   },
   "dependencies": {
     "jszip": "3.10.1",

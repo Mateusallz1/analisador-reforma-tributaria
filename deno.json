@@ -8,8 +8,9 @@
     "clean": "deno run --allow-write scripts/clean.ts",
     "test": "deno run --allow-run --allow-net=127.0.0.1 --allow-read --allow-env --allow-write scripts/run-browser-tests.ts",
     "test:mobile": "deno run --allow-run --allow-net=127.0.0.1 --allow-read --allow-env --allow-write scripts/run-browser-tests.ts /tests/browser.html 20000 \"UI mobile\" 390 844",
+    "test:real": "deno run --allow-run --allow-net=127.0.0.1 --allow-read --allow-env --allow-write scripts/run-browser-tests.ts /tests/real.html 60000 \"Amostras reais anonimizadas\"",
     "test:volume": "deno run --allow-run --allow-net=127.0.0.1 --allow-read --allow-env --allow-write scripts/run-browser-tests.ts /tests/volume.html 120000 \"Volume fiscal\"",
-    "check": "deno task lint && deno task test && deno task test:mobile && deno task build"
+    "check": "deno task lint && deno task test && deno task test:mobile && deno task test:real && deno task build"
   },
   "exclude": [
     "dist",
