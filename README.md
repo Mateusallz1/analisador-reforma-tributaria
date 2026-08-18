@@ -79,6 +79,8 @@ npm run test:volume
 
 O workflow de CI executa essa homologação separadamente depois do gate principal para que uma regressão de escala seja identificada sem misturar seu diagnóstico com os testes funcionais.
 
+O baseline medido e os critérios de regressão estão em [docs/volume-baseline.md](docs/volume-baseline.md).
+
 ## Configuração
 
 O processamento roda localmente no navegador. Nenhuma variável de ambiente é necessária para analisar XMLs ou ZIPs.
@@ -134,6 +136,8 @@ A planilha oficial CST/cClassTrib pode ser convertida para o contrato JSON usado
 ```
 
 O conversor preserva os campos consumidos pela aplicação e informa CSTs e classificações adicionados, removidos ou alterados antes de gravar a nova base. Depois da conversão, execute `npm run check` e `npm run test:volume`.
+
+O inventário de fontes e a decisão de escopo para a tabela de crédito presumido estão em [docs/data-source-inventory.md](docs/data-source-inventory.md).
 
 ## Validação local dos schemas ABRASF
 
