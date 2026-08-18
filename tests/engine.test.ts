@@ -644,6 +644,25 @@ const tests: TestCase[] = [
         ].join(''),
         'Namespace inválido de NFS-e ABRASF',
       );
+      assertParseError(
+        [
+          '<ConsultarNfseResposta><ListaNfse><CompNfse><Nfse><InfNfse>',
+          '<Numero>1</Numero><DataEmissao>2026-06-01</DataEmissao>',
+          '<Servico></Servico><PrestadorServico></PrestadorServico>',
+          '</InfNfse></Nfse></CompNfse></ListaNfse></ConsultarNfseResposta>',
+        ].join(''),
+        'Formato XML não reconhecido',
+      );
+      assertParseError(
+        [
+          '<ConsultarNfseResposta><ListaNfse xmlns="urn:unexpected"><CompNfse><Nfse><InfNfse>',
+          '<Numero>1</Numero><CodigoVerificacao>1</CodigoVerificacao><DataEmissao>2026-06-01</DataEmissao>',
+          '<IdentificacaoRps></IdentificacaoRps><Servico></Servico><PrestadorServico></PrestadorServico>',
+          '<TomadorServico></TomadorServico><OrgaoGerador></OrgaoGerador><DadosDPS></DadosDPS><IBSCBS></IBSCBS>',
+          '</InfNfse></Nfse></CompNfse></ListaNfse></ConsultarNfseResposta>',
+        ].join(''),
+        'Formato XML não reconhecido',
+      );
 
       const nationalStructureError = await processFiles([
         new File([[
@@ -1039,6 +1058,18 @@ const tests: TestCase[] = [
       assertEquals(conformNfse.itens?.[0]?.cClassTrib, '000001');
       assertEquals(conformNfse.itens?.[0]?.itemStatus, 'conforme');
       assertEquals(conformNfse.itens?.[0]?.validationStatus, 'válido');
+
+      const totalsWithoutDifference = fullTaxTotals
+        .replace('<vDifUF>0.00</vDifUF>', '')
+        .replace('<vDifMun>0.00</vDifMun>', '')
+        .replace('<vDifCBS>0.00</vDifCBS>', '');
+      const nfseWithoutDifference = parseNFeXml(
+        createNationalNfse('<CST>000</CST><cClassTrib>000001</cClassTrib>', fullTaxValues, totalsWithoutDifference),
+        'NFSe_emitida_sem_diferimento.xml',
+      );
+
+      assertEquals(nfseWithoutDifference.itens?.[0]?.itemStatus, 'conforme');
+      assertEquals(nfseWithoutDifference.itens?.[0]?.validationStatus, 'válido');
 
       const divergentNfse = parseNFeXml(
         createNationalNfse(

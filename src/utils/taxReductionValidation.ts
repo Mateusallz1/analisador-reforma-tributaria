@@ -554,7 +554,10 @@ function validateNfseDifferenceFields(root: Element): ComponentCheck[] {
     },
   ];
 
-  return fields.flatMap(({ parent, name, label }): ComponentCheck[] => {
+  const declaredFields = fields.filter(({ parent, name }) => parent && getDirectChild(parent, name));
+  if (declaredFields.length === 0) return [];
+
+  return declaredFields.flatMap(({ parent, name, label }): ComponentCheck[] => {
     const value = parent ? getDirectDecimal(parent, name) : { status: 'missing' as const };
     if (value.status !== 'valid') {
       return [{

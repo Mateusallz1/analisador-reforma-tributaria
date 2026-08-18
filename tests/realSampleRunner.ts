@@ -48,6 +48,19 @@ function createFiles(
     });
 }
 
+async function createNfseWithoutIbsCbs(file: File): Promise<File> {
+  const document = new DOMParser().parseFromString(await file.text(), 'text/xml');
+  assert(document, 'Não foi possível ler a fixture NFS-e para a variante sem IBSCBS');
+  const ibsCbs = document.getElementsByTagName('IBSCBS')[0];
+  assert(ibsCbs, 'A fixture NFS-e não possui IBSCBS para a variante de teste');
+  ibsCbs.remove();
+  return new File(
+    [new XMLSerializer().serializeToString(document)],
+    'real-nfse-without-ibscbs.xml',
+    { type: 'application/xml' },
+  );
+}
+
 async function runRealSampleHomologation(): Promise<void> {
   const nfeFiles = createFiles(REAL_NFE_FIXTURES, 'real-nfe');
   const nfceFiles = createFiles(REAL_NFCE_FIXTURES, 'real-nfce');
@@ -63,19 +76,17 @@ async function runRealSampleHomologation(): Promise<void> {
   const nfeResults = processed.results.filter((result) => result.documentKind === 'NFE');
   const nfceResults = processed.results.filter((result) => result.documentKind === 'NFCE');
   const nfseResults = processed.results.filter((result) => result.documentKind === 'NFSE');
+  const nfseWithoutIbsCbs = await createNfseWithoutIbsCbs(nfseFiles[0]);
+  const pendingNfse = await processFiles([nfseWithoutIbsCbs]);
 
   assert(files.length === 44, `Esperadas 44 fixtures fiscais anonimizadas, recebidas ${files.length}`);
-  const expectedUnsupportedNfse = processed.errors.filter(
-    (error) => error.fileName === 'real-nfse-sample-001.xml',
-  );
-
-  assert(processed.errors.length === 1, `Esperada 1 rejeição estrutural, recebidos ${processed.errors.length}`);
-  assert(expectedUnsupportedNfse.length === 1, 'A rejeição da NFS-e ABRASF não foi identificada');
   assert(
-    expectedUnsupportedNfse[0].error === 'Formato XML não reconhecido. São aceitos NF-e/NFC-e e os layouts NFS-e ABRASF ou padrão nacional (DPS/NFS-e).',
-    `Motivo de rejeição inesperado: ${expectedUnsupportedNfse[0].error}`,
+    processed.errors.length === 0,
+    `Homologação produziu ${processed.errors.length} erro(s): ${processed.errors
+      .map((error) => `${error.fileName}: ${error.error}`)
+      .join('; ')}`,
   );
-  assert(processed.results.length === 43, `Esperados 43 resultados aceitos, recebidos ${processed.results.length}`);
+  assert(processed.results.length === 44, `Esperados 44 resultados aceitos, recebidos ${processed.results.length}`);
   assert(
     nfeResults.length === 25 && nfeResults.every((result) => result.documentLayout === 'NFE'),
     `Esperadas 25 NF-e modelo 55, recebidas ${nfeResults.length}`,
@@ -84,9 +95,16 @@ async function runRealSampleHomologation(): Promise<void> {
     nfceResults.length === 18 && nfceResults.every((result) => result.documentLayout === 'NFE'),
     `Esperadas 18 NFC-e modelo 65, recebidas ${nfceResults.length}`,
   );
-  assert(nfseResults.length === 0, 'A NFS-e sem perfil estrutural não deveria entrar nos resultados');
-  assert(totalItems === 113, `Esperados 113 itens/serviços fiscais aceitos, recebidos ${totalItems}`);
-  assert(ibsCbsDocuments === 15, `Esperados 15 documentos aceitos com IBSCBS, recebidos ${ibsCbsDocuments}`);
+  assert(
+    nfseResults.length === 1 && nfseResults.every((result) => result.documentLayout === 'NFSE_ABRASF'),
+    `Esperada 1 NFS-e ABRASF aceita, recebidas ${nfseResults.length}`,
+  );
+  assert(totalItems === 114, `Esperados 114 itens/serviços fiscais aceitos, recebidos ${totalItems}`);
+  assert(ibsCbsDocuments === 16, `Esperados 16 documentos aceitos com IBSCBS, recebidos ${ibsCbsDocuments}`);
+  assert(pendingNfse.errors.length === 0, 'NFS-e sem IBSCBS não deveria gerar erro estrutural');
+  assert(pendingNfse.results.length === 1, 'NFS-e sem IBSCBS não foi reconhecida');
+  assert(!pendingNfse.results[0].contemIBSCBS, 'Variante sem IBSCBS foi marcada incorretamente');
+  assert(pendingNfse.results[0].documentLayout === 'NFSE_ABRASF', 'Variante sem IBSCBS perdeu o perfil ABRASF');
   assert(
     processed.results.every((result) => result.taxBase.version === '1.1.0'),
     'Alguma amostra não usou a versão esperada da base fiscal',
@@ -98,13 +116,13 @@ let result: TestCaseResult;
 try {
   await runRealSampleHomologation();
   result = {
-    name: 'homologa NF-e e NFC-e reais anonimizadas com o pipeline de produção',
+    name: 'homologa NF-e, NFC-e e NFS-e reais anonimizadas com o pipeline de produção',
     status: 'passed',
-    message: '25 NF-e e 18 NFC-e processadas; 1 NFS-e ABRASF sem perfil foi rejeitada; 113 itens e 15 documentos com IBSCBS.',
+    message: '25 NF-e, 18 NFC-e e 1 NFS-e ABRASF processadas; 114 itens/serviços e 16 documentos com IBSCBS.',
   };
 } catch (error) {
   result = {
-    name: 'homologa NF-e e NFC-e reais anonimizadas com o pipeline de produção',
+    name: 'homologa NF-e, NFC-e e NFS-e reais anonimizadas com o pipeline de produção',
     status: 'failed',
     message: error instanceof Error ? error.message : String(error),
   };

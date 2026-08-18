@@ -175,6 +175,49 @@ function getAbrasfDirectChildrenByLocalName(
   return children;
 }
 
+function getUnqualifiedAbrasfNfseElements(root: Element): Element[] {
+  if (root.namespaceURI || getElementLocalName(root) !== 'ConsultarNfseResposta') return [];
+
+  const listaNfseElements = getDirectChildrenByLocalName(root, 'ListaNfse');
+  if (listaNfseElements.length !== 1 || listaNfseElements[0].namespaceURI) return [];
+
+  const compNfseElements = getDirectChildrenByLocalName(listaNfseElements[0], 'CompNfse');
+  if (compNfseElements.length !== 1 || compNfseElements[0].namespaceURI) return [];
+
+  const nfseElements = getDirectChildrenByLocalName(compNfseElements[0], 'Nfse');
+  if (nfseElements.length !== 1 || nfseElements[0].namespaceURI) return [];
+
+  const dataElements = getDirectChildrenByLocalName(nfseElements[0], 'InfNfse');
+  if (dataElements.length !== 1 || dataElements[0].namespaceURI) return [];
+
+  const requiredFields = [
+    'Numero',
+    'CodigoVerificacao',
+    'DataEmissao',
+    'IdentificacaoRps',
+    'DataEmissaoRps',
+    'NaturezaOperacao',
+    'OptanteSimplesNacional',
+    'Competencia',
+    'Servico',
+    'PrestadorServico',
+    'TomadorServico',
+    'OrgaoGerador',
+    'DadosDPS',
+    'ComercioExterior',
+    'RetencoesFederais',
+    'TipoReembolsoRepasse',
+  ];
+  if (requiredFields.some((field) => {
+    const children = getDirectChildrenByLocalName(dataElements[0], field);
+    return children.length !== 1 || Boolean(children[0].namespaceURI);
+  })) {
+    return [];
+  }
+
+  return nfseElements;
+}
+
 function getAbrasfNfseElements(root: Element): Element[] {
   const rootName = getElementLocalName(root);
 
@@ -275,7 +318,8 @@ function getSingleDirectChild(parent: Element, localName: string, context: strin
 }
 
 function assertNamespace(element: Element, expectedNamespace: string, context: string): void {
-  if (element.namespaceURI !== expectedNamespace) {
+  const actualNamespace = element.namespaceURI || '';
+  if (actualNamespace !== expectedNamespace) {
     throw new Error(`Namespace inválido de ${context}. Esperado: ${expectedNamespace}.`);
   }
 }
@@ -341,7 +385,9 @@ function recognizeNationalNfseDocument(root: Element): RecognizedFiscalDocument 
 }
 
 function recognizeAbrasfNfseDocument(root: Element): RecognizedFiscalDocument | null {
-  if (root.namespaceURI !== NFSE_ABRASF_NAMESPACE) return null;
+  const isQualifiedAbrasf = root.namespaceURI === NFSE_ABRASF_NAMESPACE;
+  const unqualifiedNfseElements = isQualifiedAbrasf ? [] : getUnqualifiedAbrasfNfseElements(root);
+  if (!isQualifiedAbrasf && unqualifiedNfseElements.length === 0) return null;
 
   const versionHint = getAttributeValue(root, 'versao') ||
     getAttributeValue(getElementsByLocalName(root, 'Nfse')[0] || null, 'versao') ||
@@ -352,7 +398,9 @@ function recognizeAbrasfNfseDocument(root: Element): RecognizedFiscalDocument | 
     documentKind: 'NFSE',
     documentVersion: versionHint,
   }, () => {
-    const nfseElements = getAbrasfNfseElements(root);
+    const nfseElements = isQualifiedAbrasf
+      ? getAbrasfNfseElements(root)
+      : unqualifiedNfseElements;
 
     if (nfseElements.length === 0) {
       throw new Error('Estrutura inválida de NFS-e ABRASF: nenhuma NFS-e emitida foi encontrada no XML.');
@@ -361,9 +409,9 @@ function recognizeAbrasfNfseDocument(root: Element): RecognizedFiscalDocument | 
       throw new Error('O XML contém mais de uma NFS-e ABRASF. Separe cada nota em um arquivo para análise.');
     }
 
-    assertNamespace(nfseElements[0], NFSE_ABRASF_NAMESPACE, 'NFS-e ABRASF');
+    assertNamespace(nfseElements[0], isQualifiedAbrasf ? NFSE_ABRASF_NAMESPACE : '', 'NFS-e ABRASF');
     const dataElement = getSingleDirectChild(nfseElements[0], 'InfNfse', 'NFS-e ABRASF');
-    assertNamespace(dataElement, NFSE_ABRASF_NAMESPACE, 'NFS-e ABRASF');
+    assertNamespace(dataElement, isQualifiedAbrasf ? NFSE_ABRASF_NAMESPACE : '', 'NFS-e ABRASF');
 
     return {
       docType: 'NFSe',
