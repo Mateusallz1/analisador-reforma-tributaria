@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<nfeProc versao="4.00" xmlns="http://www.portalfiscal.inf.br/nfe">
+  <NFe xmlns="http://www.portalfiscal.inf.br/nfe">
+    <infNFe Id="NFeHOMO000013" versao="4.00">
+      <ide>
+        <cUF>22</cUF>
+        <cNF>10000013</cNF>
+        <natOp>DEVOLUCAO VENDAS ADQ TERCEIROS</natOp>
+        <mod>55</mod>
+        <serie>1</serie>
+        <nNF>100013</nNF>
+        <dhEmi>2026-06-01T12:00:00-03:00</dhEmi>
+        <dhSaiEnt>2026-06-01T12:00:00-03:00</dhSaiEnt>
+        <tpNF>0</tpNF>
+        <idDest>1</idDest>
+        <cMunFG>2211001</cMunFG>
+        <tpImp>1</tpImp>
+        <tpEmis>1</tpEmis>
+        <cDV>5</cDV>
+        <tpAmb>1</tpAmb>
+        <finNFe>4</finNFe>
+        <indFinal>1</indFinal>
+        <indPres>0</indPres>
+        <procEmi>0</procEmi>
+        <verProc>4.01</verProc>
+        <NFref>
+          <refNFe>REFNFE-__HOMO_SAMPLE_013__</refNFe>
+        </NFref>
+      </ide>
+      <emit>
+        <CNPJ>12345113000108</CNPJ>
+        <xNome>Empresa __HOMO_SAMPLE_013__</xNome>
+        <xFant>Empresa __HOMO_SAMPLE_013__</xFant>
+        <enderEmit>
+          <xLgr>Rua __HOMO_SAMPLE_013__</xLgr>
+          <nro>100</nro>
+          <xBairro>Bairro __HOMO_SAMPLE_013__</xBairro>
+          <cMun>2211001</cMun>
+          <xMun>Municipio __HOMO_SAMPLE_013__</xMun>
+          <UF>PI</UF>
+          <CEP>00000000</CEP>
+          <cPais>1058</cPais>
+          <xPais>BRASIL</xPais>
+          <fone>0000000000</fone>
+        </enderEmit>
+        <IE>000000000</IE>
+        <IM>000000000</IM>
+        <CRT>3</CRT>
+      </emit>
+      <dest>
+        <CNPJ>12345113000108</CNPJ>
+        <xNome>Empresa __HOMO_SAMPLE_013__</xNome>
+        <enderDest>
+          <xLgr>Rua __HOMO_SAMPLE_013__</xLgr>
+          <nro>100</nro>
+          <xCpl>Complemento __HOMO_SAMPLE_013__</xCpl>
+          <xBairro>Bairro __HOMO_SAMPLE_013__</xBairro>
+          <cMun>2211001</cMun>
+          <xMun>Municipio __HOMO_SAMPLE_013__</xMun>
+          <UF>PI</UF>
+          <CEP>00000000</CEP>
+          <cPais>1058</cPais>
+          <xPais>BRASIL</xPais>
+          <fone>0000000000</fone>
+        </enderDest>
+        <indIEDest>9</indIEDest>
+      </dest>
+      <autXML>
+        <CPF>12345011394</CPF>
+      </autXML>
+      <det nItem="1">
+        <prod>
+          <cProd>PROD-__HOMO_SAMPLE_013__</cProd>
+          <cEAN>SEM GTIN</cEAN>
+          <xProd>Produto __HOMO_SAMPLE_013__</xProd>
+          <NCM>72123000</NCM>
+          <CFOP>1202</CFOP>
+          <uCom>M</uCom>
+          <qCom>10</qCom>
+          <vUnCom>26.5000000000</vUnCom>
+          <vProd>265</vProd>
+          <cEANTrib>SEM GTIN</cEANTrib>
+          <uTrib>M</uTrib>
+          <qTrib>10</qTrib>
+          <vUnTrib>26.5000000000</vUnTrib>
+          <vDesc>13.21</vDesc>
+          <indTot>1</indTot>
+        </prod>
+        <imposto>
+          <vTotTrib>0</vTotTrib>
+          <ICMS>
+            <ICMS00>
+              <orig>0</orig>
+              <CST>00</CST>
+              <modBC>3</modBC>
+              <vBC>251.79</vBC>
+              <pICMS>22.50</pICMS>
+              <vICMS>56.65</vICMS>
+            </ICMS00>
+          </ICMS>
+          <PIS>
+            <PISOutr>
+              <CST>98</CST>
+              <vBC>251.79</vBC>
+              <pPIS>0.65</pPIS>
+              <vPIS>1.64</vPIS>
+            </PISOutr>
+          </PIS>
+          <COFINS>
+            <COFINSOutr>
+              <CST>98</CST>
+              <vBC>251.79</vBC>
+              <pCOFINS>3</pCOFINS>
+              <vCOFINS>7.55</vCOFINS>
+            </COFINSOutr>
+          </COFINS>
+        </imposto>
+      </det>
+      <total>
+        <ICMSTot>
+          <vBC>251.79</vBC>
+          <vICMS>56.65</vICMS>
+          <vICMSDeson>0</vICMSDeson>
+          <vFCP>0</vFCP>
+          <vBCST>0</vBCST>
+          <vST>0</vST>
+          <vFCPST>0</vFCPST>
+          <vFCPSTRet>0</vFCPSTRet>
+          <vProd>265</vProd>
+          <vFrete>0</vFrete>
+          <vSeg>0</vSeg>
+          <vDesc>13.21</vDesc>
+          <vII>0</vII>
+          <vIPI>0</vIPI>
+          <vIPIDevol>0</vIPIDevol>
+          <vPIS>1.64</vPIS>
+          <vCOFINS>7.55</vCOFINS>
+          <vOutro>0</vOutro>
+          <vNF>251.79</vNF>
+          <vTotTrib>0</vTotTrib>
+        </ICMSTot>
+      </total>
+      <transp>
+        <modFrete>9</modFrete>
+      </transp>
+      <pag>
+        <detPag>
+          <tPag>90</tPag>
+          <vPag>0</vPag>
+        </detPag>
+      </pag>
+      <infAdic>
+        <infCpl>Conteudo __HOMO_SAMPLE_013__</infCpl>
+        <obsCont xCampo="CHCRIACAO">Conteudo __HOMO_SAMPLE_013__</obsCont>
+        <obsCont xCampo="HORASAIDA">Conteudo __HOMO_SAMPLE_013__</obsCont>
+      </infAdic>
+    </infNFe>
+    <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+      <SignedInfo>
+        <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+        <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+        <Reference URI="#NFeHOMO000013">
+          <Transforms>
+            <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+            <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+          </Transforms>
+          <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+          <DigestValue>DIGEST-__HOMO_SAMPLE_013__</DigestValue>
+        </Reference>
+      </SignedInfo>
+      <SignatureValue>SIGNATURE-__HOMO_SAMPLE_013__</SignatureValue>
+      <KeyInfo>
+        <X509Data>
+          <X509Certificate>MIIH4TCCBcmgAwIBAgIIWTElBglAY2IwDQYJKoZIhvcNAQELBQAwcTELMAkGA1UEBhMCQlIxEzAR
+BgNVBAoTCklDUC1CcmFzaWwxGDAWBgNVBAsTD0FDIFNPTFVUSSB2NSBHMjEzMDEGA1UEAxMqQUMg
+Q0NOIENPTVBBTkhJQSBDRVJUSUZJQ0FET1JBIE5BQ0lPTkFMIHY1MB4XDTI1MDYwOTEzMzEwMFoX
+DTI2MDYwOTEzMzEwMFowggEHMQswCQYDVQQGEwJCUjETMBEGA1UEChMKSUNQLUJyYXNpbDELMAkG
+A1UECBMCUEkxETAPBgNVBAcTCFRlcmVzaW5hMTMwMQYDVQQLEypBQyBDQ04gQ09NUEFOSElBIENF
+UlRJRklDQURPUkEgTkFDSU9OQUwgdjUxFzAVBgNVBAsTDjIwNzgxNzEwMDAwMTAzMRwwGgYDVQQL
+ExNDZXJ0aWZpY2FkbyBEaWdpdGFsMRowGAYDVQQLExFDZXJ0aWZpY2FkbyBQSiBBMTE7MDkGA1UE
+AxMyUElBVUkgTUFURVJJQUlTIERFIENPTlNUUlVDT0VTIExUREE6MzQ5MjI3NDMwMDAxMzAwggEi
+MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC0GxBoH7yUcLPEU7YkX/sBmoi9TcwzKz6qheS6
+Se4ol0JOM5rWuKhLKRi8JrmyFiWhOVddTfxgFFFGpg5LrlSnqJinda8U10RkWt3ewgcPd9vKJKwW
+e/zIcDMY5aAC8svNqqsGkUdHCihk17WVWsRP/ITW7+cq4mJgxsRvDMP+6wMVOAjlOjho0MV0sSQX
+GsESl8+QsHVBZhzwNRRT9HLTgGyL5bvipPyTnilAhptr1bZ3hYGnBefveGpWAzBcJgBmeHeSheN/
+eNsaoxqU2IgkovxO/zGg1GXh7AWoJnHfzr8nWKQv6eMkwYfd9Y7CW+oQ3D7QH+IlnEx0kMCc4xOz
+AgMBAAGjggLjMIIC3zAJBgNVHRMEAjAAMB8GA1UdIwQYMBaAFFpnrogTBkPGK9fnn8zKwNdTT0rA
+MHAGCCsGAQUFBwEBBGQwYjBgBggrBgEFBQcwAoZUaHR0cDovL2NjZC5hY2NjbmNlcnRpZmljYWRv
+cmEuY29tLmJyL2xjci9hYy1jY25jb21wYW5oaWFjZXJ0aWZpY2Fkb3JhbmFjaW9uYWwtdjUucDdi
+MIG8BgNVHREEgbQwgbGBIHJlZ2llbGJyb2dlc3J1ZmZpbm9vQGhvdG1haWwuY29toB8GBWBMAQMC
+oBYTFFJFR0lFTCBCT1JHRVMgUlVGSU5PoBkGBWBMAQMDoBATDjM0OTIyNzQzMDAwMTMwoDgGBWBM
+AQMEoC8TLTE1MDExOTg1MDA5NjMyNjMzNjYwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMKAXBgVg
+TAEDB6AOEwwwMDAwMDAwMDAwMDAwawYDVR0gBGQwYjBgBgdgTAECAYEQMFUwUwYIKwYBBQUHAgEW
+R2h0dHA6Ly9jY2QuYWNjY25jZXJ0aWZpY2Fkb3JhLmNvbS5ici9kb2NzL2RwYy1hYy1hY2NjbmNl
+cnRpZmljYWRvcmEucGRmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDBDCBxAYDVR0fBIG8
+MIG5MFqgWKBWhlRodHRwOi8vY2NkLmFjY2NuY2VydGlmaWNhZG9yYS5jb20uYnIvbGNyL2FjLWNj
+bmNvbXBhbmhpYWNlcnRpZmljYWRvcmFuYWNpb25hbC12NS5jcmwwW6BZoFeGVWh0dHA6Ly9jY2Qy
+LmFjY2NuY2VydGlmaWNhZG9yYS5jb20uYnIvbGNyL2FjLWNjbmNvbXBhbmhpYWNlcnRpZmljYWRv
+cmFuYWNpb25hbC12NS5jcmwwHQYDVR0OBBYEFE9MeBCRHaUR3T6GGryu/uxD8JXIMA4GA1UdDwEB
+/wQEAwIF4DANBgkqhkiG9w0BAQsFAAOCAgEAYV+aRi0AI0i+i9HDD1kUyS6hAlZ+F6x8hUkzQOyo
+4DuVJe7eHAf7OHAd1RPhopAVa9ALcx+TlMLcF9bbtuAgjrDPImyMGrH7pxgvktU83Noc7ycsF+EA
+zL8occFBLlG0/q7rzcip1Y14QcOyoT5esWXQv7/6ieSll9r5YBuZoxQmQ8iHsZPNf6HKuq9dGYHj
+GBSNj6494vpU2+g2gpt27ydkCq3qVr7BEtF3j6iVnHG+5ncDZMGLVVwZExTtBV3gyg9SSv2Ff6Vv
+rh7qlwB9425teZK6+1gRpRc6VBd3mdINOuEbOJihe51s9cn64kCX4vGbg/zLu3XK8xMcRHgCXoaJ
+zWXdf0JoD1JobtC93fF5v3u8Wk9/q0j0i9RJYjgUL3SAmHEo/fOpbwDuAKKcq/wxadrbKQQ7mrO6
+7qo83vVhMR3aQthokRKErio0f3rxRAyzNsJGuUYHr+zAOBWtMkezD9LIAUA9JkHcK8ssNSW6SNcG
+6OOVUoFIj4xrrOnUEWqzXyvTcjzTG1h0lp7Ar1T56k3bJuAhR0NznaRU1Vg0Ngwm1dIZzIIiZry2
+nmdljUumwmrcXK0tNffGeiTb4Erd6SKLxdzta4GzW+aSfWI3zksZQ0NkFkiK0W2/V9xVGbhKfLiU
+PQKHGHC6D2kbJOqQLKh/AdeL5EptEC5TnZk=</X509Certificate>
+        </X509Data>
+      </KeyInfo>
+    </Signature>
+  </NFe>
+  <protNFe versao="4.00" xmlns="http://www.portalfiscal.inf.br/nfe">
+    <infProt>
+      <tpAmb>1</tpAmb>
+      <verAplic>SVRS2601161142DR</verAplic>
+      <chNFe>CHAVE-__HOMO_SAMPLE_013__</chNFe>
+      <dhRecbto>2026-03-04T15:59:19-03:00</dhRecbto>
+      <nProt>PROTO-__HOMO_SAMPLE_013__</nProt>
+      <digVal>DIGEST-__HOMO_SAMPLE_013__</digVal>
+      <cStat>100</cStat>
+      <xMotivo>Autorizado o uso da NF-e</xMotivo>
+    </infProt>
+  </protNFe>
+</nfeProc>

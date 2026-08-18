@@ -35,6 +35,7 @@ deno task dev      # servidor Vite local
 deno task lint     # TypeScript sem emitir arquivos
 deno task build    # build de produção em dist/
 deno task test     # testes da engine fiscal em browser headless
+deno task test:real # homologação com amostras reais anonimizadas
 deno task test:volume # homologação com 5.000 XMLs em browser headless
 deno task check    # lint + test + build
 deno task preview  # preview do build
@@ -50,6 +51,7 @@ npm install
 npm run dev
 npm run lint
 npm run test
+npm run test:real
 npm run test:volume
 npm run build
 npm run check
@@ -80,6 +82,8 @@ npm run test:volume
 O workflow de CI executa essa homologação separadamente depois do gate principal para que uma regressão de escala seja identificada sem misturar seu diagnóstico com os testes funcionais.
 
 O baseline medido e os critérios de regressão estão em [docs/volume-baseline.md](docs/volume-baseline.md).
+
+A primeira homologação com amostras reais anonimizadas está descrita em [docs/real-sample-homologation.md](docs/real-sample-homologation.md).
 
 ## Configuração
 
