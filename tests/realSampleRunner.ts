@@ -35,6 +35,11 @@ const REAL_NFSE_FIXTURES = import.meta.glob<string>('./fixtures/nfse-real/*.xml'
   import: 'default',
   query: '?raw',
 });
+const REAL_NFSE_NATIONAL_FIXTURES = import.meta.glob<string>('./fixtures/nfse-national-real/*.xml', {
+  eager: true,
+  import: 'default',
+  query: '?raw',
+});
 
 function createFiles(
   fixtures: Record<string, string>,
@@ -58,6 +63,26 @@ function assertFixturesDoNotContainPrivateMaterial(fixtures: Record<string, stri
     contents.every((xml) => !/-----BEGIN [^-]*PRIVATE KEY-----/i.test(xml)),
     'As fixtures não podem conter chaves privadas',
   );
+
+  for (const xml of contents) {
+    const document = new DOMParser().parseFromString(xml, 'text/xml');
+    assert(document, 'Fixture XML inválida durante a verificação de privacidade');
+
+    for (const node of Array.from(document.getElementsByTagName('*'))) {
+      const localName = node.localName || node.tagName;
+      const value = node.textContent?.trim() || '';
+
+      if (['CNPJ', 'Cnpj'].includes(localName) && value) {
+        assert(/^12345\d{3}0001\d{2}$/.test(value), 'Fixture contém CNPJ fora do padrão sintético');
+      }
+      if (['CPF', 'Cpf'].includes(localName) && value) {
+        assert(/^12345\d{4}\d{2}$/.test(value), 'Fixture contém CPF fora do padrão sintético');
+      }
+      if (['SignatureValue', 'DigestValue'].includes(localName) && value) {
+        assert(/^(SIGNATURE|DIGEST|SANITIZED)-/.test(value), 'Fixture contém valor de assinatura de origem');
+      }
+    }
+  }
 }
 
 async function createNfseWithoutIbsCbs(file: File): Promise<File> {
@@ -77,12 +102,14 @@ async function runRealSampleHomologation(): Promise<void> {
   const nfeFiles = createFiles(REAL_NFE_FIXTURES, 'real-nfe');
   const nfceFiles = createFiles(REAL_NFCE_FIXTURES, 'real-nfce');
   const nfseFiles = createFiles(REAL_NFSE_FIXTURES, 'real-nfse');
-  const files = [...nfeFiles, ...nfceFiles, ...nfseFiles];
+  const nfseNationalFiles = createFiles(REAL_NFSE_NATIONAL_FIXTURES, 'real-nfse-national');
+  const files = [...nfeFiles, ...nfceFiles, ...nfseFiles, ...nfseNationalFiles];
 
   assertFixturesDoNotContainPrivateMaterial([
     REAL_NFE_FIXTURES,
     REAL_NFCE_FIXTURES,
     REAL_NFSE_FIXTURES,
+    REAL_NFSE_NATIONAL_FIXTURES,
   ]);
 
   const processed = await processFiles(files);
@@ -94,17 +121,18 @@ async function runRealSampleHomologation(): Promise<void> {
   const nfeResults = processed.results.filter((result) => result.documentKind === 'NFE');
   const nfceResults = processed.results.filter((result) => result.documentKind === 'NFCE');
   const nfseResults = processed.results.filter((result) => result.documentKind === 'NFSE');
+  const nationalNfseResults = nfseResults.filter((result) => result.documentLayout === 'NFSE_NATIONAL');
   const nfseWithoutIbsCbs = await createNfseWithoutIbsCbs(nfseFiles[0]);
   const pendingNfse = await processFiles([nfseWithoutIbsCbs]);
 
-  assert(files.length === 44, `Esperadas 44 fixtures fiscais anonimizadas, recebidas ${files.length}`);
+  assert(files.length === 45, `Esperadas 45 fixtures fiscais anonimizadas, recebidas ${files.length}`);
   assert(
     processed.errors.length === 0,
     `Homologação produziu ${processed.errors.length} erro(s): ${processed.errors
       .map((error) => `${error.fileName}: ${error.error}`)
       .join('; ')}`,
   );
-  assert(processed.results.length === 44, `Esperados 44 resultados aceitos, recebidos ${processed.results.length}`);
+  assert(processed.results.length === 45, `Esperados 45 resultados aceitos, recebidos ${processed.results.length}`);
   assert(
     nfeResults.length === 25 && nfeResults.every((result) => result.documentLayout === 'NFE'),
     `Esperadas 25 NF-e modelo 55, recebidas ${nfeResults.length}`,
@@ -114,11 +142,14 @@ async function runRealSampleHomologation(): Promise<void> {
     `Esperadas 18 NFC-e modelo 65, recebidas ${nfceResults.length}`,
   );
   assert(
-    nfseResults.length === 1 && nfseResults.every((result) => result.documentLayout === 'NFSE_ABRASF'),
-    `Esperada 1 NFS-e ABRASF aceita, recebidas ${nfseResults.length}`,
+    nfseResults.length === 2 && nfseResults.some((result) => result.documentLayout === 'NFSE_ABRASF'),
+    `Esperadas 2 NFS-e aceitas, recebidas ${nfseResults.length}`,
   );
-  assert(totalItems === 114, `Esperados 114 itens/serviços fiscais aceitos, recebidos ${totalItems}`);
-  assert(ibsCbsDocuments === 16, `Esperados 16 documentos aceitos com IBSCBS, recebidos ${ibsCbsDocuments}`);
+  assert(nationalNfseResults.length === 1, 'NFS-e nacional real não foi reconhecida');
+  assert(nationalNfseResults[0].status === 'CONFORME', 'NFS-e nacional real não permaneceu conforme');
+  assert(nationalNfseResults[0].itens?.[0]?.itemStatus === 'conforme', 'Item da NFS-e nacional real não permaneceu conforme');
+  assert(totalItems === 115, `Esperados 115 itens/serviços fiscais aceitos, recebidos ${totalItems}`);
+  assert(ibsCbsDocuments === 17, `Esperados 17 documentos aceitos com IBSCBS, recebidos ${ibsCbsDocuments}`);
   assert(pendingNfse.errors.length === 0, 'NFS-e sem IBSCBS não deveria gerar erro estrutural');
   assert(pendingNfse.results.length === 1, 'NFS-e sem IBSCBS não foi reconhecida');
   assert(!pendingNfse.results[0].contemIBSCBS, 'Variante sem IBSCBS foi marcada incorretamente');
@@ -136,7 +167,7 @@ try {
   result = {
     name: 'homologa NF-e, NFC-e e NFS-e reais anonimizadas com o pipeline de produção',
     status: 'passed',
-    message: '25 NF-e, 18 NFC-e e 1 NFS-e ABRASF processadas; 114 itens/serviços e 16 documentos com IBSCBS.',
+    message: '25 NF-e, 18 NFC-e, 1 NFS-e ABRASF e 1 NFS-e nacional processadas; 115 itens/serviços e 17 documentos com IBSCBS.',
   };
 } catch (error) {
   result = {

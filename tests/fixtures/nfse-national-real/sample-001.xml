@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NFSe versao="1.01" xmlns="http://www.sped.fazenda.gov.br/nfse">
+  <infNFSe Id="NFeHOMO000001">
+    <xLocEmi>Parnaíba</xLocEmi>
+    <xLocPrestacao>Parnaíba</xLocPrestacao>
+    <nNFSe>5050</nNFSe>
+    <cLocIncid>2207702</cLocIncid>
+    <xLocIncid>Parnaíba</xLocIncid>
+    <xTribNac>Suporte técnico em informática, inclusive instalação, configuração e manutenção de programas de computação e bancos de dados.</xTribNac>
+    <xNBS>Serviços notariais e de registro</xNBS>
+    <verAplic>SefinNacional_1.6.0</verAplic>
+    <ambGer>2</ambGer>
+    <tpEmis>1</tpEmis>
+    <procEmi>1</procEmi>
+    <cStat>100</cStat>
+    <dhProc>2026-06-01T12:00:00-03:00</dhProc>
+    <nDFSe>589107</nDFSe>
+    <emit>
+      <CNPJ>12345101000183</CNPJ>
+      <xNome>Empresa __HOMO_SAMPLE_001__</xNome>
+      <enderNac>
+        <xLgr>Rua __HOMO_SAMPLE_001__</xLgr>
+        <nro>100</nro>
+        <xBairro>Bairro __HOMO_SAMPLE_001__</xBairro>
+        <cMun>2207702</cMun>
+        <UF>PI</UF>
+        <CEP>REDACTED-__HOMO_SAMPLE_001__-X</CEP>
+      </enderNac>
+      <fone>REDACTED-__HOMO_SAMPLE_001__00</fone>
+    </emit>
+    <valores>
+      <vBC>260.35</vBC>
+      <pAliqAplic>2.00</pAliqAplic>
+      <vISSQN>5.21</vISSQN>
+      <vLiq>260.35</vLiq>
+    </valores>
+    <IBSCBS>
+      <cLocalidadeIncid>2110658</cLocalidadeIncid>
+      <xLocalidadeIncid>São Domingos do Azeitão</xLocalidadeIncid>
+      <valores>
+        <vBC>255.14</vBC>
+        <vCalcReeRepRes>0.00</vCalcReeRepRes>
+        <uf>
+          <pIBSUF>0.10</pIBSUF>
+          <pAliqEfetUF>0.10</pAliqEfetUF>
+        </uf>
+        <mun>
+          <pIBSMun>0.00</pIBSMun>
+          <pAliqEfetMun>0.00</pAliqEfetMun>
+        </mun>
+        <fed>
+          <pCBS>0.90</pCBS>
+          <pAliqEfetCBS>0.90</pAliqEfetCBS>
+        </fed>
+      </valores>
+      <totCIBS>
+        <vTotNF>260.35</vTotNF>
+        <gIBS>
+          <vIBSTot>0.26</vIBSTot>
+          <gIBSUFTot>
+            <vIBSUF>0.26</vIBSUF>
+          </gIBSUFTot>
+          <gIBSMunTot>
+            <vIBSMun>0.00</vIBSMun>
+          </gIBSMunTot>
+        </gIBS>
+        <gCBS>
+          <vCBS>2.30</vCBS>
+        </gCBS>
+      </totCIBS>
+    </IBSCBS>
+    <DPS xmlns="http://www.sped.fazenda.gov.br/nfse" versao="1.01">
+      <infDPS Id="NFeHOMO000001">
+        <tpAmb>1</tpAmb>
+        <dhEmi>2026-06-01T12:00:00-03:00</dhEmi>
+        <verAplic>v1.0</verAplic>
+        <serie>1</serie>
+        <nDPS>27747</nDPS>
+        <dCompet>2026-08-17</dCompet>
+        <tpEmit>1</tpEmit>
+        <cLocEmi>2207702</cLocEmi>
+        <prest>
+          <CNPJ>12345101000183</CNPJ>
+          <fone>REDACTED-__HOMO_SAMPLE_001__00</fone>
+          <regTrib>
+            <opSimpNac>1</opSimpNac>
+            <regEspTrib>0</regEspTrib>
+          </regTrib>
+        </prest>
+        <toma>
+          <CPF>12345010150</CPF>
+          <xNome>Empresa __HOMO_SAMPLE_001__</xNome>
+          <end>
+            <endNac>
+              <cMun>2110658</cMun>
+              <CEP>REDACTED-__HOMO_SAMPLE_001__-X</CEP>
+            </endNac>
+            <xLgr>Rua __HOMO_SAMPLE_001__</xLgr>
+            <nro>100</nro>
+            <xCpl>Complemento __HOMO_SAMPLE_001__</xCpl>
+            <xBairro>Bairro __HOMO_SAMPLE_001__</xBairro>
+          </end>
+          <fone>REDACTED-__HOMO_SAMPLE_001__00</fone>
+          <email>homologacao@example.invalid</email>
+        </toma>
+        <serv>
+          <locPrest>
+            <cLocPrestacao>2207702</cLocPrestacao>
+          </locPrest>
+          <cServ>
+            <cTribNac>010701</cTribNac>
+            <xDescServ>Venda #000045-001 - FoxCloud - Backup em Nuvem - Data da Venda 17/08/2026
+
+Data em que o servico foi prestado (17/08/2026)</xDescServ>
+            <cNBS>113040000</cNBS>
+            <cIntContrib>NAOINFORMADO</cIntContrib>
+          </cServ>
+        </serv>
+        <valores>
+          <vServPrest>
+            <vServ>260.35</vServ>
+          </vServPrest>
+          <trib>
+            <tribMun>
+              <tribISSQN>1</tribISSQN>
+              <tpRetISSQN>1</tpRetISSQN>
+            </tribMun>
+            <totTrib>
+              <pTotTrib>
+                <pTotTribFed>3.65</pTotTribFed>
+                <pTotTribEst>0.00</pTotTribEst>
+                <pTotTribMun>2.00</pTotTribMun>
+              </pTotTrib>
+            </totTrib>
+          </trib>
+        </valores>
+        <IBSCBS>
+          <finNFSe>0</finNFSe>
+          <indFinal>0</indFinal>
+          <cIndOp>100301</cIndOp>
+          <indDest>0</indDest>
+          <valores>
+            <trib>
+              <gIBSCBS>
+                <CST>000</CST>
+                <cClassTrib>000001</cClassTrib>
+              </gIBSCBS>
+            </trib>
+          </valores>
+        </IBSCBS>
+      </infDPS>
+      <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+        <SignedInfo>
+          <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+          <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+          <Reference URI="#NFeHOMO000001">
+            <Transforms>
+              <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+              <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+            </Transforms>
+            <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+            <DigestValue>DIGEST-__HOMO_SAMPLE_001__</DigestValue>
+          </Reference>
+        </SignedInfo>
+        <SignatureValue>SIGNATURE-__HOMO_SAMPLE_001__</SignatureValue>
+        <KeyInfo>
+          <X509Data></X509Data>
+        </KeyInfo>
+      </Signature>
+    </DPS>
+  </infNFSe>
+  <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+    <SignedInfo>
+      <CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments" />
+      <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
+      <Reference URI="#NFeHOMO000001">
+        <Transforms>
+          <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+          <Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments" />
+        </Transforms>
+        <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+        <DigestValue>DIGEST-__HOMO_SAMPLE_001__</DigestValue>
+      </Reference>
+    </SignedInfo>
+    <SignatureValue>SIGNATURE-__HOMO_SAMPLE_001__</SignatureValue>
+    <KeyInfo>
+      <X509Data></X509Data>
+    </KeyInfo>
+  </Signature>
+</NFSe>
