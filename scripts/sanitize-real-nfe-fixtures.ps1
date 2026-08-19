@@ -49,6 +49,8 @@ $readerSettings = [System.Xml.XmlReaderSettings]::new()
 $readerSettings.DtdProcessing = [System.Xml.DtdProcessing]::Prohibit
 $readerSettings.XmlResolver = $null
 
+$removedElementNames = @('X509Certificate')
+
 $redactedNames = @{
   CNPJ = '00000000000000'
   CPF = '00000000000'
@@ -154,6 +156,13 @@ function Sanitize-Document(
   [hashtable]$replacements
 ) {
   foreach ($element in @($document.SelectNodes('//*'))) {
+    if ($removedElementNames -contains $element.LocalName) {
+      if ($null -ne $element.ParentNode) {
+        $element.ParentNode.RemoveChild($element) | Out-Null
+      }
+      continue
+    }
+
     if ($replacements.ContainsKey($element.LocalName)) {
       Set-ElementText $element $replacements[$element.LocalName]
     }
@@ -207,8 +216,9 @@ for ($index = 0; $index -lt $files.Count; $index++) {
   }
 
   $replacements = @{} + $redactedNames
-  $replacements['CNPJ'] = New-ValidCnpj (100 + $sequence)
-  $replacements['CPF'] = New-ValidCpf (100 + $sequence)
+  $replacementSeed = 100 + $sequence
+  $replacements['CNPJ'] = New-ValidCnpj $replacementSeed
+  $replacements['CPF'] = New-ValidCpf $replacementSeed
   $token = '__HOMO_SAMPLE_{0:D3}__' -f $sequence
   $replacements['xNome'] = "Empresa $token"
   $replacements['xFant'] = "Empresa $token"
@@ -247,12 +257,12 @@ for ($index = 0; $index -lt $files.Count; $index++) {
   $replacements['SignatureValue'] = "SIGNATURE-$token"
   $replacements['DigestValue'] = "DIGEST-$token"
   while (@($sensitiveValues | Where-Object { $_.Value -eq $replacements['CNPJ'] }).Count -gt 0) {
-    $sequence++
-    $replacements['CNPJ'] = New-ValidCnpj (100 + $sequence)
+    $replacementSeed++
+    $replacements['CNPJ'] = New-ValidCnpj $replacementSeed
   }
   while (@($sensitiveValues | Where-Object { $_.Value -eq $replacements['CPF'] }).Count -gt 0) {
-    $sequence++
-    $replacements['CPF'] = New-ValidCpf (100 + $sequence)
+    $replacementSeed++
+    $replacements['CPF'] = New-ValidCpf $replacementSeed
   }
   foreach ($key in @($replacements.Keys)) {
     $value = [string]$replacements[$key]

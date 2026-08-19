@@ -5,7 +5,7 @@
       <ide>
         <cUF>22</cUF>
         <cNF>10000011</cNF>
-        <natOp>Venda ao Consumidor</natOp>
+        <natOp>Venda</natOp>
         <mod>65</mod>
         <serie>1</serie>
         <nNF>100011</nNF>
@@ -15,14 +15,13 @@
         <cMunFG>2211001</cMunFG>
         <tpImp>4</tpImp>
         <tpEmis>1</tpEmis>
-        <cDV>5</cDV>
+        <cDV>7</cDV>
         <tpAmb>1</tpAmb>
         <finNFe>1</finNFe>
         <indFinal>1</indFinal>
         <indPres>1</indPres>
-        <indIntermed>0</indIntermed>
         <procEmi>0</procEmi>
-        <verProc>25.12</verProc>
+        <verProc>SgeIBNFCe</verProc>
       </ide>
       <emit>
         <CNPJ>12345111000119</CNPJ>
@@ -43,86 +42,59 @@
         <IE>000000000</IE>
         <CRT>3</CRT>
       </emit>
-      <dest>
-        <CPF>12345011122</CPF>
-        <xNome>Empresa __HOMO_SAMPLE_011__</xNome>
-        <indIEDest>9</indIEDest>
-      </dest>
       <det nItem="1">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_011__</cProd>
           <cEAN>EAN-__HOMO_SAMPLE_011__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_011__</xProd>
-          <NCM>38221990</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>UND</uCom>
-          <qCom>1.0000</qCom>
-          <vUnCom>145.0000000000</vUnCom>
-          <vProd>145.00</vProd>
+          <NCM>85444900</NCM>
+          <CEST>1200700</CEST>
+          <CFOP>5405</CFOP>
+          <uCom>UN</uCom>
+          <qCom>15.0000</qCom>
+          <vUnCom>5.5000</vUnCom>
+          <vProd>82.50</vProd>
           <cEANTrib>EANTRIB-__HOMO_SAMPLE_011__</cEANTrib>
-          <uTrib>UND</uTrib>
-          <qTrib>1.0000</qTrib>
-          <vUnTrib>145.0000000000</vUnTrib>
+          <uTrib>UN</uTrib>
+          <qTrib>15.0000</qTrib>
+          <vUnTrib>5.5000</vUnTrib>
           <indTot>1</indTot>
-          <rastro>
-            <nLote>25I066X</nLote>
-            <qLote>1.000</qLote>
-            <dFab>2025-08-31</dFab>
-            <dVal>2027-08-31</dVal>
-          </rastro>
         </prod>
         <imposto>
-          <vTotTrib>19.50</vTotTrib>
+          <vTotTrib>28.28</vTotTrib>
           <ICMS>
-            <ICMS00>
+            <ICMS60>
               <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>145.00</vBC>
-              <pICMS>22.5000</pICMS>
-              <vICMS>32.63</vICMS>
-            </ICMS00>
+              <CST>60</CST>
+              <vBCSTRet>0.00</vBCSTRet>
+              <pST>0.0000</pST>
+              <vICMSSTRet>0.00</vICMSSTRet>
+            </ICMS60>
           </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>145.00</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.94</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>145.00</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>4.35</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
         </imposto>
       </det>
       <total>
         <ICMSTot>
-          <vBC>145.00</vBC>
-          <vICMS>32.63</vICMS>
+          <vBC>0.00</vBC>
+          <vICMS>0.00</vICMS>
           <vICMSDeson>0.00</vICMSDeson>
           <vFCP>0.00</vFCP>
           <vBCST>0.00</vBCST>
           <vST>0.00</vST>
           <vFCPST>0.00</vFCPST>
           <vFCPSTRet>0.00</vFCPSTRet>
-          <vProd>145.00</vProd>
+          <vProd>82.50</vProd>
           <vFrete>0.00</vFrete>
           <vSeg>0.00</vSeg>
           <vDesc>0.00</vDesc>
           <vII>0.00</vII>
           <vIPI>0.00</vIPI>
           <vIPIDevol>0.00</vIPIDevol>
-          <vPIS>0.94</vPIS>
-          <vCOFINS>4.35</vCOFINS>
+          <vPIS>0.00</vPIS>
+          <vCOFINS>0.00</vCOFINS>
           <vOutro>0.00</vOutro>
-          <vNF>145.00</vNF>
-          <vTotTrib>19.50</vTotTrib>
+          <vNF>82.50</vNF>
+          <vTotTrib>28.28</vTotTrib>
         </ICMSTot>
       </total>
       <transp>
@@ -130,9 +102,9 @@
       </transp>
       <pag>
         <detPag>
-          <indPag>0</indPag>
+          <indPag>1</indPag>
           <tPag>03</tPag>
-          <vPag>145.00</vPag>
+          <vPag>82.50</vPag>
           <card>
             <tpIntegra>2</tpIntegra>
           </card>
@@ -141,9 +113,15 @@
       <infAdic>
         <infCpl>Conteudo __HOMO_SAMPLE_011__</infCpl>
       </infAdic>
+      <infRespTec>
+        <CNPJ>12345111000119</CNPJ>
+        <xContato>Contato __HOMO_SAMPLE_011__</xContato>
+        <email>homologacao@example.invalid</email>
+        <fone>0000000000</fone>
+      </infRespTec>
     </infNFe>
     <infNFeSupl>
-      <qrCode>http://www.sefaz.pi.gov.br/nfce/qrcode?p=222603REDACTED-__HOMO_SAMPLE_011__650010000066141000357595|2|1|1|975F5613DB3969F2E1A2AC16AE238C8C1AC36338</qrCode>
+      <qrCode>http://www.sefaz.pi.gov.br/nfce/qrcode?p=222603REDACTED-__HOMO_SAMPLE_011__650040002089111002210587|2|1|1|D9F5CF96F553CA91C3E84A34855B2A7F38549EB6</qrCode>
       <urlChave>https://example.invalid/__HOMO_SAMPLE_011__</urlChave>
     </infNFeSupl>
     <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
@@ -161,9 +139,7 @@
       </SignedInfo>
       <SignatureValue>SIGNATURE-__HOMO_SAMPLE_011__</SignatureValue>
       <KeyInfo>
-        <X509Data>
-          <X509Certificate>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</X509Certificate>
-        </X509Data>
+        <X509Data></X509Data>
       </KeyInfo>
     </Signature>
   </NFe>
@@ -172,7 +148,7 @@
       <tpAmb>1</tpAmb>
       <verAplic>SVRSnfce2512111137DR</verAplic>
       <chNFe>CHAVE-__HOMO_SAMPLE_011__</chNFe>
-      <dhRecbto>2026-03-04T15:17:56-03:00</dhRecbto>
+      <dhRecbto>2026-03-02T09:17:56-03:00</dhRecbto>
       <nProt>PROTO-__HOMO_SAMPLE_011__</nProt>
       <digVal>DIGEST-__HOMO_SAMPLE_011__</digVal>
       <cStat>100</cStat>

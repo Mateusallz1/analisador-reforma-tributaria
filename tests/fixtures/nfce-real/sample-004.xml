@@ -5,7 +5,7 @@
       <ide>
         <cUF>22</cUF>
         <cNF>10000004</cNF>
-        <natOp>VENDA AO CONSUMIDOR</natOp>
+        <natOp>VENDA DE MERCADORIA ADQUIRIDA OU RECEBIDA DE TERCEIROS</natOp>
         <mod>65</mod>
         <serie>1</serie>
         <nNF>100004</nNF>
@@ -15,14 +15,14 @@
         <cMunFG>2211001</cMunFG>
         <tpImp>4</tpImp>
         <tpEmis>1</tpEmis>
-        <cDV>0</cDV>
+        <cDV>9</cDV>
         <tpAmb>1</tpAmb>
         <finNFe>1</finNFe>
         <indFinal>1</indFinal>
         <indPres>1</indPres>
         <indIntermed>0</indIntermed>
         <procEmi>0</procEmi>
-        <verProc>iPDV 11.14.4794.68</verProc>
+        <verProc>1.3.2</verProc>
       </ide>
       <emit>
         <CNPJ>12345104000117</CNPJ>
@@ -31,99 +31,241 @@
         <enderEmit>
           <xLgr>Rua __HOMO_SAMPLE_004__</xLgr>
           <nro>100</nro>
+          <xCpl>Complemento __HOMO_SAMPLE_004__</xCpl>
           <xBairro>Bairro __HOMO_SAMPLE_004__</xBairro>
           <cMun>2211001</cMun>
           <xMun>Municipio __HOMO_SAMPLE_004__</xMun>
           <UF>PI</UF>
           <CEP>00000000</CEP>
           <cPais>1058</cPais>
-          <xPais>Brasil</xPais>
+          <xPais>BRASIL</xPais>
           <fone>0000000000</fone>
         </enderEmit>
         <IE>000000000</IE>
         <CRT>3</CRT>
       </emit>
+      <dest>
+        <CPF>12345010401</CPF>
+        <xNome>Empresa __HOMO_SAMPLE_004__</xNome>
+        <enderDest>
+          <xLgr>Rua __HOMO_SAMPLE_004__</xLgr>
+          <nro>100</nro>
+          <xBairro>Bairro __HOMO_SAMPLE_004__</xBairro>
+          <cMun>2205508</cMun>
+          <xMun>Municipio __HOMO_SAMPLE_004__</xMun>
+          <UF>PI</UF>
+          <CEP>00000000</CEP>
+          <cPais>1058</cPais>
+          <xPais>BRASIL</xPais>
+          <fone>0000000000</fone>
+        </enderDest>
+        <indIEDest>9</indIEDest>
+        <email>homologacao@example.invalid</email>
+      </dest>
       <det nItem="1">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_004__</cProd>
           <cEAN>EAN-__HOMO_SAMPLE_004__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_004__</xProd>
-          <NCM>48202000</NCM>
+          <NCM>62034900</NCM>
           <CFOP>5102</CFOP>
           <uCom>PC</uCom>
-          <qCom>1.0000</qCom>
-          <vUnCom>55.5200000000</vUnCom>
-          <vProd>55.52</vProd>
+          <qCom>1</qCom>
+          <vUnCom>110.9</vUnCom>
+          <vProd>110.90</vProd>
           <cEANTrib>EANTRIB-__HOMO_SAMPLE_004__</cEANTrib>
           <uTrib>PC</uTrib>
-          <qTrib>1.0000</qTrib>
-          <vUnTrib>55.5200000000</vUnTrib>
+          <qTrib>1</qTrib>
+          <vUnTrib>110.9</vUnTrib>
           <indTot>1</indTot>
         </prod>
         <imposto>
-          <vTotTrib>13.99</vTotTrib>
           <ICMS>
             <ICMS00>
               <orig>0</orig>
               <CST>00</CST>
               <modBC>3</modBC>
-              <vBC>55.52</vBC>
-              <pICMS>22.5000</pICMS>
-              <vICMS>12.49</vICMS>
+              <vBC>110.90</vBC>
+              <pICMS>22.50</pICMS>
+              <vICMS>24.95</vICMS>
             </ICMS00>
           </ICMS>
           <PIS>
             <PISAliq>
               <CST>01</CST>
-              <vBC>55.52</vBC>
-              <pPIS>0.0000</pPIS>
-              <vPIS>0.00</vPIS>
+              <vBC>110.90</vBC>
+              <pPIS>0.6500</pPIS>
+              <vPIS>0.72</vPIS>
             </PISAliq>
           </PIS>
           <COFINS>
             <COFINSAliq>
               <CST>01</CST>
-              <vBC>55.52</vBC>
-              <pCOFINS>0.0000</pCOFINS>
-              <vCOFINS>0.00</vCOFINS>
+              <vBC>110.90</vBC>
+              <pCOFINS>3.0000</pCOFINS>
+              <vCOFINS>3.33</vCOFINS>
             </COFINSAliq>
           </COFINS>
+          <IBSCBS>
+            <CST>000</CST>
+            <cClassTrib>000001</cClassTrib>
+            <gIBSCBS>
+              <vBC>110.90</vBC>
+              <gIBSUF>
+                <pIBSUF>0.1000</pIBSUF>
+                <vIBSUF>0.11</vIBSUF>
+              </gIBSUF>
+              <gIBSMun>
+                <pIBSMun>0.0000</pIBSMun>
+                <vIBSMun>0.00</vIBSMun>
+              </gIBSMun>
+              <vIBS>0.11</vIBS>
+              <gCBS>
+                <pCBS>0.9000</pCBS>
+                <vCBS>1.00</vCBS>
+              </gCBS>
+            </gIBSCBS>
+          </IBSCBS>
         </imposto>
+        <vItem>110.90</vItem>
+      </det>
+      <det nItem="2">
+        <prod>
+          <cProd>PROD-__HOMO_SAMPLE_004__</cProd>
+          <cEAN>EAN-__HOMO_SAMPLE_004__</cEAN>
+          <xProd>Produto __HOMO_SAMPLE_004__</xProd>
+          <NCM>62062000</NCM>
+          <CFOP>5102</CFOP>
+          <uCom>PC</uCom>
+          <qCom>1</qCom>
+          <vUnCom>98.9</vUnCom>
+          <vProd>98.90</vProd>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_004__</cEANTrib>
+          <uTrib>PC</uTrib>
+          <qTrib>1</qTrib>
+          <vUnTrib>98.9</vUnTrib>
+          <indTot>1</indTot>
+        </prod>
+        <imposto>
+          <ICMS>
+            <ICMS00>
+              <orig>0</orig>
+              <CST>00</CST>
+              <modBC>3</modBC>
+              <vBC>98.90</vBC>
+              <pICMS>22.50</pICMS>
+              <vICMS>22.25</vICMS>
+            </ICMS00>
+          </ICMS>
+          <PIS>
+            <PISAliq>
+              <CST>01</CST>
+              <vBC>98.90</vBC>
+              <pPIS>0.6500</pPIS>
+              <vPIS>0.64</vPIS>
+            </PISAliq>
+          </PIS>
+          <COFINS>
+            <COFINSAliq>
+              <CST>01</CST>
+              <vBC>98.90</vBC>
+              <pCOFINS>3.0000</pCOFINS>
+              <vCOFINS>2.97</vCOFINS>
+            </COFINSAliq>
+          </COFINS>
+          <IBSCBS>
+            <CST>000</CST>
+            <cClassTrib>000001</cClassTrib>
+            <gIBSCBS>
+              <vBC>98.90</vBC>
+              <gIBSUF>
+                <pIBSUF>0.1000</pIBSUF>
+                <vIBSUF>0.10</vIBSUF>
+              </gIBSUF>
+              <gIBSMun>
+                <pIBSMun>0.0000</pIBSMun>
+                <vIBSMun>0.00</vIBSMun>
+              </gIBSMun>
+              <vIBS>0.10</vIBS>
+              <gCBS>
+                <pCBS>0.9000</pCBS>
+                <vCBS>0.89</vCBS>
+              </gCBS>
+            </gIBSCBS>
+          </IBSCBS>
+        </imposto>
+        <vItem>98.90</vItem>
       </det>
       <total>
         <ICMSTot>
-          <vBC>55.52</vBC>
-          <vICMS>12.49</vICMS>
+          <vBC>209.80</vBC>
+          <vICMS>47.20</vICMS>
           <vICMSDeson>0.00</vICMSDeson>
+          <vFCPUFDest>0.00</vFCPUFDest>
+          <vICMSUFDest>0.00</vICMSUFDest>
+          <vICMSUFRemet>0.00</vICMSUFRemet>
           <vFCP>0.00</vFCP>
           <vBCST>0.00</vBCST>
           <vST>0.00</vST>
           <vFCPST>0.00</vFCPST>
           <vFCPSTRet>0.00</vFCPSTRet>
-          <vProd>55.52</vProd>
+          <vProd>209.80</vProd>
           <vFrete>0.00</vFrete>
           <vSeg>0.00</vSeg>
           <vDesc>0.00</vDesc>
           <vII>0.00</vII>
           <vIPI>0.00</vIPI>
           <vIPIDevol>0.00</vIPIDevol>
-          <vPIS>0.00</vPIS>
-          <vCOFINS>0.00</vCOFINS>
+          <vPIS>1.36</vPIS>
+          <vCOFINS>6.30</vCOFINS>
           <vOutro>0.00</vOutro>
-          <vNF>55.52</vNF>
-          <vTotTrib>13.99</vTotTrib>
+          <vNF>209.80</vNF>
         </ICMSTot>
+        <IBSCBSTot>
+          <vBCIBSCBS>209.80</vBCIBSCBS>
+          <gIBS>
+            <gIBSUF>
+              <vDif>0.00</vDif>
+              <vDevTrib>0.00</vDevTrib>
+              <vIBSUF>0.21</vIBSUF>
+            </gIBSUF>
+            <gIBSMun>
+              <vDif>0.00</vDif>
+              <vDevTrib>0.00</vDevTrib>
+              <vIBSMun>0.00</vIBSMun>
+            </gIBSMun>
+            <vIBS>0.21</vIBS>
+            <vCredPres>0.00</vCredPres>
+            <vCredPresCondSus>0.00</vCredPresCondSus>
+          </gIBS>
+          <gCBS>
+            <vDif>0.00</vDif>
+            <vDevTrib>0.00</vDevTrib>
+            <vCBS>1.89</vCBS>
+            <vCredPres>0.00</vCredPres>
+            <vCredPresCondSus>0.00</vCredPresCondSus>
+          </gCBS>
+        </IBSCBSTot>
+        <vNFTot>209.80</vNFTot>
       </total>
       <transp>
         <modFrete>9</modFrete>
+        <vol>
+          <qVol>0</qVol>
+          <pesoL>0.000</pesoL>
+          <pesoB>0.000</pesoB>
+        </vol>
       </transp>
       <pag>
         <detPag>
-          <tPag>17</tPag>
-          <vPag>55.52</vPag>
-          <card>
-            <tpIntegra>2</tpIntegra>
-          </card>
+          <indPag>0</indPag>
+          <tPag>01</tPag>
+          <vPag>41.75</vPag>
+        </detPag>
+        <detPag>
+          <indPag>0</indPag>
+          <tPag>05</tPag>
+          <vPag>168.05</vPag>
         </detPag>
       </pag>
       <infAdic>
@@ -131,7 +273,7 @@
       </infAdic>
     </infNFe>
     <infNFeSupl>
-      <qrCode>http://www.sefaz.pi.gov.br/nfce/qrcode?p=222603REDACTED-__HOMO_SAMPLE_004__650020000028991000029000|2|1|1|A1C9E088953CFB372A57348D30F2883ADDFD2215</qrCode>
+      <qrCode>http://www.sefaz.pi.gov.br/nfce/qrcode?p=222603REDACTED-__HOMO_SAMPLE_004__650020000029151685529599|2|1|0|B444A5FE2074C2836F78180AB0535D4DF6B4F9DA</qrCode>
       <urlChave>https://example.invalid/__HOMO_SAMPLE_004__</urlChave>
     </infNFeSupl>
     <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
@@ -149,9 +291,7 @@
       </SignedInfo>
       <SignatureValue>SIGNATURE-__HOMO_SAMPLE_004__</SignatureValue>
       <KeyInfo>
-        <X509Data>
-          <X509Certificate>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</X509Certificate>
-        </X509Data>
+        <X509Data></X509Data>
       </KeyInfo>
     </Signature>
   </NFe>
@@ -160,7 +300,7 @@
       <tpAmb>1</tpAmb>
       <verAplic>SVRSnfce2512111137DR</verAplic>
       <chNFe>CHAVE-__HOMO_SAMPLE_004__</chNFe>
-      <dhRecbto>2026-03-04T10:53:39-03:00</dhRecbto>
+      <dhRecbto>2026-03-05T10:56:20-03:00</dhRecbto>
       <nProt>PROTO-__HOMO_SAMPLE_004__</nProt>
       <digVal>DIGEST-__HOMO_SAMPLE_004__</digVal>
       <cStat>100</cStat>

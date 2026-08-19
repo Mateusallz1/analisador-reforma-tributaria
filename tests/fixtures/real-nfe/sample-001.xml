@@ -67,7 +67,7 @@
       <det nItem="1">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_001__</cProd>
-          <cEAN>17893000521329</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_001__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_001__</xProd>
           <NCM>02101200</NCM>
           <CEST>1708701</CEST>
@@ -77,7 +77,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>158.6300000000</vUnCom>
           <vProd>158.63</vProd>
-          <cEANTrib>7893000521322</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_001__</cEANTrib>
           <uTrib>KG</uTrib>
           <qTrib>4.5000</qTrib>
           <vUnTrib>35.2511111111</vUnTrib>
@@ -133,7 +133,7 @@
       <det nItem="2">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_001__</cProd>
-          <cEAN>17891515486843</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_001__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_001__</xProd>
           <NCM>16023230</NCM>
           <CEST>1707900</CEST>
@@ -143,7 +143,7 @@
           <qCom>2.0000</qCom>
           <vUnCom>116.0450000000</vUnCom>
           <vProd>232.09</vProd>
-          <cEANTrib>7891515486846</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_001__</cEANTrib>
           <uTrib>KG</uTrib>
           <qTrib>8.4000</qTrib>
           <vUnTrib>27.6297619048</vUnTrib>
@@ -198,7 +198,7 @@
       <det nItem="3">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_001__</cProd>
-          <cEAN>17891515487178</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_001__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_001__</xProd>
           <NCM>02071422</NCM>
           <CEST>1708700</CEST>
@@ -208,7 +208,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>214.8000000000</vUnCom>
           <vProd>214.80</vProd>
-          <cEANTrib>7891515487171</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_001__</cEANTrib>
           <uTrib>KG</uTrib>
           <qTrib>15.0000</qTrib>
           <vUnTrib>14.3200000000</vUnTrib>
@@ -259,7 +259,7 @@
       <det nItem="4">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_001__</cProd>
-          <cEAN>17891515547223</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_001__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_001__</xProd>
           <NCM>20041000</NCM>
           <CEST>1709101</CEST>
@@ -269,7 +269,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>196.9800000000</vUnCom>
           <vProd>196.98</vProd>
-          <cEANTrib>7891515547226</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_001__</cEANTrib>
           <uTrib>KG</uTrib>
           <qTrib>10.5000</qTrib>
           <vUnTrib>18.7600000000</vUnTrib>
@@ -391,41 +391,7 @@
       </SignedInfo>
       <SignatureValue>SIGNATURE-__HOMO_SAMPLE_001__</SignatureValue>
       <KeyInfo>
-        <X509Data>
-          <X509Certificate>MIIHLTCCBRWgAwIBAgIIIp4lBCI6brgwDQYJKoZIhvcNAQELBQAwWTELMAkGA1UEBhMCQlIxEzAR
-BgNVBAoTCklDUC1CcmFzaWwxFTATBgNVBAsTDEFDIFNPTFVUSSB2NTEeMBwGA1UEAxMVQUMgU09M
-VVRJIE11bHRpcGxhIHY1MB4XDTI1MDQyMjEyMzYwMFoXDTI2MDQyMjEyMzYwMFowgdQxCzAJBgNV
-BAYTAkJSMRMwEQYDVQQKEwpJQ1AtQnJhc2lsMQswCQYDVQQIEwJTQzEPMA0GA1UEBxMGSXRhamFp
-MR4wHAYDVQQLExVBQyBTT0xVVEkgTXVsdGlwbGEgdjUxFzAVBgNVBAsTDjE5MTU1ODczMDAwMTAw
-MRwwGgYDVQQLExNDZXJ0aWZpY2FkbyBEaWdpdGFsMRowGAYDVQQLExFDZXJ0aWZpY2FkbyBQSiBB
-MTEfMB0GA1UEAxMWQlJGIFMgQTowMTgzODcyMzAwMDEyNzCCASIwDQYJKoZIhvcNAQEBBQADggEP
-ADCCAQoCggEBAMHKPJOsHd9ViQ4FZvkkXgnVvDysy3+085AGV5Q0RkdDTK0TQ4pDop82Lo1TXoJ2
-TvdgSMwFXSqMlQkot4OYRqnl0Mhe0lCrz2cCY+fU9EZusJXhtw3QPFuI3DhcBT/Zp6UXzG6Uw+fT
-7h8+Vsyjbr/9m1z5iu5GAmJ/qR7sUiUyorV6xePXSJgc3p2Nn6PA5hzQ+5In/jP2nImFtJGM14cN
-29vVjAPYHZgDqYZatucGLhHOzSwwpaOEFhyScFykgObEcubACru17aaa8xE+yNJvnwC2N9X/vH/X
-07NiflUm2nme2D/mtGasukjuEnnZr64pejSBNdvmaIiIVNn6JfsCAwEAAaOCAnswggJ3MAkGA1Ud
-EwQCMAAwHwYDVR0jBBgwFoAUxVLtJYAJ35yCyJ9Hxt20XzHdubEwVAYIKwYBBQUHAQEESDBGMEQG
-CCsGAQUFBzAChjhodHRwOi8vY2NkLmFjc29sdXRpLmNvbS5ici9sY3IvYWMtc29sdXRpLW11bHRp
-cGxhLXY1LnA3YjCBtgYDVR0RBIGuMIGrgRV0cmlidXRhcmlvY3NjQGJyZi5jb22gJAYFYEwBAwKg
-GxMZRkFCSU8gTFVJUyBNRU5ERVMgTUFSSUFOT6AZBgVgTAEDA6AQEw4wMTgzODcyMzAwMDEyN6A4
-BgVgTAEDBKAvEy0wMjExMTk4MDI5MzE2MDQyODM2MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDCg
-FwYFYEwBAwegDhMMMDAwMDAwMDAwMDAwMF0GA1UdIARWMFQwUgYGYEwBAgEmMEgwRgYIKwYBBQUH
-AgEWOmh0dHA6Ly9jY2QuYWNzb2x1dGkuY29tLmJyL2RvY3MvZHBjLWFjLXNvbHV0aS1tdWx0aXBs
-YS5wZGYwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMIGMBgNVHR8EgYQwgYEwPqA8oDqG
-OGh0dHA6Ly9jY2QuYWNzb2x1dGkuY29tLmJyL2xjci9hYy1zb2x1dGktbXVsdGlwbGEtdjUuY3Js
-MD+gPaA7hjlodHRwOi8vY2NkMi5hY3NvbHV0aS5jb20uYnIvbGNyL2FjLXNvbHV0aS1tdWx0aXBs
-YS12NS5jcmwwHQYDVR0OBBYEFOszwjUoObMKZQe6HOf8M0C4Bcy8MA4GA1UdDwEB/wQEAwIF4DAN
-BgkqhkiG9w0BAQsFAAOCAgEAWpwx7PXX2OdCydd1Dz/TqIYsPcTqNdpWUEPvJHsECUS5n41eVg0V
-YobxAg2Xpn/2RHSmBpI83AW23/WGjs7vsIGu/i2xzMcUSZNJTmPPmIEIQaEQU9LLtP5OoCnzDbaI
-3AWOsuwKVUebTwwqHOnvhCMDfS36Mo95bIptgy5/MvbH4DXxQCAUUvwp8/t8Rni6cP9ucr8rYuCS
-78V7q9S4KAL385RgOrVh+yfZPPxBGTdBrTq81KagxowPJMRsGb+ikynaf5kEt8Npgs+DQeqmn5st
-5Aymz5gXoexAJIYTTosEDx++rwLBOHjVjqLAqg/daxRWtbhfjwKl+e482tynwVDL2Wtnm9xNCkHI
-CdM1ipcn9uf+0mwRwMpbmMVAeA6bmLl7OqpYyPdjwA+QTc14X8n9pReEnc0OkcW/4WJie/OgBWCV
-wb2sF10aYrhnTiYn7xxUDotXuw+GiIuNFjLJo5gOhuy+b/ic2MGDfEmvBBYtaTH0Z2p1Hoh5QFj+
-k+IuMTEv7fEzgUJKJ9myicU0GsVT2duih+mErQySFGk8+d/OhX0a/yCKgW4qSTOmRqGV+FaXCOgS
-7j8rHDFLvK10/SGdAPTaOlLSDoV219dkO6FmHIiEzWFDwpk4s6qXXiLqwkQWsKU76J6c5y3Ht0FX
-sqmG/0uRyrBag4H1g1yJ9OI=</X509Certificate>
-        </X509Data>
+        <X509Data></X509Data>
       </KeyInfo>
     </Signature>
   </NFe>
@@ -438,7 +404,7 @@ sqmG/0uRyrBag4H1g1yJ9OI=</X509Certificate>
       <nProt>PROTO-__HOMO_SAMPLE_001__</nProt>
       <digVal>DIGEST-__HOMO_SAMPLE_001__</digVal>
       <cStat>100</cStat>
-      <xMotivo>Autorizado o uso da NF-e</xMotivo>
+      <xMotivo>Motivo __HOMO_SAMPLE_001__</xMotivo>
     </infProt>
   </protNFe>
 </nfeProc>

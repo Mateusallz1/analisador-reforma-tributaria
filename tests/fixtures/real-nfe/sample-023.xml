@@ -64,7 +64,7 @@
       <det nItem="2">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85444900</NCM>
           <CFOP>5102</CFOP>
@@ -72,7 +72,7 @@
           <qCom>2.0000</qCom>
           <vUnCom>110.0000000000</vUnCom>
           <vProd>220.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>2.0000</qTrib>
           <vUnTrib>110.0000000000</vUnTrib>
@@ -127,7 +127,7 @@
       <det nItem="3">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>84733011</NCM>
           <CEST>1200700</CEST>
@@ -136,7 +136,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>50.0000000000</vUnCom>
           <vProd>50.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>1.0000</qTrib>
           <vUnTrib>50.0000000000</vUnTrib>
@@ -191,7 +191,7 @@
       <det nItem="4">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85182990</NCM>
           <CEST>0105400</CEST>
@@ -200,7 +200,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>150.0000000000</vUnCom>
           <vProd>150.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>1.0000</qTrib>
           <vUnTrib>150.0000000000</vUnTrib>
@@ -255,7 +255,7 @@
       <det nItem="5">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85322200</NCM>
           <CEST>2806300</CEST>
@@ -264,7 +264,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>1.0000000000</vUnCom>
           <vProd>1.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>1.0000</qTrib>
           <vUnTrib>1.0000000000</vUnTrib>
@@ -319,7 +319,7 @@
       <det nItem="6">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85369010</NCM>
           <CEST>2111200</CEST>
@@ -328,7 +328,7 @@
           <qCom>15.0000</qCom>
           <vUnCom>1.0000000000</vUnCom>
           <vProd>15.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>15.0000</qTrib>
           <vUnTrib>1.0000000000</vUnTrib>
@@ -383,7 +383,7 @@
       <det nItem="7">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85369010</NCM>
           <CEST>0106900</CEST>
@@ -392,7 +392,7 @@
           <qCom>5.0000</qCom>
           <vUnCom>1.0000000000</vUnCom>
           <vProd>5.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>5.0000</qTrib>
           <vUnTrib>1.0000000000</vUnTrib>
@@ -447,7 +447,7 @@
       <det nItem="8">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85365090</NCM>
           <CEST>0106400</CEST>
@@ -456,7 +456,7 @@
           <qCom>5.0000</qCom>
           <vUnCom>22.0000000000</vUnCom>
           <vProd>110.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>5.0000</qTrib>
           <vUnTrib>22.0000000000</vUnTrib>
@@ -511,7 +511,7 @@
       <det nItem="9">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85061019</NCM>
           <CEST>0105200</CEST>
@@ -520,7 +520,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>8.0000000000</vUnCom>
           <vProd>8.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>1.0000</qTrib>
           <vUnTrib>8.0000000000</vUnTrib>
@@ -575,7 +575,7 @@
       <det nItem="10">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85369040</NCM>
           <CFOP>5102</CFOP>
@@ -583,7 +583,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>15.0000000000</vUnCom>
           <vProd>15.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>1.0000</qTrib>
           <vUnTrib>15.0000000000</vUnTrib>
@@ -638,7 +638,7 @@
       <det nItem="11">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85044029</NCM>
           <CEST>1200100</CEST>
@@ -647,7 +647,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>70.0000000000</vUnCom>
           <vProd>70.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>1.0000</qTrib>
           <vUnTrib>70.0000000000</vUnTrib>
@@ -702,7 +702,7 @@
       <det nItem="12">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85044029</NCM>
           <CEST>1200100</CEST>
@@ -711,7 +711,7 @@
           <qCom>2.0000</qCom>
           <vUnCom>35.0000000000</vUnCom>
           <vProd>70.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>2.0000</qTrib>
           <vUnTrib>35.0000000000</vUnTrib>
@@ -766,7 +766,7 @@
       <det nItem="13">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85334092</NCM>
           <CEST>2806300</CEST>
@@ -775,7 +775,7 @@
           <qCom>2.0000</qCom>
           <vUnCom>4.0000000000</vUnCom>
           <vProd>8.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>2.0000</qTrib>
           <vUnTrib>4.0000000000</vUnTrib>
@@ -830,7 +830,7 @@
       <det nItem="14">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85333110</NCM>
           <CEST>2806300</CEST>
@@ -839,7 +839,7 @@
           <qCom>2.0000</qCom>
           <vUnCom>4.0000000000</vUnCom>
           <vProd>8.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>2.0000</qTrib>
           <vUnTrib>4.0000000000</vUnTrib>
@@ -894,7 +894,7 @@
       <det nItem="15">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85365090</NCM>
           <CEST>0105700</CEST>
@@ -903,7 +903,7 @@
           <qCom>5.0000</qCom>
           <vUnCom>8.0000000000</vUnCom>
           <vProd>40.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>5.0000</qTrib>
           <vUnTrib>8.0000000000</vUnTrib>
@@ -958,7 +958,7 @@
       <det nItem="16">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85044029</NCM>
           <CEST>1200100</CEST>
@@ -967,7 +967,7 @@
           <qCom>2.0000</qCom>
           <vUnCom>35.0000000000</vUnCom>
           <vProd>70.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>2.0000</qTrib>
           <vUnTrib>35.0000000000</vUnTrib>
@@ -1022,7 +1022,7 @@
       <det nItem="17">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>90303100</NCM>
           <CEST>2111900</CEST>
@@ -1031,7 +1031,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>360.0000000000</vUnCom>
           <vProd>360.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>1.0000</qTrib>
           <vUnTrib>360.0000000000</vUnTrib>
@@ -1086,7 +1086,7 @@
       <det nItem="18">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85322590</NCM>
           <CEST>2806300</CEST>
@@ -1095,7 +1095,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>40.0000000000</vUnCom>
           <vProd>40.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>1.0000</qTrib>
           <vUnTrib>40.0000000000</vUnTrib>
@@ -1150,7 +1150,7 @@
       <det nItem="19">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85411099</NCM>
           <CFOP>5102</CFOP>
@@ -1158,7 +1158,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>8.0000000000</vUnCom>
           <vProd>8.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>1.0000</qTrib>
           <vUnTrib>8.0000000000</vUnTrib>
@@ -1213,7 +1213,7 @@
       <det nItem="20">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85044090</NCM>
           <CEST>1200100</CEST>
@@ -1222,7 +1222,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>180.0000000000</vUnCom>
           <vProd>180.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>1.0000</qTrib>
           <vUnTrib>180.0000000000</vUnTrib>
@@ -1277,7 +1277,7 @@
       <det nItem="21">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85444900</NCM>
           <CEST>1200700</CEST>
@@ -1286,7 +1286,7 @@
           <qCom>6.0000</qCom>
           <vUnCom>2.5000000000</vUnCom>
           <vProd>15.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>6.0000</qTrib>
           <vUnTrib>2.5000000000</vUnTrib>
@@ -1341,7 +1341,7 @@
       <det nItem="22">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>90309090</NCM>
           <CEST>2805700</CEST>
@@ -1350,7 +1350,7 @@
           <qCom>1.0000</qCom>
           <vUnCom>27.0000000000</vUnCom>
           <vProd>27.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>1.0000</qTrib>
           <vUnTrib>27.0000000000</vUnTrib>
@@ -1405,7 +1405,7 @@
       <det nItem="23">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85122029</NCM>
           <CEST>0105400</CEST>
@@ -1414,7 +1414,7 @@
           <qCom>40.0000</qCom>
           <vUnCom>15.0000000000</vUnCom>
           <vProd>600.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>40.0000</qTrib>
           <vUnTrib>15.0000000000</vUnTrib>
@@ -1469,7 +1469,7 @@
       <det nItem="1">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_023__</cProd>
-          <cEAN>SEM GTIN</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_023__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_023__</xProd>
           <NCM>85122029</NCM>
           <CEST>0105400</CEST>
@@ -1478,7 +1478,7 @@
           <qCom>10.0000</qCom>
           <vUnCom>15.0000000000</vUnCom>
           <vProd>150.00</vProd>
-          <cEANTrib>SEM GTIN</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_023__</cEANTrib>
           <uTrib>UM</uTrib>
           <qTrib>10.0000</qTrib>
           <vUnTrib>15.0000000000</vUnTrib>
@@ -1614,9 +1614,7 @@
       </SignedInfo>
       <SignatureValue>SIGNATURE-__HOMO_SAMPLE_023__</SignatureValue>
       <KeyInfo>
-        <X509Data>
-          <X509Certificate>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</X509Certificate>
-        </X509Data>
+        <X509Data></X509Data>
       </KeyInfo>
     </Signature>
   </NFe>
@@ -1629,7 +1627,7 @@
       <nProt>PROTO-__HOMO_SAMPLE_023__</nProt>
       <digVal>DIGEST-__HOMO_SAMPLE_023__</digVal>
       <cStat>100</cStat>
-      <xMotivo>Autorizado o uso da NF-e</xMotivo>
+      <xMotivo>Motivo __HOMO_SAMPLE_023__</xMotivo>
     </infProt>
   </protNFe>
 </nfeProc>
