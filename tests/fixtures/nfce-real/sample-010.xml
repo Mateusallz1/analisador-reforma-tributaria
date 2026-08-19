@@ -5,7 +5,7 @@
       <ide>
         <cUF>22</cUF>
         <cNF>10000010</cNF>
-        <natOp>VENDA DE MERCADORIA ADQUIRIDA OU RECEBIDA DE TERCEIROS</natOp>
+        <natOp>VENDA AO CONSUMIDOR</natOp>
         <mod>65</mod>
         <serie>1</serie>
         <nNF>100010</nNF>
@@ -22,7 +22,7 @@
         <indPres>1</indPres>
         <indIntermed>0</indIntermed>
         <procEmi>0</procEmi>
-        <verProc>1.3.2</verProc>
+        <verProc>iPDV 11.14.4794.68</verProc>
       </ide>
       <emit>
         <CNPJ>12345110000174</CNPJ>
@@ -31,1122 +31,99 @@
         <enderEmit>
           <xLgr>Rua __HOMO_SAMPLE_010__</xLgr>
           <nro>100</nro>
-          <xCpl>Complemento __HOMO_SAMPLE_010__</xCpl>
           <xBairro>Bairro __HOMO_SAMPLE_010__</xBairro>
           <cMun>2211001</cMun>
           <xMun>Municipio __HOMO_SAMPLE_010__</xMun>
           <UF>PI</UF>
           <CEP>00000000</CEP>
           <cPais>1058</cPais>
-          <xPais>BRASIL</xPais>
+          <xPais>Brasil</xPais>
           <fone>0000000000</fone>
         </enderEmit>
         <IE>000000000</IE>
         <CRT>3</CRT>
       </emit>
-      <dest>
-        <CPF>12345011041</CPF>
-        <xNome>Empresa __HOMO_SAMPLE_010__</xNome>
-        <enderDest>
-          <xLgr>Rua __HOMO_SAMPLE_010__</xLgr>
-          <nro>100</nro>
-          <xBairro>Bairro __HOMO_SAMPLE_010__</xBairro>
-          <cMun>2201507</cMun>
-          <xMun>Municipio __HOMO_SAMPLE_010__</xMun>
-          <UF>PI</UF>
-          <CEP>00000000</CEP>
-          <cPais>1058</cPais>
-          <xPais>BRASIL</xPais>
-          <fone>0000000000</fone>
-        </enderDest>
-        <indIEDest>9</indIEDest>
-        <email>homologacao@example.invalid</email>
-      </dest>
       <det nItem="1">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
           <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046300</NCM>
+          <NCM>48202000</NCM>
           <CFOP>5102</CFOP>
           <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>116.9</vUnCom>
-          <vProd>116.90</vProd>
+          <qCom>1.0000</qCom>
+          <vUnCom>55.5200000000</vUnCom>
+          <vProd>55.52</vProd>
           <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
           <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>116.9</vUnTrib>
-          <vDesc>9.35</vDesc>
+          <qTrib>1.0000</qTrib>
+          <vUnTrib>55.5200000000</vUnTrib>
           <indTot>1</indTot>
         </prod>
         <imposto>
+          <vTotTrib>13.99</vTotTrib>
           <ICMS>
             <ICMS00>
               <orig>0</orig>
               <CST>00</CST>
               <modBC>3</modBC>
-              <vBC>107.55</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>24.20</vICMS>
+              <vBC>55.52</vBC>
+              <pICMS>22.5000</pICMS>
+              <vICMS>12.49</vICMS>
             </ICMS00>
           </ICMS>
           <PIS>
             <PISAliq>
               <CST>01</CST>
-              <vBC>107.55</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.70</vPIS>
+              <vBC>55.52</vBC>
+              <pPIS>0.0000</pPIS>
+              <vPIS>0.00</vPIS>
             </PISAliq>
           </PIS>
           <COFINS>
             <COFINSAliq>
               <CST>01</CST>
-              <vBC>107.55</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.23</vCOFINS>
+              <vBC>55.52</vBC>
+              <pCOFINS>0.0000</pCOFINS>
+              <vCOFINS>0.00</vCOFINS>
             </COFINSAliq>
           </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>107.55</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.11</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.11</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>0.97</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
         </imposto>
-        <vItem>107.55</vItem>
-      </det>
-      <det nItem="2">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046300</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>118.9</vUnCom>
-          <vProd>118.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>118.9</vUnTrib>
-          <vDesc>9.51</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>109.39</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>24.61</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>109.39</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.71</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>109.39</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.28</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>109.39</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.11</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.11</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>0.98</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>109.39</vItem>
-      </det>
-      <det nItem="3">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046300</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>118.9</vUnCom>
-          <vProd>118.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>118.9</vUnTrib>
-          <vDesc>9.51</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>109.39</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>24.61</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>109.39</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.71</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>109.39</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.28</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>109.39</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.11</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.11</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>0.98</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>109.39</vItem>
-      </det>
-      <det nItem="4">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>61046200</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>125.9</vUnCom>
-          <vProd>125.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>125.9</vUnTrib>
-          <vDesc>10.07</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>115.83</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>26.06</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>115.83</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.75</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>115.83</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.47</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>115.83</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.12</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.12</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>1.04</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>115.83</vItem>
-      </det>
-      <det nItem="5">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046900</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>145.9</vUnCom>
-          <vProd>145.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>145.9</vUnTrib>
-          <vDesc>11.70</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>134.20</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>30.20</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>134.20</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.87</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>134.20</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>4.03</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>134.20</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.13</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.13</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>1.21</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>134.20</vItem>
-      </det>
-      <det nItem="6">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046300</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>120.9</vUnCom>
-          <vProd>120.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>120.9</vUnTrib>
-          <vDesc>9.67</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>111.23</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>25.03</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.72</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.34</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>111.23</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.11</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.11</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>1.00</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>111.23</vItem>
-      </det>
-      <det nItem="7">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046300</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>120.9</vUnCom>
-          <vProd>120.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>120.9</vUnTrib>
-          <vDesc>9.67</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>111.23</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>25.03</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.72</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.34</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>111.23</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.11</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.11</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>1.00</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>111.23</vItem>
-      </det>
-      <det nItem="8">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046900</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>130.9</vUnCom>
-          <vProd>130.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>130.9</vUnTrib>
-          <vDesc>10.47</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>120.43</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>27.10</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>120.43</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.78</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>120.43</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.61</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>120.43</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.12</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.12</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>1.08</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>120.43</vItem>
-      </det>
-      <det nItem="9">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046300</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>120.9</vUnCom>
-          <vProd>120.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>120.9</vUnTrib>
-          <vDesc>9.67</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>111.23</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>25.03</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.72</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.34</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>111.23</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.11</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.11</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>1.00</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>111.23</vItem>
-      </det>
-      <det nItem="10">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046300</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>120.9</vUnCom>
-          <vProd>120.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>120.9</vUnTrib>
-          <vDesc>9.67</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>111.23</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>25.03</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.72</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.34</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>111.23</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.11</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.11</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>1.00</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>111.23</vItem>
-      </det>
-      <det nItem="11">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046300</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>120.9</vUnCom>
-          <vProd>120.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>120.9</vUnTrib>
-          <vDesc>9.67</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>111.23</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>25.03</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.72</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.34</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>111.23</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.11</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.11</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>1.00</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>111.23</vItem>
-      </det>
-      <det nItem="12">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046300</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>118.9</vUnCom>
-          <vProd>118.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>118.9</vUnTrib>
-          <vDesc>9.51</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>109.39</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>24.61</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>109.39</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.71</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>109.39</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.28</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>109.39</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.11</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.11</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>0.98</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>109.39</vItem>
-      </det>
-      <det nItem="13">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046300</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>116.9</vUnCom>
-          <vProd>116.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>116.9</vUnTrib>
-          <vDesc>9.35</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>107.55</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>24.20</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>107.55</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.70</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>107.55</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.23</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>107.55</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.11</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.11</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>0.97</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>107.55</vItem>
-      </det>
-      <det nItem="14">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046300</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>120.9</vUnCom>
-          <vProd>120.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>120.9</vUnTrib>
-          <vDesc>9.67</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>111.23</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>25.03</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.72</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.34</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>111.23</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.11</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.11</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>1.00</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>111.23</vItem>
-      </det>
-      <det nItem="15">
-        <prod>
-          <cProd>PROD-__HOMO_SAMPLE_010__</cProd>
-          <cEAN>EAN-__HOMO_SAMPLE_010__</cEAN>
-          <xProd>Produto __HOMO_SAMPLE_010__</xProd>
-          <NCM>62046300</NCM>
-          <CFOP>5102</CFOP>
-          <uCom>PC</uCom>
-          <qCom>1</qCom>
-          <vUnCom>120.9</vUnCom>
-          <vProd>120.90</vProd>
-          <cEANTrib>EANTRIB-__HOMO_SAMPLE_010__</cEANTrib>
-          <uTrib>PC</uTrib>
-          <qTrib>1</qTrib>
-          <vUnTrib>120.9</vUnTrib>
-          <vDesc>9.67</vDesc>
-          <indTot>1</indTot>
-        </prod>
-        <imposto>
-          <ICMS>
-            <ICMS00>
-              <orig>0</orig>
-              <CST>00</CST>
-              <modBC>3</modBC>
-              <vBC>111.23</vBC>
-              <pICMS>22.50</pICMS>
-              <vICMS>25.03</vICMS>
-            </ICMS00>
-          </ICMS>
-          <PIS>
-            <PISAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pPIS>0.6500</pPIS>
-              <vPIS>0.72</vPIS>
-            </PISAliq>
-          </PIS>
-          <COFINS>
-            <COFINSAliq>
-              <CST>01</CST>
-              <vBC>111.23</vBC>
-              <pCOFINS>3.0000</pCOFINS>
-              <vCOFINS>3.34</vCOFINS>
-            </COFINSAliq>
-          </COFINS>
-          <IBSCBS>
-            <CST>000</CST>
-            <cClassTrib>000001</cClassTrib>
-            <gIBSCBS>
-              <vBC>111.23</vBC>
-              <gIBSUF>
-                <pIBSUF>0.1000</pIBSUF>
-                <vIBSUF>0.11</vIBSUF>
-              </gIBSUF>
-              <gIBSMun>
-                <pIBSMun>0.0000</pIBSMun>
-                <vIBSMun>0.00</vIBSMun>
-              </gIBSMun>
-              <vIBS>0.11</vIBS>
-              <gCBS>
-                <pCBS>0.9000</pCBS>
-                <vCBS>1.00</vCBS>
-              </gCBS>
-            </gIBSCBS>
-          </IBSCBS>
-        </imposto>
-        <vItem>111.23</vItem>
       </det>
       <total>
         <ICMSTot>
-          <vBC>1692.34</vBC>
-          <vICMS>380.80</vICMS>
+          <vBC>55.52</vBC>
+          <vICMS>12.49</vICMS>
           <vICMSDeson>0.00</vICMSDeson>
-          <vFCPUFDest>0.00</vFCPUFDest>
-          <vICMSUFDest>0.00</vICMSUFDest>
-          <vICMSUFRemet>0.00</vICMSUFRemet>
           <vFCP>0.00</vFCP>
           <vBCST>0.00</vBCST>
           <vST>0.00</vST>
           <vFCPST>0.00</vFCPST>
           <vFCPSTRet>0.00</vFCPSTRet>
-          <vProd>1839.50</vProd>
+          <vProd>55.52</vProd>
           <vFrete>0.00</vFrete>
           <vSeg>0.00</vSeg>
-          <vDesc>147.16</vDesc>
+          <vDesc>0.00</vDesc>
           <vII>0.00</vII>
           <vIPI>0.00</vIPI>
           <vIPIDevol>0.00</vIPIDevol>
-          <vPIS>10.97</vPIS>
-          <vCOFINS>50.79</vCOFINS>
+          <vPIS>0.00</vPIS>
+          <vCOFINS>0.00</vCOFINS>
           <vOutro>0.00</vOutro>
-          <vNF>1692.34</vNF>
+          <vNF>55.52</vNF>
+          <vTotTrib>13.99</vTotTrib>
         </ICMSTot>
-        <IBSCBSTot>
-          <vBCIBSCBS>1692.34</vBCIBSCBS>
-          <gIBS>
-            <gIBSUF>
-              <vDif>0.00</vDif>
-              <vDevTrib>0.00</vDevTrib>
-              <vIBSUF>1.69</vIBSUF>
-            </gIBSUF>
-            <gIBSMun>
-              <vDif>0.00</vDif>
-              <vDevTrib>0.00</vDevTrib>
-              <vIBSMun>0.00</vIBSMun>
-            </gIBSMun>
-            <vIBS>1.69</vIBS>
-            <vCredPres>0.00</vCredPres>
-            <vCredPresCondSus>0.00</vCredPresCondSus>
-          </gIBS>
-          <gCBS>
-            <vDif>0.00</vDif>
-            <vDevTrib>0.00</vDevTrib>
-            <vCBS>15.21</vCBS>
-            <vCredPres>0.00</vCredPres>
-            <vCredPresCondSus>0.00</vCredPresCondSus>
-          </gCBS>
-        </IBSCBSTot>
-        <vNFTot>1692.34</vNFTot>
       </total>
       <transp>
         <modFrete>9</modFrete>
-        <vol>
-          <qVol>0</qVol>
-          <pesoL>0.000</pesoL>
-          <pesoB>0.000</pesoB>
-        </vol>
       </transp>
       <pag>
         <detPag>
-          <indPag>0</indPag>
-          <tPag>01</tPag>
-          <vPag>1692.34</vPag>
+          <tPag>17</tPag>
+          <vPag>55.52</vPag>
+          <card>
+            <tpIntegra>2</tpIntegra>
+          </card>
         </detPag>
       </pag>
       <infAdic>
@@ -1154,7 +131,7 @@
       </infAdic>
     </infNFe>
     <infNFeSupl>
-      <qrCode>http://www.sefaz.pi.gov.br/nfce/qrcode?p=222603REDACTED-__HOMO_SAMPLE_010__650020000041341212923660|2|1|0|31717DCC81B7552CDC8C6F834C941FAC7A403B8A</qrCode>
+      <qrCode>http://www.sefaz.pi.gov.br/nfce/qrcode?p=222603REDACTED-__HOMO_SAMPLE_010__650020000028991000029000|2|1|1|A1C9E088953CFB372A57348D30F2883ADDFD2215</qrCode>
       <urlChave>https://example.invalid/__HOMO_SAMPLE_010__</urlChave>
     </infNFeSupl>
     <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
@@ -1172,9 +149,7 @@
       </SignedInfo>
       <SignatureValue>SIGNATURE-__HOMO_SAMPLE_010__</SignatureValue>
       <KeyInfo>
-        <X509Data>
-          <X509Certificate>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</X509Certificate>
-        </X509Data>
+        <X509Data></X509Data>
       </KeyInfo>
     </Signature>
   </NFe>
@@ -1183,7 +158,7 @@
       <tpAmb>1</tpAmb>
       <verAplic>SVRSnfce2512111137DR</verAplic>
       <chNFe>CHAVE-__HOMO_SAMPLE_010__</chNFe>
-      <dhRecbto>2026-03-03T13:10:15-03:00</dhRecbto>
+      <dhRecbto>2026-03-04T10:53:39-03:00</dhRecbto>
       <nProt>PROTO-__HOMO_SAMPLE_010__</nProt>
       <digVal>DIGEST-__HOMO_SAMPLE_010__</digVal>
       <cStat>100</cStat>

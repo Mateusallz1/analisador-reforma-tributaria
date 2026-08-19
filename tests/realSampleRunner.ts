@@ -48,6 +48,18 @@ function createFiles(
     });
 }
 
+function assertFixturesDoNotContainPrivateMaterial(fixtures: Record<string, string>[]): void {
+  const contents = fixtures.flatMap((fixture) => Object.values(fixture));
+  assert(
+    contents.every((xml) => !/<(?:[A-Za-z_][\w.-]*:)?X509Certificate\b/i.test(xml)),
+    'As fixtures não podem conter certificados X.509 de origem',
+  );
+  assert(
+    contents.every((xml) => !/-----BEGIN [^-]*PRIVATE KEY-----/i.test(xml)),
+    'As fixtures não podem conter chaves privadas',
+  );
+}
+
 async function createNfseWithoutIbsCbs(file: File): Promise<File> {
   const document = new DOMParser().parseFromString(await file.text(), 'text/xml');
   assert(document, 'Não foi possível ler a fixture NFS-e para a variante sem IBSCBS');
@@ -66,6 +78,12 @@ async function runRealSampleHomologation(): Promise<void> {
   const nfceFiles = createFiles(REAL_NFCE_FIXTURES, 'real-nfce');
   const nfseFiles = createFiles(REAL_NFSE_FIXTURES, 'real-nfse');
   const files = [...nfeFiles, ...nfceFiles, ...nfseFiles];
+
+  assertFixturesDoNotContainPrivateMaterial([
+    REAL_NFE_FIXTURES,
+    REAL_NFCE_FIXTURES,
+    REAL_NFSE_FIXTURES,
+  ]);
 
   const processed = await processFiles(files);
   const totalItems = processed.results.reduce(

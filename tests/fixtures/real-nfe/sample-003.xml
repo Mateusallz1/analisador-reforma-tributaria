@@ -69,7 +69,7 @@
       <det nItem="1">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_003__</cProd>
-          <cEAN>7890988371499</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_003__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_003__</xProd>
           <NCM>64039190</NCM>
           <CFOP>2202</CFOP>
@@ -77,7 +77,7 @@
           <qCom>3.0000</qCom>
           <vUnCom>66.00000</vUnCom>
           <vProd>198.00</vProd>
-          <cEANTrib>7890988371499</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_003__</cEANTrib>
           <uTrib>Un</uTrib>
           <qTrib>3.0000</qTrib>
           <vUnTrib>66.00000</vUnTrib>
@@ -169,7 +169,7 @@
       <det nItem="2">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_003__</cProd>
-          <cEAN>7890988371505</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_003__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_003__</xProd>
           <NCM>64039190</NCM>
           <CFOP>2202</CFOP>
@@ -177,7 +177,7 @@
           <qCom>3.0000</qCom>
           <vUnCom>66.00000</vUnCom>
           <vProd>198.00</vProd>
-          <cEANTrib>7890988371505</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_003__</cEANTrib>
           <uTrib>Un</uTrib>
           <qTrib>3.0000</qTrib>
           <vUnTrib>66.00000</vUnTrib>
@@ -269,7 +269,7 @@
       <det nItem="3">
         <prod>
           <cProd>PROD-__HOMO_SAMPLE_003__</cProd>
-          <cEAN>7890988371512</cEAN>
+          <cEAN>EAN-__HOMO_SAMPLE_003__</cEAN>
           <xProd>Produto __HOMO_SAMPLE_003__</xProd>
           <NCM>64039190</NCM>
           <CFOP>2202</CFOP>
@@ -277,7 +277,7 @@
           <qCom>3.0000</qCom>
           <vUnCom>66.00000</vUnCom>
           <vProd>198.00</vProd>
-          <cEANTrib>7890988371512</cEANTrib>
+          <cEANTrib>EANTRIB-__HOMO_SAMPLE_003__</cEANTrib>
           <uTrib>Un</uTrib>
           <qTrib>3.0000</qTrib>
           <vUnTrib>66.00000</vUnTrib>
@@ -467,9 +467,7 @@
       </SignedInfo>
       <SignatureValue>SIGNATURE-__HOMO_SAMPLE_003__</SignatureValue>
       <KeyInfo>
-        <X509Data>
-          <X509Certificate>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</X509Certificate>
-        </X509Data>
+        <X509Data></X509Data>
       </KeyInfo>
     </Signature>
   </NFe>
@@ -482,7 +480,7 @@
       <nProt>PROTO-__HOMO_SAMPLE_003__</nProt>
       <digVal>DIGEST-__HOMO_SAMPLE_003__</digVal>
       <cStat>100</cStat>
-      <xMotivo>Autorizado o uso da NF-e</xMotivo>
+      <xMotivo>Motivo __HOMO_SAMPLE_003__</xMotivo>
     </infProt>
   </protNFe>
 </nfeProc>
