@@ -7,11 +7,14 @@ Em 2026-08-18 foram catalogados XMLs reais locais sem copiar os originais para o
 - 25 documentos NF-e modelo 55;
 - 18 documentos NFC-e modelo 65;
 - 1 NFS-e ABRASF em resposta `ConsultarNfseResposta`, aceita pelo perfil sem namespace explícito;
-- 114 itens/serviços aceitos;
-- 16 documentos aceitos com grupo `IBSCBS`;
+- 1 NFS-e padrão nacional emitida, com classificação válida e conforme;
+- 115 itens/serviços aceitos;
+- 17 documentos aceitos com grupo `IBSCBS`;
 - nenhum erro de leitura XML.
 
-As cópias em `tests/fixtures/real-nfe`, `tests/fixtures/nfce-real` e `tests/fixtures/nfse-real` foram geradas pelo script `scripts/sanitize-real-nfe-fixtures.ps1`. O processo redige CNPJ, CPF, nomes, endereços, produtos, contatos, informações adicionais, chaves, protocolos, certificados X.509, assinaturas, observações e datas operacionais. Os XMLs originais permanecem fora do repositório.
+As cópias em `tests/fixtures/real-nfe`, `tests/fixtures/nfce-real`, `tests/fixtures/nfse-real` e `tests/fixtures/nfse-national-real` foram geradas pelo script `scripts/sanitize-real-nfe-fixtures.ps1`. O processo redige CNPJ, CPF, nomes, endereços, produtos, contatos, informações adicionais, chaves, protocolos, certificados X.509, assinaturas, observações e datas operacionais. Os XMLs originais permanecem fora do repositório.
+
+O teste real também exige CNPJ/CPF no padrão sintético da homologação e valores de assinatura com tokens de sanitização.
 
 Para substituir fixtures existentes, use `-Force`. O script nunca remove XMLs que não tenham o padrão `sample-<número>.xml` e recusa uma pasta de saída que contenha outros XMLs.
 
@@ -23,7 +26,7 @@ O comando abaixo usa `processFiles`, o mesmo pipeline usado pela aplicação:
 npm run test:real
 ```
 
-O teste valida reconhecimento separado de NF-e, NFC-e e do perfil ABRASF sem namespace, quantidade de documentos e itens/serviços, presença de `IBSCBS`, ausência de erros de processamento e uso da versão esperada da base fiscal.
+O teste valida reconhecimento separado de NF-e, NFC-e, ABRASF sem namespace e NFS-e nacional emitida, quantidade de documentos e itens/serviços, presença de `IBSCBS`, ausência de erros de processamento e uso da versão esperada da base fiscal.
 
 Como chaves de acesso, protocolos e assinaturas foram anonimizados, esta etapa não usa o status de autorização como evidência. Ela valida o comportamento do parser e da análise diante de estruturas reais preservadas.
 
